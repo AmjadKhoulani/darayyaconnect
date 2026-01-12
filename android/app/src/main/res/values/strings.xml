@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Darayya Connect</string>
+    <string name="title_activity_main">Darayya Connect</string>
+    <string name="package_name">com.darayya.app</string>
+    <string name="custom_url_scheme">com.darayya.app</string>
+</resources>

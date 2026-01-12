@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    .mask-linear-fade {
+        mask-image: linear-gradient(to left, black 80%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to left, black 80%, transparent 100%);
+    }
+
+    .pause-animation:hover {
+        animation-play-state: paused;
+    }
+}
+
+/* Base Styles */
+body {
+    background-color: #f0f2f5;
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    color: #1e293b;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Masterclass Geometry System */
+:root {
+    --premium-emerald: #059669;
+    --premium-emerald-dark: #064e3b;
+    --premium-gold: #d4af37;
+    --premium-gold-light: #f6e05e;
+    --premium-slate: #334155;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+
+    /* Perfect Radius Scale */
+    --radius-full: 9999px;
+    --radius-huge: 32px;
+    --radius-large: 24px;
+    --radius-mid: 16px;
+    --radius-small: 12px;
+}
+
+.rounded-huge {
+    border-radius: var(--radius-huge);
+}
+
+.rounded-large {
+    border-radius: var(--radius-large);
+}
+
+.rounded-mid {
+    border-radius: var(--radius-mid);
+}
+
+/* Mobile Typography Scale */
+.text-mobile-h1 {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--mobile-text-primary);
+}
+
+.text-mobile-h2 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--mobile-text-primary);
+}
+
+.text-mobile-body {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--mobile-text-secondary);
+}
+
+.text-mobile-caption {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--mobile-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Spacing Rhythm */
+.p-master {
+    padding: 24px;
+}
+
+.px-master {
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.gap-master {
+    gap: 16px;
+}
+
+/* Perfect Alignment Helpers */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+}
+
+.glass-dark {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Premium Shadows */
+.shadow-premium {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-premium-xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+}
+
+/* Liquid Smoothness */
+.active-scale {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease !important;
+}
+
+.active-scale:active {
+    transform: scale(0.94);
+    opacity: 0.9;
+}
+
+.safe-top {
+    padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Smooth Page Transitions */
+.page-enter {
+    animation: slideUp 0.4s cubic-bezier(0.23, 1, 0.320, 1) forwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse-emerald {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.animate-pulse-emerald {
+    animation: pulse-emerald 2s infinite;
+}
