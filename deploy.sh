@@ -19,11 +19,15 @@ echo "🏗️ Building frontend assets..."
 npm install
 npm run build
 
+# Clear and cache configuration
+echo "⚡ Preparing environment..."
+php artisan config:clear
+
 # Run database migrations
 echo "🗄️ Running migrations..."
 php artisan migrate --force
 
-# Clear and cache configuration
+# Recache everything
 echo "⚡ Optimizing Laravel..."
 php artisan config:cache
 php artisan route:cache
