@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import AddReport from './pages/AddReport';
 import Initiatives from './pages/Initiatives';
 import Discussions from './pages/Discussions';
+import AddDiscussion from './pages/AddDiscussion';
 import DiscussionDetail from './pages/DiscussionDetail';
 import Directory from './pages/Directory';
 import Map from './pages/Map';
@@ -89,6 +90,7 @@ function AppContent() {
                 <Route path="/add-report" element={<AddReport />} />
                 <Route path="/initiatives" element={<Initiatives />} />
                 <Route path="/discussions" element={<Discussions />} />
+                <Route path="/discussions/add" element={<AddDiscussion />} />
                 <Route path="/discussions/:id" element={<DiscussionDetail />} />
                 <Route path="/directory" element={<Directory />} />
                 <Route path="/map" element={<Map />} />
