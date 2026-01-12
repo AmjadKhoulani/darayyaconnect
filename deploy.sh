@@ -4,7 +4,7 @@ set -e
 echo "🚀 Starting deployment..."
 
 # Navigate to the project directory
-cd /home/darayyaconnect.com/public_html
+cd /home/darayya/domains/darayyaconnect.com/public_html
 
 # Pull the latest changes from the main branch
 echo "📥 Pulling latest changes..."
