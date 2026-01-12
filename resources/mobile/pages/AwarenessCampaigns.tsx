@@ -80,17 +80,18 @@ export default function AwarenessCampaigns() {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20" dir="rtl">
-            <header className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white sticky top-0 z-30 shadow-xl">
-                <div className="px-5 py-6">
+            <header className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white pb-14 pt-8 z-30 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <div className="px-5">
                     <div className="text-center">
-                        <div className="text-4xl mb-3">🎓</div>
+                        <div className="text-4xl mb-3 animate-float">🎓</div>
                         <h1 className="text-2xl font-black mb-1">التوعية المجتمعية</h1>
                         <p className="text-xs text-indigo-100 font-medium">وعي يحمي الأرواح</p>
                     </div>
                 </div>
             </header>
 
-            <main className="px-5 py-6">
+            <main className="px-5 -mt-10 relative z-40 bg-slate-50 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)]">
                 {loading ? (
                     <div className="grid grid-cols-2 gap-4">
                         {[1, 2, 3, 4].map(i => <SkeletonLoader key={i} type="card" />)}

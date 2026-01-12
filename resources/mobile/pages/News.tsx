@@ -105,24 +105,24 @@ export default function News() {
         <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
                 {/* Header */}
-                <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                <header className="bg-white pb-14 pt-8 z-40 relative">
+                    <div className="flex items-center justify-between px-5">
+                        <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate(-1)}
-                                className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-colors border border-slate-200"
+                                className="w-12 h-12 bg-slate-50 hover:bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 transition-all border border-slate-200 active:scale-90 shadow-sm"
                             >
-                                <ArrowRight size={20} className="rotate-180" />
+                                <ArrowRight size={22} className="rotate-180" />
                             </button>
                             <div>
-                                <h1 className="text-lg font-bold text-slate-800">الأخبار</h1>
-                                <p className="text-[11px] text-slate-500 font-medium">آخر أخبار المدينة</p>
+                                <h1 className="text-2xl font-black text-slate-800 tracking-tight">الأخبار</h1>
+                                <p className="text-xs text-slate-500 font-medium mt-0.5">آخر مستجدات المدينة</p>
                             </div>
                         </div>
                     </div>
                 </header>
 
-                <main className="px-4 py-6 space-y-4">
+                <main className="px-5 -mt-10 relative z-50 bg-slate-50 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-4">
                     {loading ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map(i => (

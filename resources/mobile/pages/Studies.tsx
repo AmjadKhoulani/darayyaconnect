@@ -146,13 +146,13 @@ export default function Studies() {
         <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
                 {/* Header with Search */}
-                <header className="bg-white border-b border-slate-100 sticky top-0 z-30 pt-4 pb-2 shadow-sm/50 backdrop-blur-md bg-white/90">
+                <header className="bg-white pb-12 pt-6 z-30 relative">
                     <div className="px-5 flex items-center justify-between mb-4">
                         <div>
                             <h1 className="text-2xl font-black text-slate-800 tracking-tight">مركز المعرفة 💡</h1>
                             <p className="text-xs text-slate-500 font-medium mt-0.5">رؤى ملهمة لمستقبل مدينتنا</p>
                         </div>
-                        <button className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 transition active:scale-95">
+                        <button className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 transition active:scale-95 shadow-sm">
                             <Search size={20} />
                         </button>
                     </div>
@@ -183,7 +183,7 @@ export default function Studies() {
                     </div>
                 </header>
 
-                <main className="px-5 py-6 space-y-8">
+                <main className="px-5 -mt-10 relative z-40 bg-slate-50 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-8">
 
                     {activeTab === 'global' && (
                         <div className="space-y-6 animate-slide-up">
