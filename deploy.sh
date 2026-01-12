@@ -23,9 +23,10 @@ npm run build
 echo "⚡ Preparing environment..."
 php artisan config:clear
 
-# Run database migrations
-echo "🗄️ Running migrations..."
+# Run database migrations and seed admin
+echo "🗄️ Running migrations and seeding admin..."
 php artisan migrate --force
+php artisan db:seed --class=AdminUserSeeder --force
 
 # Recache everything
 echo "⚡ Optimizing Laravel..."
