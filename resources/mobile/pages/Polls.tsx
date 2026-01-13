@@ -153,26 +153,26 @@ export default function Polls() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
                 {/* Header */}
-                <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-4 shadow-sm">
+                <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 px-4 py-4 shadow-sm transition-colors duration-300">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => navigate(-1)}
-                                className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-colors border border-slate-200"
+                                className="w-10 h-10 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 transition-colors border border-slate-200 dark:border-slate-700"
                             >
                                 <ArrowRight size={20} className="rotate-180" />
                             </button>
                             <div>
-                                <h1 className="text-lg font-bold text-slate-800">الاستطلاعات</h1>
-                                <p className="text-[11px] text-slate-500 font-medium">شارك رأيك في قرارات المدينة</p>
+                                <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">الاستطلاعات</h1>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">شارك رأيك في قرارات المدينة</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
-                            <BarChart3 size={14} className="text-emerald-600" />
-                            <span className="text-xs font-bold text-emerald-600">{polls.length}</span>
+                        <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                            <BarChart3 size={14} className="text-emerald-600 dark:text-emerald-400" />
+                            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{polls.length}</span>
                         </div>
                     </div>
                 </header>
@@ -209,8 +209,8 @@ export default function Polls() {
                     ) : polls.length === 0 ? (
                         <div className="text-center py-12">
                             <span className="text-5xl opacity-30 block mb-4">📊</span>
-                            <h3 className="font-bold text-slate-800 mb-2">لا يوجد استطلاعات نشطة</h3>
-                            <p className="text-slate-500 text-sm">تابعنا للمشاركة في الاستطلاعات القادمة</p>
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-2">لا يوجد استطلاعات نشطة</h3>
+                            <p className="text-slate-500 dark:text-slate-500 text-sm">تابعنا للمشاركة في الاستطلاعات القادمة</p>
                         </div>
                     ) : (
                         polls.map((poll, index) => {
@@ -220,21 +220,21 @@ export default function Polls() {
                             return (
                                 <div
                                     key={poll.id}
-                                    className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fade-in-up"
+                                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-premium overflow-hidden animate-fade-in-up"
                                     style={{ animationDelay: `${(index + 1) * 150}ms` }}
                                 >
                                     {/* Poll Header */}
-                                    <div className="p-5 border-b border-slate-100">
+                                    <div className="p-5 border-b border-slate-100 dark:border-slate-700/50">
                                         <div className="flex items-start justify-between gap-3 mb-2">
-                                            <h3 className="font-bold text-slate-900 text-base leading-relaxed">{poll.question}</h3>
+                                            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base leading-relaxed">{poll.question}</h3>
                                             {poll.is_active && (
-                                                <span className="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-lg border border-emerald-100 whitespace-nowrap">
+                                                <span className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-emerald-100 dark:border-emerald-800/50 whitespace-nowrap">
                                                     نشط
                                                 </span>
                                             )}
                                         </div>
                                         {poll.description && (
-                                            <p className="text-xs text-slate-500">{poll.description}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{poll.description}</p>
                                         )}
                                     </div>
 
@@ -254,15 +254,15 @@ export default function Polls() {
                                                     disabled={hasVoted || votingId === poll.id}
                                                     className={`w-full relative rounded-xl border-2 p-4 text-right transition-all ${hasVoted
                                                         ? isSelected
-                                                            ? 'border-emerald-500 bg-emerald-50'
-                                                            : 'border-slate-200 bg-slate-50'
-                                                        : 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30 active:scale-[0.98]'
+                                                            ? 'border-emerald-500 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20'
+                                                            : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40'
+                                                        : 'border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 active:scale-[0.98]'
                                                         }`}
                                                 >
                                                     {/* Progress Bar (shown after voting) */}
                                                     {hasVoted && (
                                                         <div
-                                                            className={`absolute inset-0 rounded-xl transition-all ${isWinner ? 'bg-emerald-100' : 'bg-slate-100'
+                                                            className={`absolute inset-0 rounded-xl transition-all ${isWinner ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-slate-100 dark:bg-slate-800/50'
                                                                 }`}
                                                             style={{ width: `${percentage}%` }}
                                                         ></div>
@@ -271,17 +271,17 @@ export default function Polls() {
                                                     <div className="relative z-10 flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
                                                             {hasVoted && isSelected && (
-                                                                <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                                                                <div className="w-6 h-6 bg-emerald-500 dark:bg-emerald-600 rounded-full flex items-center justify-center">
                                                                     <Check size={14} className="text-white" />
                                                                 </div>
                                                             )}
-                                                            <span className={`font-medium text-sm ${isSelected ? 'text-emerald-700' : 'text-slate-700'}`}>
+                                                            <span className={`font-medium text-sm ${isSelected ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}`}>
                                                                 {option.text}
                                                             </span>
                                                         </div>
 
                                                         {hasVoted && (
-                                                            <span className={`text-sm font-bold ${isWinner ? 'text-emerald-600' : 'text-slate-500'}`}>
+                                                            <span className={`text-sm font-bold ${isWinner ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-500'}`}>
                                                                 {percentage}%
                                                             </span>
                                                         )}
@@ -292,13 +292,13 @@ export default function Polls() {
                                     </div>
 
                                     {/* Footer Stats */}
-                                    <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                                            <Users size={14} />
+                                    <div className="px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 font-medium">
+                                            <Users size={14} className="text-slate-400 dark:text-slate-600" />
                                             <span>{poll.total_votes} مشارك</span>
                                         </div>
                                         {poll.ends_at && (
-                                            <div className="flex items-center gap-2 text-xs text-amber-600 font-medium">
+                                            <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-500 font-bold">
                                                 <Clock size={14} />
                                                 <span>{getTimeRemaining(poll.ends_at)}</span>
                                             </div>

@@ -79,19 +79,20 @@ export default function AwarenessCampaigns() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl">
-            <header className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white pb-14 pt-8 z-30 relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">
+            <header className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white pb-14 pt-8 z-30 relative overflow-hidden shadow-xl">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-                <div className="px-5">
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full -ml-24 -mb-24 blur-2xl"></div>
+                <div className="px-5 relative z-10">
                     <div className="text-center">
                         <div className="text-4xl mb-3 animate-float">🎓</div>
-                        <h1 className="text-2xl font-black mb-1">التوعية المجتمعية</h1>
-                        <p className="text-xs text-indigo-100 font-medium">وعي يحمي الأرواح</p>
+                        <h1 className="text-2xl font-black mb-1 leading-tight tracking-tight">التوعية المجتمعية</h1>
+                        <p className="text-xs text-indigo-100 font-medium">وعي يحمي الأرواح، يبني داريا</p>
                     </div>
                 </div>
             </header>
 
-            <main className="px-5 -mt-10 relative z-40 bg-slate-50 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)]">
+            <main className="px-5 -mt-10 relative z-40 bg-slate-50 dark:bg-slate-900 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] transition-colors duration-300">
                 {loading ? (
                     <div className="grid grid-cols-2 gap-4">
                         {[1, 2, 3, 4].map(i => <SkeletonLoader key={i} type="card" />)}
@@ -102,23 +103,23 @@ export default function AwarenessCampaigns() {
                             <div
                                 key={campaign.id}
                                 onClick={() => navigate(`/awareness/campaign/${campaign.id}`)}
-                                className={`bg-gradient-to-br ${colorClasses[campaign.color] || colorClasses.emerald} p-5 rounded-3xl active:scale-95 transition-all cursor-pointer shadow-lg relative overflow-hidden`}
+                                className={`bg-gradient-to-br ${colorClasses[campaign.color] || colorClasses.emerald} p-5 rounded-3xl active:scale-95 transition-all cursor-pointer shadow-lg relative overflow-hidden group`}
                             >
-                                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:bg-white/20 transition-colors"></div>
 
                                 <div className="relative z-10">
-                                    <div className="text-5xl mb-3">{campaign.icon}</div>
+                                    <div className="text-5xl mb-3 group-hover:scale-110 transition-transform origin-right">{campaign.icon}</div>
                                     <h3 className="font-black text-white text-base mb-1 leading-tight">
                                         {campaign.title}
                                     </h3>
-                                    <p className="text-xs text-white/80 font-medium mb-2">
+                                    <p className="text-[10px] text-white/80 font-bold mb-2 uppercase tracking-wide">
                                         {campaign.subtitle}
                                     </p>
-                                    <p className="text-[10px] text-white/70 leading-relaxed line-clamp-2">
+                                    <p className="text-[10px] text-white/70 leading-relaxed line-clamp-2 font-medium">
                                         {campaign.description}
                                     </p>
-                                    <div className="mt-3 flex items-center gap-1 text-xs text-white/90">
-                                        <Book size={12} />
+                                    <div className="mt-4 flex items-center gap-1.5 text-[10px] text-white/90 bg-white/10 w-fit px-2 py-1 rounded-lg border border-white/10 font-black">
+                                        <Book size={10} />
                                         <span>{campaign.articles.length} مقالة</span>
                                     </div>
                                 </div>
@@ -127,9 +128,9 @@ export default function AwarenessCampaigns() {
                     </div>
                 )}
 
-                <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-4">
-                    <p className="text-xs text-indigo-700 font-medium text-center leading-relaxed">
-                        💡 محتوى توعوي مجاني لبناء مجتمع واعٍ ومسؤول
+                <div className="mt-8 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/10 dark:to-purple-900/10 border border-indigo-100 dark:border-indigo-800/50 rounded-2xl p-4 text-center">
+                    <p className="text-xs text-indigo-700 dark:text-indigo-400 font-black leading-relaxed">
+                        💡 محتوى توعوي مجاني متوفر لجميع أهل داريا لبناء مجتمع واعٍ، آمن ومسؤول
                     </p>
                 </div>
             </main>

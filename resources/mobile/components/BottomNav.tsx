@@ -13,7 +13,7 @@ export default function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 flex justify-around items-center z-50 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] safe-bottom">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/60 flex justify-around items-center z-50 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] safe-bottom transition-colors duration-300">
             {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (

@@ -101,4 +101,57 @@ class InfrastructureStatusController extends Controller
             'features' => $features
         ]);
     }
+
+    public function getSummary(Request $request)
+    {
+        $services = [
+            ['id' => 'water', 'name' => 'المياه', 'icon' => '💧'],
+            ['id' => 'electricity', 'name' => 'الكهرباء', 'icon' => '⚡'],
+            ['id' => 'internet', 'name' => 'الإنترنت', 'icon' => '🌐'],
+            ['id' => 'phone', 'name' => 'الاتصالات', 'icon' => '📱'],
+        ];
+
+        $summary = [];
+        $today = Carbon::today();
+
+        foreach ($services as $service) {
+            $type = $service['id'];
+            $status = 'stable'; // Default
+            $label = 'يعمل بشكل طبيعي';
+
+            // Calculate status from logs if applicable
+            if (in_array($type, ['water', 'electricity'])) {
+                $totalLogs = ServiceLog::where('service_type', $type)
+                    ->whereDate('log_date', $today)
+                    ->count();
+
+                if ($totalLogs > 0) {
+                    $availableLogs = ServiceLog::where('service_type', $type)
+                        ->whereDate('log_date', $today)
+                        ->where('status', 'available')
+                        ->count();
+                    
+                    $percentage = ($availableLogs / $totalLogs) * 100;
+
+                    if ($percentage < 40) {
+                        $status = 'cutoff';
+                        $label = 'توقف كامل';
+                    } elseif ($percentage < 70) {
+                        $status = 'unstable';
+                        $label = 'غير مستقر';
+                    }
+                }
+            }
+
+            $summary[] = [
+                'id' => $service['id'],
+                'name' => $service['name'],
+                'icon' => $service['icon'],
+                'status' => $status,
+                'label' => $label
+            ];
+        }
+
+        return response()->json($summary);
+    }
 }

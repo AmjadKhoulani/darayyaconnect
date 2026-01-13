@@ -64,32 +64,32 @@ export default function AddDiscussion() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-4 shadow-sm">
+            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 px-4 py-4 shadow-sm transition-colors duration-300">
                 <div className="flex items-center gap-4 px-1">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-12 h-12 bg-slate-50 hover:bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 transition-all border border-slate-200 active:scale-90 shadow-sm"
+                        className="w-12 h-12 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-800 active:scale-90 shadow-sm"
                     >
                         <ArrowRight size={22} className="rotate-180" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-black text-slate-800 tracking-tight">موضوع جديد ✨</h1>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">شارك أفكارك مع مجتمع داريا</p>
+                        <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">موضوع جديد ✨</h1>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">شارك أفكارك مع مجتمع داريا</p>
                     </div>
                 </div>
             </header>
 
             <main className="px-5 py-6 space-y-6">
                 {/* Info Widget */}
-                <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-5 flex gap-4">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0">
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-3xl p-5 flex gap-4">
+                    <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
                         <MessageSquare size={24} />
                     </div>
                     <div>
-                        <h3 className="text-sm font-black text-emerald-800 mb-1">صوتك يهمنا</h3>
-                        <p className="text-emerald-700/70 text-xs leading-relaxed font-medium">
+                        <h3 className="text-sm font-black text-emerald-800 dark:text-emerald-100 mb-1">صوتك يهمنا</h3>
+                        <p className="text-emerald-700/70 dark:text-emerald-400/70 text-xs leading-relaxed font-medium">
                             تأكد من اختيار القسم المناسب لموضوعك لضمان وصوله للجمهور الصحيح.
                         </p>
                     </div>
@@ -97,48 +97,48 @@ export default function AddDiscussion() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Title */}
-                    <div className="bg-white rounded-[32px] p-2 border border-slate-200 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-[32px] p-2 border border-slate-200 dark:border-slate-700 shadow-premium transition-colors duration-300">
                         <div className="p-4 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 mb-2 px-1">عنوان الموضوع</label>
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 px-1">عنوان الموضوع</label>
                                 <input
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     placeholder="اكتب عنواناً مختصراً وواضحاً..."
-                                    className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-all text-slate-900 placeholder-slate-400 text-sm font-bold"
+                                    className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder:text-slate-500 text-sm font-bold"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 mb-2 px-1">التفاصيل</label>
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 px-1">التفاصيل</label>
                                 <textarea
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     placeholder="اشرح موضوعك بالتفصيل، ما هي الفكرة أو السؤال؟"
                                     rows={6}
-                                    className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-all text-slate-900 placeholder-slate-400 text-sm min-h-[160px] resize-none leading-relaxed font-medium"
+                                    className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder:text-slate-500 text-sm min-h-[160px] resize-none leading-relaxed font-medium"
                                     required
                                 />
                             </div>
 
                             {/* Image Upload */}
                             <div>
-                                <label className={`flex items-center gap-3 p-4 rounded-2xl cursor-pointer transition-all border-2 border-dashed ${image ? 'bg-emerald-50 border-emerald-500' : 'bg-slate-50 border-slate-200 hover:border-emerald-400'}`}>
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${image ? 'bg-emerald-100 text-emerald-600' : 'bg-white text-slate-400'}`}>
+                                <label className={`flex items-center gap-3 p-4 rounded-2xl cursor-pointer transition-all border-2 border-dashed ${image ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-emerald-400'}`}>
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${image ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500'}`}>
                                         <ImageIcon size={24} />
                                     </div>
                                     <div className="flex-1">
-                                        <span className={`text-sm font-bold block ${image ? 'text-emerald-700' : 'text-slate-600'}`}>{image ? 'تم اختيار الصورة' : 'إضافة صورة توضيحية'}</span>
-                                        <span className={`text-xs block ${image ? 'text-emerald-600' : 'text-slate-400'}`}>{image ? image.name : 'اختياري - تدعم الفكرة'}</span>
+                                        <span className={`text-sm font-bold block ${image ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-100'}`}>{image ? 'تم اختيار الصورة' : 'إضافة صورة توضيحية'}</span>
+                                        <span className={`text-xs block ${image ? 'text-emerald-600 dark:text-emerald-500' : 'text-slate-400 dark:text-slate-500'}`}>{image ? image.name : 'اختياري - تدعم الفكرة'}</span>
                                     </div>
                                     <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
                                     {image && (
                                         <button
                                             type="button"
                                             onClick={(e) => { e.preventDefault(); setImage(null) }}
-                                            className="w-8 h-8 bg-white text-red-500 flex items-center justify-center rounded-full shadow-sm hover:bg-red-50 transition-colors"
+                                            className="w-8 h-8 bg-white dark:bg-slate-800 text-red-500 flex items-center justify-center rounded-full shadow-sm hover:bg-red-50 dark:hover:bg-red-900 transition-colors"
                                         >
                                             <X size={18} />
                                         </button>
@@ -150,7 +150,7 @@ export default function AddDiscussion() {
 
                     {/* Categories */}
                     <div>
-                        <label className="flex items-center gap-2 text-sm font-black text-slate-800 mb-4 px-1">
+                        <label className="flex items-center gap-2 text-sm font-black text-slate-800 dark:text-slate-100 mb-4 px-1">
                             <div className="w-1.5 h-4 bg-emerald-600 rounded-full"></div>
                             اختر القسم المناسب
                         </label>
@@ -161,11 +161,11 @@ export default function AddDiscussion() {
                                     type="button"
                                     onClick={() => setSelectedCategory(cat.id)}
                                     className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden group ${selectedCategory === cat.id
-                                        ? 'bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-900/20'
-                                        : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                                        ? 'bg-slate-900 dark:bg-emerald-600 border-slate-900 dark:border-emerald-600 text-white shadow-lg shadow-slate-900/20 dark:shadow-emerald-600/20'
+                                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                                         }`}
                                 >
-                                    <div className={`text-2xl mb-1 p-2 rounded-xl transition-colors ${selectedCategory === cat.id ? 'bg-white/10' : 'bg-slate-50'}`}>
+                                    <div className={`text-2xl mb-1 p-2 rounded-xl transition-colors ${selectedCategory === cat.id ? 'bg-white/10' : 'bg-slate-50 dark:bg-slate-900'}`}>
                                         {cat.icon}
                                     </div>
                                     <span className="text-xs font-black">{cat.name}</span>
@@ -178,9 +178,9 @@ export default function AddDiscussion() {
                     </div>
 
                     {/* Warning Widget */}
-                    <div className="bg-amber-50 border border-amber-100 rounded-3xl p-4 flex gap-3">
-                        <AlertCircle size={20} className="text-amber-600 shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
+                    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-3xl p-4 flex gap-3">
+                        <AlertCircle size={20} className="text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-amber-800 dark:text-amber-200 font-medium leading-relaxed">
                             يرجى الالتزام بمعايير المجتمع وعدم نشر محتوى مسيء أو غير لائق. يتم مراجعة كافة المواضيع من قبل المشرفين.
                         </p>
                     </div>

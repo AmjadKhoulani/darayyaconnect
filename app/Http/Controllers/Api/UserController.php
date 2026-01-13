@@ -10,9 +10,12 @@ class UserController extends Controller
 {
     public function updateLocation(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('📍 Location Update Request:', $request->all());
+
         $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
+            'is_resident' => 'boolean',
         ]);
 
         $user = $request->user();
@@ -23,6 +26,8 @@ class UserController extends Controller
         $user->update([
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
+            'is_resident' => $request->is_resident ?? $user->is_resident,
+            'location_verified_at' => now(),
         ]);
 
         return response()->json(['message' => 'Location updated successfully']);

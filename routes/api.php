@@ -89,6 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Crowdsourced Status Layer (Outside Auth for easy map access or same level as infrastructure)
 Route::get('/infrastructure/status-heatmap', [App\Http\Controllers\Api\InfrastructureStatusController::class, 'getHeatmapData']);
+Route::get('/infrastructure/status-summary', [App\Http\Controllers\Api\InfrastructureStatusController::class, 'getSummary']);
 
 // Dashboard Stats for Mobile Home
 Route::get('/dashboard/stats', [App\Http\Controllers\Api\DashboardController::class, 'getStats']);

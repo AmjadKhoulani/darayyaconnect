@@ -33,7 +33,19 @@ class User extends Authenticatable
         'longitude',
         'is_verified_official',
         'profession',
+        'is_resident',
+        'location_verified_at',
+        'country_code',
+        'mobile',
     ];
+
+    /**
+     * Scope a query to only include resident users.
+     */
+    public function scopeResidents($query)
+    {
+        return $query->where('is_resident', true);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

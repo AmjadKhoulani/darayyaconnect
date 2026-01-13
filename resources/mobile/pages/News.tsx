@@ -102,34 +102,34 @@ export default function News() {
 
     // News List View
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
                 {/* Header */}
-                <header className="bg-white pb-14 pt-8 z-40 relative">
+                <header className="bg-white dark:bg-slate-900 pb-14 pt-8 z-40 relative transition-colors duration-300">
                     <div className="flex items-center justify-between px-5">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate(-1)}
-                                className="w-12 h-12 bg-slate-50 hover:bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 transition-all border border-slate-200 active:scale-90 shadow-sm"
+                                className="w-12 h-12 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-800 active:scale-90 shadow-sm"
                             >
                                 <ArrowRight size={22} className="rotate-180" />
                             </button>
                             <div>
-                                <h1 className="text-2xl font-black text-slate-800 tracking-tight">الأخبار</h1>
-                                <p className="text-xs text-slate-500 font-medium mt-0.5">آخر مستجدات المدينة</p>
+                                <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">الأخبار</h1>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">آخر مستجدات المدينة</p>
                             </div>
                         </div>
                     </div>
                 </header>
 
-                <main className="px-5 -mt-10 relative z-50 bg-slate-50 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-4">
+                <main className="px-5 -mt-10 relative z-50 bg-slate-50 dark:bg-slate-900 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-4 transition-colors duration-300">
                     {loading ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map(i => (
-                                <div key={i} className="bg-white rounded-2xl p-5 animate-pulse border border-slate-100">
-                                    <div className="h-4 bg-slate-200 rounded w-3/4 mb-3"></div>
-                                    <div className="h-3 bg-slate-100 rounded w-full mb-2"></div>
-                                    <div className="h-3 bg-slate-100 rounded w-2/3"></div>
+                                <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-5 animate-pulse border border-slate-100 dark:border-slate-700">
+                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-3"></div>
+                                    <div className="h-3 bg-slate-100 dark:bg-slate-700/50 rounded w-full mb-2"></div>
+                                    <div className="h-3 bg-slate-100 dark:bg-slate-700/50 rounded w-2/3"></div>
                                 </div>
                             ))}
                         </div>
@@ -140,33 +140,33 @@ export default function News() {
                                 <button
                                     key={item.id}
                                     onClick={() => navigate(`/news/${item.id}`)}
-                                    className={`w-full bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-emerald-200 transition-all text-right group animate-fade-in-up`}
+                                    className={`w-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-premium hover:border-emerald-200 dark:hover:border-emerald-800 transition-all text-right group animate-fade-in-up`}
                                     style={{ animationDelay: `${index * 100}ms` }}
                                 >
                                     <div className="flex items-start gap-4">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <span className={`bg-${color}-50 text-${color}-600 text-[10px] font-bold px-2 py-1 rounded-lg border border-${color}-100`}>
+                                                <span className={`bg-${color}-50 dark:bg-${color}-900/20 text-${color}-600 dark:text-${color}-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-${color}-100 dark:border-${color}-800/50`}>
                                                     {item.category}
                                                 </span>
-                                                <span className="text-[10px] text-slate-400 font-medium">{formatDate(item.created_at)}</span>
+                                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{formatDate(item.created_at)}</span>
                                             </div>
-                                            <h3 className="font-bold text-slate-900 text-sm mb-2 leading-relaxed line-clamp-2 group-hover:text-emerald-700 transition-colors">
+                                            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm mb-2 leading-relaxed line-clamp-2 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                                 {item.title}
                                             </h3>
-                                            <p className="text-xs text-slate-500 line-clamp-2 mb-3 leading-relaxed opacity-80">
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-3 leading-relaxed opacity-80">
                                                 {item.summary}
                                             </p>
-                                            <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+                                            <div className="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/50">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-lg filter grayscale group-hover:grayscale-0 transition-all">{item.source_icon}</span>
-                                                    <span className="text-[10px] text-slate-500 font-bold">{item.source}</span>
+                                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">{item.source}</span>
                                                 </div>
-                                                <div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium">
-                                                    <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-full">
+                                                <div className="flex items-center gap-3 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                                                    <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded-full">
                                                         <Eye size={12} /> {item.views}
                                                     </span>
-                                                    <span className="flex items-center gap-1 bg-rose-50 text-rose-500 px-2 py-0.5 rounded-full">
+                                                    <span className="flex items-center gap-1 bg-rose-50 dark:bg-rose-900/30 text-rose-500 dark:text-rose-400 px-2 py-0.5 rounded-full">
                                                         <Heart size={12} className="fill-rose-500" /> {item.likes}
                                                     </span>
                                                 </div>

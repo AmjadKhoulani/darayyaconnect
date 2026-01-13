@@ -43,14 +43,31 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
+            'age' => 'required|integer|min:12|max:100',
+            'gender' => 'required|string|in:male,female',
+            'mobile' => 'required|numeric',
+            'country_code' => 'required|string',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'age' => $request->age,
+            'gender' => $request->gender,
+            'role' => 'citizen',
+            'mobile' => $request->mobile,
+            'country_code' => $request->country_code,
         ]);
+
+        // Send Welcome Email
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\WelcomeMail($user));
+        } catch (\Exception $e) {
+            // Log error but don't fail registration
+            \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
 
         return response()->json([
             'token' => $user->createToken('mobile_app')->plainTextToken,

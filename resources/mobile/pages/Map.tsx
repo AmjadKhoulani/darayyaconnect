@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Crosshair, Layers, X } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { GeolocationService } from '../services/GeolocationService';
 import { Geolocation } from '@capacitor/geolocation';
+
 import api from '../services/api';
 
 // Sample Service Locations
@@ -180,7 +182,9 @@ export default function Map() {
             fetch('/api/infrastructure')
                 .then(res => res.json())
                 .then(data => {
-                    if (!map.current) return;
+                    // Capture map instance to ensure type safety in closure and fix lint errors
+                    const mapInstance = map.current;
+                    if (!mapInstance) return;
 
                     // Separate lines by type
                     ['water', 'electricity', 'sewage', 'phone'].forEach(type => {
@@ -203,14 +207,14 @@ export default function Map() {
                         };
 
                         // Add Line Source
-                        map.current.addSource(`infra-${type}-source`, {
+                        mapInstance.addSource(`infra-${type}-source`, {
                             type: 'geojson',
                             data: geoJson
                         });
 
                         // Add Line Layer
                         const util = (INFRA_COLORS as any)[type];
-                        map.current.addLayer({
+                        mapInstance.addLayer({
                             id: `infra-${type}`,
                             type: 'line',
                             source: `infra-${type}-source`,
@@ -238,8 +242,8 @@ export default function Map() {
                                 }))
                             };
 
-                            map.current.addSource(`infra-${type}-nodes`, { type: 'geojson', data: nodesGeoJson });
-                            map.current.addLayer({
+                            mapInstance.addSource(`infra-${type}-nodes`, { type: 'geojson', data: nodesGeoJson });
+                            mapInstance.addLayer({
                                 id: `infra-${type}-nodes-layer`,
                                 type: 'circle',
                                 source: `infra-${type}-nodes`,
@@ -389,6 +393,13 @@ export default function Map() {
     }, [activeLayers]);
 
 
+    // Auto-locate on mount
+    useEffect(() => {
+        if (map.current) {
+            locateUser();
+        }
+    }, [map.current]);
+
     // Handle Search
     useEffect(() => {
         const filtered = serviceLocations.filter(loc =>
@@ -412,10 +423,10 @@ export default function Map() {
             const el = document.createElement('div');
             el.className = 'flex flex-col items-center justify-center animate-bounce-short cursor-pointer';
             el.innerHTML = `
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-xl shadow-lg border-2 border-emerald-500 transform transition hover:scale-110">
+                <div class="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-xl shadow-lg border-2 border-emerald-500 transform transition hover:scale-110">
                     ${loc.emoji}
                 </div>
-                <div class="bg-white/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold shadow mt-1 whitespace-nowrap">
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold shadow-sm mt-1 whitespace-nowrap text-slate-800 dark:text-slate-100 border border-slate-100 dark:border-slate-700/50">
                     ${loc.name}
                 </div>
             `;
@@ -435,21 +446,35 @@ export default function Map() {
 
     const locateUser = async () => {
         try {
-            const coordinates = await Geolocation.getCurrentPosition();
-            const { latitude, longitude } = coordinates.coords;
+            console.log("Locating user...");
+            const result = await GeolocationService.getCurrentPosition();
 
-            if (map.current) {
-                const el = document.createElement('div');
-                el.className = 'w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg pulse-ring';
+            if (result.coords) {
+                const { latitude, longitude } = result.coords;
+                console.log("User located:", latitude, longitude);
 
-                new maplibregl.Marker({ element: el })
-                    .setLngLat([longitude, latitude])
-                    .addTo(map.current);
+                if (map.current) {
+                    // Remove existing user marker if any
+                    const existingMarker = document.getElementById('user-location-marker');
+                    if (existingMarker) existingMarker.remove();
 
-                map.current.flyTo({ center: [longitude, latitude], zoom: 16 });
+                    const el = document.createElement('div');
+                    el.id = 'user-location-marker';
+                    el.className = 'w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-slate-100 shadow-lg pulse-ring';
+
+                    new maplibregl.Marker({ element: el })
+                        .setLngLat([longitude, latitude])
+                        .addTo(map.current);
+
+                    map.current.flyTo({ center: [longitude, latitude], zoom: 16 });
+                }
+            } else if (result.error) {
+                console.error("Location error:", result.error);
+                alert(result.error);
             }
         } catch (e) {
             console.error("Error getting location", e);
+            alert('تعذر تحديد موقعك الحالي');
         }
     };
 
@@ -461,10 +486,10 @@ export default function Map() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col" dir="rtl">
+        <div className="fixed inset-0 h-[100dvh] bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-300 overflow-hidden" dir="rtl">
             {/* Map Container */}
-            <div className="flex-1 relative overflow-hidden">
-                <div ref={mapContainer} className="absolute inset-0 z-0 bg-slate-200" />
+            <div className="flex-1 relative w-full h-full">
+                <div ref={mapContainer} className="absolute inset-0 z-0 bg-slate-200 dark:bg-slate-800" />
 
                 {/* Header & Search */}
                 <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none">
@@ -484,12 +509,12 @@ export default function Map() {
                         </div>
 
                         {/* Search Bar */}
-                        <div className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-2 transition-all focus-within:ring-2 ring-emerald-500/20">
-                            <span className="text-slate-400 mr-2">🔍</span>
+                        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-2 rounded-xl shadow-premium border border-slate-200 dark:border-slate-800 flex items-center gap-2 transition-all focus-within:ring-2 ring-emerald-500/20">
+                            <span className="text-slate-400 dark:text-slate-500 mr-2">🔍</span>
                             <input
                                 type="text"
                                 placeholder="ابحث عن صيدلية، مركز..."
-                                className="bg-transparent border-none text-sm text-slate-800 placeholder-slate-400 w-full focus:ring-0 p-0 outline-none"
+                                className="bg-transparent border-none text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 w-full focus:ring-0 p-0 outline-none"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -501,13 +526,13 @@ export default function Map() {
                 <div className="absolute bottom-6 left-4 z-10 flex flex-col gap-3 pointer-events-auto">
                     <button
                         onClick={() => setShowLayersMenu(true)}
-                        className={`w-12 h-12 rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform border z-20 ${showLayersMenu ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-white text-emerald-600 border-slate-100'}`}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center shadow-premium active:scale-95 transition-transform border z-20 ${showLayersMenu ? 'bg-emerald-600 dark:bg-emerald-500 text-white border-emerald-700 dark:border-emerald-400' : 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border-slate-100 dark:border-slate-700'}`}
                     >
                         <Layers size={22} />
                     </button>
                     <button
                         onClick={locateUser}
-                        className="w-12 h-12 bg-white text-blue-600 rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform border border-slate-100"
+                        className="w-12 h-12 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-100 dark:border-slate-700"
                     >
                         <Crosshair size={24} />
                     </button>
@@ -515,31 +540,31 @@ export default function Map() {
 
                 {/* Layers Bottom Sheet / Modal */}
                 {showLayersMenu && (
-                    <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/20 backdrop-blur-sm" onClick={() => setShowLayersMenu(false)}>
-                        <div className="bg-white w-full max-w-md rounded-t-3xl shadow-2xl p-6 animate-in slide-in-from-bottom duration-200" onClick={e => e.stopPropagation()}>
+                    <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLayersMenu(false)}>
+                        <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-3xl shadow-2xl p-6 animate-in slide-in-from-bottom duration-200" onClick={e => e.stopPropagation()}>
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                                     <Layers size={20} className="text-emerald-500" />
                                     طبقات الخريطة
                                 </h3>
-                                <button onClick={() => setShowLayersMenu(false)} className="bg-slate-50 p-2 rounded-full text-slate-500 hover:bg-slate-100">
+                                <button onClick={() => setShowLayersMenu(false)} className="bg-slate-50 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
                                     <X size={20} />
                                 </button>
                             </div>
 
                             <div className="space-y-3">
-                                <div className="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                                <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <input type="checkbox" checked={activeLayers.heatmap} onChange={() => toggleLayer('heatmap')} className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 text-sm block">الكثافة السكانية</span>
-                                            <span className="text-[10px] text-slate-500">خريطة حرارية لتوزيع السكان</span>
+                                        <input type="checkbox" checked={activeLayers.heatmap} onChange={() => toggleLayer('heatmap')} className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500" />
+                                        <div className="flex-1 text-right">
+                                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">الكثافة السكانية</span>
+                                            <span className="text-[10px] text-slate-500 dark:text-slate-400">خريطة حرارية لتوزيع السكان</span>
                                         </div>
                                         <div className="h-4 w-4 rounded-full bg-gradient-to-tr from-blue-300 to-red-500 opacity-80"></div>
                                     </label>
                                 </div>
 
-                                <div className="text-xs font-bold text-slate-400 mt-4 mb-2 pr-2">البنية التحتية</div>
+                                <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right">البنية التحتية</div>
 
                                 {[
                                     { id: 'water', label: 'شبكة المياه', color: 'bg-blue-500', sub: 'خطوط التوزيع الرئيسية' },
@@ -547,37 +572,37 @@ export default function Map() {
                                     { id: 'sewage', label: 'الصرف الصحي', color: 'bg-orange-800', sub: 'المجرورات الرئيسية' },
                                     { id: 'phone', label: 'الهاتف', color: 'bg-emerald-500', sub: 'كابلات الاتصالات' },
                                 ].map(layer => (
-                                    <label key={layer.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-white active:bg-slate-50 transition cursor-pointer">
+                                    <label key={layer.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer">
                                         <input
                                             type="checkbox"
                                             checked={activeLayers[layer.id as keyof typeof activeLayers]}
                                             onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
-                                            className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500"
                                         />
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 text-sm block">{layer.label}</span>
-                                            <span className="text-[10px] text-slate-500">{layer.sub}</span>
+                                        <div className="flex-1 text-right">
+                                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
+                                            <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
                                         </div>
                                         <div className={`w-10 h-1.5 rounded-full ${layer.color} opacity-80`}></div>
                                     </label>
                                 ))}
 
-                                <div className="text-xs font-bold text-slate-400 mt-4 mb-2 pr-2">حالة الشبكة (مجتمعي)</div>
+                                <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right">حالة الشبكة (مجتمعي)</div>
 
                                 {[
                                     { id: 'crowdElectricity', label: 'كهرباء (بلاغات)', color: 'bg-yellow-400', sub: 'حالة الكهرباء الآن' },
                                     { id: 'crowdWater', label: 'مياه (بلاغات)', color: 'bg-blue-400', sub: 'حالة المياه الآن' },
                                 ].map(layer => (
-                                    <label key={layer.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-white active:bg-slate-50 transition cursor-pointer">
+                                    <label key={layer.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer">
                                         <input
                                             type="checkbox"
                                             checked={activeLayers[layer.id as keyof typeof activeLayers]}
                                             onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
-                                            className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500"
                                         />
-                                        <div className="flex-1">
-                                            <span className="font-bold text-slate-700 text-sm block">{layer.label}</span>
-                                            <span className="text-[10px] text-slate-500">{layer.sub}</span>
+                                        <div className="flex-1 text-right">
+                                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
+                                            <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
                                         </div>
                                         <div className={`w-10 h-1.5 rounded-full ${layer.color} opacity-80`}></div>
                                     </label>
@@ -594,10 +619,10 @@ export default function Map() {
                             <button
                                 key={loc.id}
                                 onClick={() => map.current?.flyTo({ center: [loc.lng, loc.lat], zoom: 17 })}
-                                className="bg-white/95 backdrop-blur-sm p-3 rounded-2xl min-w-[130px] shadow-lg border border-slate-100 flex flex-col items-center text-center active:scale-95 transition-transform"
+                                className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm p-3 rounded-2xl min-w-[130px] shadow-premium border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center active:scale-95 transition-transform"
                             >
                                 <div className="text-2xl mb-1">{loc.emoji}</div>
-                                <div className="font-bold text-slate-800 text-xs truncate w-full">{loc.name}</div>
+                                <div className="font-bold text-slate-800 dark:text-slate-100 text-xs truncate w-full">{loc.name}</div>
                             </button>
                         ))}
                     </div>

@@ -52,18 +52,18 @@ export default function Volunteering() {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
 
                 {/* Clean Header */}
-                <header className="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-4 shadow-sm flex items-center justify-between">
+                <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 px-4 py-4 shadow-sm flex items-center justify-between transition-colors duration-300">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-colors border border-slate-200">
+                        <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 transition-colors border border-slate-200 dark:border-slate-700">
                             <ChevronRight size={24} className="rotate-180" />
                         </button>
                         <div>
-                            <h1 className="text-lg font-bold text-slate-800">فرص التطوع</h1>
-                            <p className="text-[11px] text-slate-500 font-medium">ساهم في بناء مجتمعنا</p>
+                            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">فرص التطوع</h1>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">ساهم في بناء مجتمعنا</p>
                         </div>
                     </div>
                 </header>
@@ -71,15 +71,15 @@ export default function Volunteering() {
                 <main className="px-4 py-4 space-y-6">
 
                     {/* Hero Banner */}
-                    <div className="relative rounded-3xl overflow-hidden shadow-lg animate-fade-in-up">
-                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-800 to-teal-600 mix-blend-multiply opacity-90"></div>
+                    <div className="relative rounded-3xl overflow-hidden shadow-premium animate-fade-in-up">
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-800 to-teal-600 mix-blend-multiply opacity-90 dark:opacity-80"></div>
                         <img
                             src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&q=80"
                             className="w-full h-48 object-cover"
                             alt="Volunteer Hero"
                         />
                         <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-                            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-3">
+                            <div className="w-10 h-10 bg-white/20 dark:bg-slate-900/40 backdrop-blur-md rounded-xl flex items-center justify-center mb-3 border border-white/20">
                                 <Heart className="text-white fill-white" size={20} />
                             </div>
                             <h2 className="text-2xl font-black mb-1">اصنع فرقاً اليوم</h2>
@@ -90,29 +90,29 @@ export default function Volunteering() {
                     </div>
 
                     {/* Stats Bar */}
-                    <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                        <div className="text-center flex-1 border-l border-slate-100 last:border-0 px-2">
-                            <div className="text-xl font-bold text-slate-800">125</div>
-                            <div className="text-[10px] font-medium text-slate-500">متطوع</div>
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-premium flex items-center justify-between animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                        <div className="text-center flex-1 border-l border-slate-100 dark:border-slate-700 last:border-0 px-2">
+                            <div className="text-xl font-bold text-slate-800 dark:text-slate-100">125</div>
+                            <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">متطوع</div>
                         </div>
-                        <div className="text-center flex-1 border-l border-slate-100 last:border-0 px-2">
-                            <div className="text-xl font-bold text-emerald-600">12</div>
-                            <div className="text-[10px] font-medium text-slate-500">فرصة</div>
+                        <div className="text-center flex-1 border-l border-slate-100 dark:border-slate-700 last:border-0 px-2">
+                            <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">12</div>
+                            <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">فرصة</div>
                         </div>
                         <div className="text-center flex-1 px-2">
-                            <div className="text-xl font-bold text-blue-600">850</div>
-                            <div className="text-[10px] font-medium text-slate-500">ساعة</div>
+                            <div className="text-xl font-bold text-blue-600 dark:text-blue-400">850</div>
+                            <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">ساعة</div>
                         </div>
                     </div>
 
                     {/* Opportunities List */}
                     <div className="space-y-4">
-                        <h3 className="font-bold text-slate-800 text-sm px-1">فرص متاحة الآن</h3>
+                        <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm px-1">فرص متاحة الآن</h3>
                         {opportunities.map((opp, index) => (
                             <button
                                 key={opp.id}
-                                onClick={() => navigate(`/volunteering/${opp.id}`)}
-                                className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:border-emerald-200 transition-all group animate-fade-in-up active:scale-[0.99] text-right"
+                                onClick={() => navigate(`/volunteering/${opp.id}`, { state: { opp } })}
+                                className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-premium overflow-hidden hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group animate-fade-in-up active:scale-[0.99] text-right"
                                 style={{ animationDelay: `${(index + 2) * 100}ms` }}
                             >
                                 <div className="p-4">
@@ -128,31 +128,31 @@ export default function Volunteering() {
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start mb-1">
-                                                <h3 className="font-bold text-sm text-slate-800 line-clamp-2 group-hover:text-emerald-700 transition-colors leading-relaxed">
+                                                <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 line-clamp-2 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors leading-relaxed">
                                                     {opp.title}
                                                 </h3>
                                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${opp.filled >= opp.spots ? 'bg-rose-50 text-rose-500 border-rose-100' : 'bg-emerald-50 text-emerald-500 border-emerald-100'}`}>
                                                     {opp.filled}/{opp.spots}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium mt-1">
-                                                <Users size={12} className="text-slate-400" />
-                                                <span className="text-slate-600">{opp.org}</span>
-                                                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                                <span className="text-emerald-600">{opp.date}</span>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium mt-1">
+                                                <Users size={12} className="text-slate-400 dark:text-slate-500" />
+                                                <span className="text-slate-600 dark:text-slate-300">{opp.org}</span>
+                                                <span className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></span>
+                                                <span className="text-emerald-600 dark:text-emerald-400">{opp.date}</span>
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between border-t border-slate-50 pt-3 mt-1">
+                                    <div className="flex items-center justify-between border-t border-slate-50 dark:border-slate-700/50 pt-3 mt-1">
                                         <div className="flex items-center gap-2">
                                             {opp.tags.map(tag => (
-                                                <span key={tag} className="bg-slate-50 text-slate-500 px-2 py-1 rounded-lg text-[10px] font-bold border border-slate-100">
+                                                <span key={tag} className="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-2 py-1 rounded-lg text-[10px] font-bold border border-slate-100 dark:border-slate-700">
                                                     {tag}
                                                 </span>
                                             ))}
                                         </div>
-                                        <div className="flex items-center gap-1 text-slate-400 text-[10px] font-medium group-hover:text-emerald-600 transition-colors">
+                                        <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 text-[10px] font-medium group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                             <span>التفاصيل</span>
                                             <ChevronRight size={14} className="rotate-180" />
                                         </div>
@@ -163,7 +163,7 @@ export default function Volunteering() {
                     </div>
 
                     <div className="text-center py-8">
-                        <button className="text-emerald-600 text-xs font-bold hover:underline bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
+                        <button className="text-emerald-600 dark:text-emerald-400 text-xs font-bold hover:underline bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2 rounded-full border border-emerald-100 dark:border-emerald-800">
                             هل تمثل جمعية؟ أضف فرصة جديدة
                         </button>
                     </div>

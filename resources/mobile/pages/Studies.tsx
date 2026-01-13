@@ -143,39 +143,39 @@ export default function Studies() {
     }, [fetchStudies]);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
                 {/* Header with Search */}
-                <header className="bg-white pb-12 pt-6 z-30 relative">
+                <header className="bg-white dark:bg-slate-900 pb-12 pt-6 z-30 relative transition-colors duration-300">
                     <div className="px-5 flex items-center justify-between mb-4">
                         <div>
-                            <h1 className="text-2xl font-black text-slate-800 tracking-tight">مركز المعرفة 💡</h1>
-                            <p className="text-xs text-slate-500 font-medium mt-0.5">رؤى ملهمة لمستقبل مدينتنا</p>
+                            <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">مركز المعرفة 💡</h1>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">رؤى ملهمة لمستقبل مدينتنا</p>
                         </div>
-                        <button className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 transition active:scale-95 shadow-sm">
+                        <button className="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition active:scale-95 shadow-sm">
                             <Search size={20} />
                         </button>
                     </div>
 
                     {/* Custom Tab Switcher */}
                     <div className="px-5 pb-2">
-                        <div className="bg-slate-100 p-1.5 rounded-2xl flex relative">
+                        <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative">
                             {/* Sliding Background (Simplified logic for now) */}
                             <button
                                 onClick={() => setActiveTab('global')}
-                                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all relative z-10 ${activeTab === 'global' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all relative z-10 ${activeTab === 'global' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                             >
                                 🌍 تجارب عالمية
                             </button>
                             <button
                                 onClick={() => setActiveTab('local')}
-                                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all relative z-10 ${activeTab === 'local' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all relative z-10 ${activeTab === 'local' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                             >
                                 📊 دراسات محلية
                             </button>
                             <button
                                 onClick={() => setActiveTab('awareness')}
-                                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all relative z-10 ${activeTab === 'awareness' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all relative z-10 ${activeTab === 'awareness' ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                             >
                                 📢 توعية
                             </button>
@@ -183,7 +183,7 @@ export default function Studies() {
                     </div>
                 </header>
 
-                <main className="px-5 -mt-10 relative z-40 bg-slate-50 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-8">
+                <main className="px-5 -mt-10 relative z-40 bg-slate-50 dark:bg-slate-900 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-8 transition-colors duration-300">
 
                     {activeTab === 'global' && (
                         <div className="space-y-6 animate-slide-up">
@@ -235,23 +235,23 @@ export default function Studies() {
                                     <div
                                         key={exp.id}
                                         onClick={() => navigate(`/study/${exp.id}`)}
-                                        className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex gap-4 hover:border-blue-200 transition-colors cursor-pointer group"
+                                        className="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/50 flex gap-4 hover:border-blue-200 dark:hover:border-blue-700 transition-colors cursor-pointer group"
                                     >
-                                        <div className="w-24 h-24 rounded-2xl bg-slate-100 overflow-hidden shrink-0 relative">
+                                        <div className="w-24 h-24 rounded-2xl bg-slate-100 dark:bg-slate-900 overflow-hidden shrink-0 relative">
                                             <img src={exp.image} className="w-full h-full object-cover" alt="" />
                                             <div className={`absolute inset-0 bg-${exp.color}-500/10 mix-blend-overlay`}></div>
                                         </div>
                                         <div className="flex-1 py-1">
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className={`text-[10px] font-bold text-${exp.color}-600 uppercase tracking-wide bg-${exp.color}-50 px-2 py-0.5 rounded-lg`}>
+                                                <span className={`text-[10px] font-bold text-${exp.color}-600 dark:text-${exp.color}-400 uppercase tracking-wide bg-${exp.color}-50 dark:bg-${exp.color}-900/20 px-2 py-0.5 rounded-lg`}>
                                                     {exp.category}
                                                 </span>
-                                                <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold flex items-center gap-1">
                                                     <Clock size={10} /> {exp.readTime}
                                                 </span>
                                             </div>
-                                            <h3 className="font-bold text-slate-800 text-base mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">{exp.title}</h3>
-                                            <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{exp.summary}</p>
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">{exp.title}</h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{exp.summary}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -273,25 +273,25 @@ export default function Studies() {
 
                             {loading ? [1, 2].map(i => <SkeletonLoader key={i} type="card" />) : (
                                 studies.map(study => (
-                                    <div key={study.id} onClick={() => navigate(`/study/${study.id}`)} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm active:scale-[0.98] transition-all">
+                                    <div key={study.id} onClick={() => navigate(`/study/${study.id}`)} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm active:scale-[0.98] transition-all">
                                         <div className="flex items-start justify-between mb-3">
-                                            <div className="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl border border-orange-100">
+                                            <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center text-2xl border border-orange-100 dark:border-orange-800/50">
                                                 {study.icon || '📈'}
                                             </div>
-                                            <div className="bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
-                                                <span className="text-[10px] font-bold text-slate-500">{study.category}</span>
+                                            <div className="bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-lg border border-slate-100 dark:border-slate-800/50">
+                                                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{study.category}</span>
                                             </div>
                                         </div>
-                                        <h3 className="font-bold text-slate-900 text-lg mb-2">{study.title}</h3>
-                                        <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed mb-4">{study.summary}</p>
-                                        <div className="flex items-center gap-4 pt-4 border-t border-slate-50">
+                                        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-2">{study.title}</h3>
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 leading-relaxed mb-4">{study.summary}</p>
+                                        <div className="flex items-center gap-4 pt-4 border-t border-slate-50 dark:border-slate-700/50">
                                             <div className="flex items-center gap-1.5">
-                                                <DollarSign size={14} className="text-slate-400" />
-                                                <span className="text-xs font-bold text-slate-700">{study.economics?.investment || 'غير محدد'}</span>
+                                                <DollarSign size={14} className="text-slate-400 dark:text-slate-500" />
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{study.economics?.investment || 'غير محدد'}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <Users size={14} className="text-slate-400" />
-                                                <span className="text-xs font-bold text-slate-700">{study.economics?.jobs || 'غير محدد'} وظيفة</span>
+                                                <Users size={14} className="text-slate-400 dark:text-slate-500" />
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{study.economics?.jobs || 'غير محدد'} وظيفة</span>
                                             </div>
                                         </div>
                                     </div>
@@ -328,18 +328,18 @@ export default function Studies() {
                                     <button
                                         key={item.id}
                                         onClick={() => navigate(`/awareness/${item.id}`)}
-                                        className="w-full bg-white rounded-3xl border border-slate-200 p-4 flex items-center gap-4 text-right active:scale-[0.98] transition-transform shadow-sm hover:shadow-md hover:border-slate-300"
+                                        className="w-full bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-4 flex items-center gap-4 text-right active:scale-[0.98] transition-all shadow-premium hover:border-slate-300 dark:hover:border-slate-600"
                                     >
-                                        <div className={`w-16 h-16 rounded-2xl bg-${item.color}-50 border border-${item.color}-100 flex items-center justify-center text-3xl shrink-0`}>
+                                        <div className={`w-16 h-16 rounded-2xl bg-${item.color}-50 dark:bg-${item.color}-900/20 border border-${item.color}-100 dark:border-${item.color}-800/50 flex items-center justify-center text-3xl shrink-0`}>
                                             {item.icon}
                                         </div>
                                         <div className="flex-1">
-                                            <div className={`text-[10px] font-black uppercase text-${item.color}-600 mb-0.5 tracking-wide`}>{item.type}</div>
-                                            <h3 className="font-bold text-slate-800 text-base mb-1 leading-tight">{item.title}</h3>
-                                            <p className="text-xs text-slate-500 leading-relaxed line-clamp-1">{item.desc}</p>
+                                            <div className={`text-[10px] font-black uppercase text-${item.color}-600 dark:text-${item.color}-400 mb-0.5 tracking-wide`}>{item.type}</div>
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base mb-1 leading-tight">{item.title}</h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-1">{item.desc}</p>
                                         </div>
-                                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
-                                            <ArrowRight size={16} className="text-slate-400 rotate-180" />
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center shrink-0">
+                                            <ArrowRight size={16} className="text-slate-400 dark:text-slate-500 rotate-180" />
                                         </div>
                                     </button>
                                 ))}

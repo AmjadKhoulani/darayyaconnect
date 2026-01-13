@@ -233,7 +233,7 @@ export default function StudyDetail() {
             .finally(() => setLoading(false));
     }, [id]);
 
-    if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-slate-800 border-t-transparent rounded-full"></div></div>;
+    if (loading) return <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center transition-colors duration-300"><div className="animate-spin w-8 h-8 border-2 border-slate-800 dark:border-slate-400 border-t-transparent rounded-full"></div></div>;
 
 
     // Use either the API study data OR our rich local data
@@ -243,7 +243,7 @@ export default function StudyDetail() {
 
 
     return (
-        <div className="bg-slate-50 min-h-screen pb-10" dir="rtl">
+        <div className="bg-slate-50 dark:bg-slate-900 min-h-screen pb-10 transition-colors duration-300" dir="rtl">
             {/* Immersive Header */}
             <div className="relative h-[60vh] w-full bg-slate-900 overflow-hidden">
                 <img
@@ -288,14 +288,14 @@ export default function StudyDetail() {
             <main className="px-5 -mt-8 relative z-30 space-y-6">
 
                 {/* Summary Card */}
-                <div className="bg-white rounded-[32px] p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
+                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-6 shadow-premium border border-slate-100 dark:border-slate-700/50">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-                            <BookOpen size={18} className="text-slate-600" />
+                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center border border-slate-200 dark:border-slate-600">
+                            <BookOpen size={18} className="text-slate-600 dark:text-slate-400" />
                         </div>
-                        <h3 className="text-lg font-black text-slate-800">الملخص</h3>
+                        <h3 className="text-lg font-black text-slate-800 dark:text-slate-100">الملخص</h3>
                     </div>
-                    <p className="text-slate-600 leading-loose text-sm font-medium">
+                    <p className="text-slate-600 dark:text-slate-300 leading-loose text-sm font-medium">
                         {displayStudy.summary}
                     </p>
                 </div>
@@ -304,10 +304,10 @@ export default function StudyDetail() {
                 {richContent.stats && (
                     <div className="grid grid-cols-3 gap-3">
                         {richContent.stats.map((stat: any, i: number) => (
-                            <div key={i} className="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm">
+                            <div key={i} className="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 text-center shadow-sm">
                                 <div className="flex justify-center mb-1">{stat.icon}</div>
-                                <div className="text-lg font-black text-slate-800">{stat.value}</div>
-                                <div className="text-[10px] text-slate-400 font-bold uppercase">{stat.label}</div>
+                                <div className="text-lg font-black text-slate-800 dark:text-slate-100">{stat.value}</div>
+                                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{stat.label}</div>
                             </div>
                         ))}
                     </div>
@@ -315,14 +315,14 @@ export default function StudyDetail() {
 
                 {/* The Challenge (Red Theme) */}
                 {richContent.challenge && (
-                    <div className="bg-rose-50 rounded-[32px] p-6 border border-rose-100">
+                    <div className="bg-rose-50 dark:bg-rose-950/20 rounded-[32px] p-6 border border-rose-100 dark:border-rose-900/30">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-600">
+                            <div className="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
                                 <Target size={20} />
                             </div>
-                            <h3 className="text-lg font-black text-rose-900">المشكلة / التحدي</h3>
+                            <h3 className="text-lg font-black text-rose-900 dark:text-rose-100">المشكلة / التحدي</h3>
                         </div>
-                        <p className="text-rose-800/80 leading-loose text-sm font-medium">
+                        <p className="text-rose-800/80 dark:text-rose-300/80 leading-loose text-sm font-medium">
                             {richContent.challenge}
                         </p>
                     </div>
@@ -330,22 +330,22 @@ export default function StudyDetail() {
 
                 {/* The Solution (Green Theme) */}
                 {richContent.solution && (
-                    <div className="bg-emerald-50 rounded-[32px] p-6 border border-emerald-100">
+                    <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-[32px] p-6 border border-emerald-100 dark:border-emerald-900/30">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                                 <Lightbulb size={20} />
                             </div>
-                            <h3 className="text-lg font-black text-emerald-900">الحل المبتكر</h3>
+                            <h3 className="text-lg font-black text-emerald-900 dark:text-emerald-100">الحل المبتكر</h3>
                         </div>
-                        <p className="text-emerald-800/80 leading-loose text-sm font-medium mb-4">
+                        <p className="text-emerald-800/80 dark:text-emerald-300/80 leading-loose text-sm font-medium mb-4">
                             {richContent.solution}
                         </p>
                         {richContent.solutionPoints && (
                             <ul className="space-y-3">
                                 {richContent.solutionPoints.map((item: string, i: number) => (
-                                    <li key={i} className="flex items-center gap-3 bg-white/60 p-3 rounded-xl">
+                                    <li key={i} className="flex items-center gap-3 bg-white/60 dark:bg-slate-800/60 p-3 rounded-xl">
                                         <CheckCircle size={16} className="text-emerald-500 shrink-0" />
-                                        <span className="text-emerald-900 text-xs font-bold">{item}</span>
+                                        <span className="text-emerald-900 dark:text-emerald-100 text-xs font-bold">{item}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -355,21 +355,21 @@ export default function StudyDetail() {
 
                 {/* Impact (Blue Theme) */}
                 {richContent.impact && (
-                    <div className="bg-indigo-50 rounded-[32px] p-6 border border-indigo-100">
+                    <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-[32px] p-6 border border-indigo-100 dark:border-indigo-900/30">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                            <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                                 <TrendingUp size={20} />
                             </div>
-                            <h3 className="text-lg font-black text-indigo-900">الأثر والنتائج</h3>
+                            <h3 className="text-lg font-black text-indigo-900 dark:text-indigo-100">الأثر والنتائج</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white p-4 rounded-2xl shadow-sm text-center">
-                                <span className="text-3xl font-black text-indigo-600 block mb-1">{richContent.impact.val1}</span>
-                                <span className="text-[10px] text-slate-500 font-bold uppercase">{richContent.impact.label1}</span>
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-premium text-center border border-indigo-100 dark:border-indigo-900/30">
+                                <span className="text-3xl font-black text-indigo-600 dark:text-indigo-400 block mb-1">{richContent.impact.val1}</span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{richContent.impact.label1}</span>
                             </div>
-                            <div className="bg-white p-4 rounded-2xl shadow-sm text-center">
-                                <span className="text-3xl font-black text-indigo-600 block mb-1">{richContent.impact.val2}</span>
-                                <span className="text-[10px] text-slate-500 font-bold uppercase">{richContent.impact.label2}</span>
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-premium text-center border border-indigo-100 dark:border-indigo-900/30">
+                                <span className="text-3xl font-black text-indigo-600 dark:text-indigo-400 block mb-1">{richContent.impact.val2}</span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{richContent.impact.label2}</span>
                             </div>
                         </div>
                     </div>
@@ -378,10 +378,10 @@ export default function StudyDetail() {
                 {/* Gallery Section - Added per user request */}
                 {richContent.gallery && (
                     <div>
-                        <h3 className="text-lg font-black text-slate-800 mb-4 px-2">معرض الصور</h3>
-                        <div className="flex gap-4 overflow-x-auto pb-4 px-1 -mx-5 px-5 snap-x">
+                        <h3 className="text-lg font-black text-slate-800 dark:text-slate-100 mb-4 px-2">معرض الصور</h3>
+                        <div className="flex gap-4 overflow-x-auto pb-4 px-1 -mx-5 px-5 snap-x scrollbar-hide">
                             {richContent.gallery.map((img: string, i: number) => (
-                                <div key={i} className="flex-shrink-0 w-64 h-48 rounded-2xl overflow-hidden shadow-md snap-center relative border border-slate-200">
+                                <div key={i} className="flex-shrink-0 w-64 h-48 rounded-2xl overflow-hidden shadow-premium snap-center relative border border-slate-200 dark:border-slate-700">
                                     <img src={img} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
                                 </div>
                             ))}
@@ -393,23 +393,23 @@ export default function StudyDetail() {
                 {/* Quote Block */}
                 {richContent.quote && (
                     <div className="relative py-8 px-4 text-center">
-                        <Quote size={40} className="text-slate-200 absolute top-0 left-0" />
-                        <p className="font-black text-xl text-slate-800 leading-relaxed italic relative z-10">
+                        <Quote size={40} className="text-slate-200 dark:text-slate-800 absolute top-0 left-0" />
+                        <p className="font-black text-xl text-slate-800 dark:text-slate-100 leading-relaxed italic relative z-10">
                             "{richContent.quote}"
                         </p>
                         <div className="mt-4 flex items-center justify-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500 text-lg">
+                            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-50 dark:text-slate-400 text-lg">
                                 {richContent.author?.charAt(0)}
                             </div>
                             <div className="text-right">
-                                <div className="text-sm font-bold text-slate-800">{richContent.author}</div>
-                                <div className="text-[10px] text-slate-500">{richContent.role}</div>
+                                <div className="text-sm font-bold text-slate-800 dark:text-slate-200">{richContent.author}</div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400">{richContent.role}</div>
                             </div>
                         </div>
                     </div>
                 )}
                 {/* Read More Button */}
-                <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-xl shadow-slate-900/20">
+                <button className="w-full py-4 bg-slate-900 dark:bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-slate-900/20 dark:shadow-indigo-600/20">
                     <span>قراءة التقرير الفني الكامل (PDF)</span>
                     <ArrowUpRight size={18} />
                 </button>

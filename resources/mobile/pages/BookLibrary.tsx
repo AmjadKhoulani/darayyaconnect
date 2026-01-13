@@ -46,10 +46,11 @@ export default function BookLibrary() {
     }, [fetchBooks]);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
-                <header className="bg-gradient-to-br from-teal-600 to-emerald-700 text-white sticky top-0 z-30 shadow-xl">
-                    <div className="px-5 py-6">
+                <header className="bg-gradient-to-br from-teal-600 to-emerald-700 text-white sticky top-0 z-30 shadow-xl overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                    <div className="px-5 py-6 relative z-10">
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h1 className="text-2xl font-black flex items-center gap-2">
@@ -73,7 +74,7 @@ export default function BookLibrary() {
                                 placeholder="ابحث عن كتاب..."
                                 value={filters.search}
                                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                                className="w-full pr-11 pl-4 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl text-sm text-white placeholder:text-white/60"
+                                className="w-full pr-11 pl-4 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl text-sm text-white placeholder:text-white/60 focus:bg-white/30 transition-all outline-none"
                             />
                         </div>
 
@@ -81,7 +82,7 @@ export default function BookLibrary() {
                             <select
                                 value={filters.category}
                                 onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                                className="px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-xs text-white"
+                                className="px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-xs text-white appearance-none outline-none"
                             >
                                 <option value="" className="text-slate-800">كل الفئات</option>
                                 {Object.entries(categories).map(([key, cat]) => (
@@ -94,7 +95,7 @@ export default function BookLibrary() {
                             <select
                                 value={filters.language}
                                 onChange={(e) => setFilters({ ...filters, language: e.target.value })}
-                                className="px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-xs text-white"
+                                className="px-3 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-xs text-white appearance-none outline-none"
                             >
                                 <option value="" className="text-slate-800">كل اللغات</option>
                                 <option value="arabic" className="text-slate-800">عربي</option>
@@ -113,9 +114,9 @@ export default function BookLibrary() {
                         </div>
                     ) : books.length === 0 ? (
                         <div className="text-center py-16">
-                            <BookOpen size={64} className="mx-auto text-slate-300 mb-4" />
-                            <h3 className="text-lg font-bold text-slate-700 mb-2">لا توجد كتب</h3>
-                            <p className="text-sm text-slate-500">كن أول من يضيف كتاباً!</p>
+                            <BookOpen size={64} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
+                            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">لا توجد كتب</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-500">كن أول من يضيف كتاباً!</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 gap-4">
@@ -125,22 +126,22 @@ export default function BookLibrary() {
                                     <div
                                         key={book.id}
                                         onClick={() => navigate(`/books/${book.id}`)}
-                                        className="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 active:scale-95 transition-transform"
+                                        className="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-premium border border-slate-100 dark:border-slate-700 active:scale-95 transition-all"
                                     >
-                                        <div className="aspect-[3/4] bg-gradient-to-br from-teal-100 to-emerald-100 rounded-2xl mb-3 flex items-center justify-center text-5xl">
+                                        <div className="aspect-[3/4] bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900/40 dark:to-emerald-900/40 rounded-2xl mb-3 flex items-center justify-center text-5xl">
                                             {cat?.icon || '📚'}
                                         </div>
-                                        <h3 className="font-bold text-slate-800 text-sm line-clamp-2 leading-tight mb-1">
+                                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm line-clamp-2 leading-tight mb-1">
                                             {book.title}
                                         </h3>
-                                        <p className="text-xs text-slate-500 line-clamp-1 mb-2">{book.author}</p>
-                                        <div className="flex items-center justify-between text-[10px]">
-                                            <span className="px-2 py-1 bg-teal-50 text-teal-700 rounded-lg font-bold">
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mb-2 font-medium">{book.author}</p>
+                                        <div className="flex flex-col gap-2">
+                                            <span className="px-2 py-1 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-lg font-bold text-[10px] w-fit">
                                                 {cat?.label}
                                             </span>
-                                            <span className={`px-2 py-1 rounded-lg font-bold ${book.status === 'available'
-                                                    ? 'bg-emerald-50 text-emerald-700'
-                                                    : 'bg-rose-50 text-rose-700'
+                                            <span className={`px-2 py-1 rounded-lg font-bold text-[10px] w-fit ${book.status === 'available'
+                                                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                                                : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'
                                                 }`}>
                                                 {book.status === 'available' ? '🟢 متاح' : '🔴 معار'}
                                             </span>
@@ -151,8 +152,8 @@ export default function BookLibrary() {
                         </div>
                     )}
 
-                    <div className="mt-6 bg-teal-50 border border-teal-100 rounded-2xl p-4 text-center">
-                        <p className="text-xs text-teal-700 font-medium">
+                    <div className="mt-6 bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-2xl p-4 text-center">
+                        <p className="text-xs text-teal-700 dark:text-teal-400 font-medium">
                             💡 جميع الكتب للاستعارة المجانية فقط - لا بيع ولا شراء
                         </p>
                     </div>

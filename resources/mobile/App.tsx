@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Geolocation } from '@capacitor/geolocation';
 import Home from './pages/Home';
@@ -7,8 +7,14 @@ import StudyDetail from './pages/StudyDetail';
 import AwarenessDetail from './pages/AwarenessDetail';
 import Profile from './pages/Profile';
 import ServicesStatus from './pages/ServicesStatus';
+import WaterStatus from './pages/WaterStatus';
+import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
+import HashtagChat from './pages/HashtagChat';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Splash from './pages/Splash';
+import SetupLocation from './pages/SetupLocation';
 import AddReport from './pages/AddReport';
 import Initiatives from './pages/Initiatives';
 import Discussions from './pages/Discussions';
@@ -36,20 +42,48 @@ import AddBook from './pages/AddBook';
 import AwarenessCampaigns from './pages/AwarenessCampaigns';
 import CampaignDetail from './pages/CampaignDetail';
 import ArticleView from './pages/ArticleView';
+import Settings from './pages/Settings';
+import EditProfile from './pages/EditProfile';
+import About from './pages/About';
 import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
 import OfflineIndicator from './components/OfflineIndicator';
+import { ThemeProvider } from './components/ThemeContext';
 import api from './services/api';
 import './animations.css';
 import './styles/global.css';
 
 function AppContent() {
     const location = useLocation();
-    const hideFabRoutes = ['/login', '/register', '/add-report', '/study'];
+    const navigate = useNavigate();
+    const hideFabRoutes = ['/login', '/register', '/add-report', '/study', '/splash'];
     // Check if current path starts with any of the restricted paths
     const showFab = !hideFabRoutes.some(path => location.pathname.startsWith(path));
 
     useEffect(() => {
+        // Auth Guard
+        const publicRoutes = ['/splash', '/login', '/register'];
+        const token = localStorage.getItem('token');
+
+        if (!token && !publicRoutes.includes(location.pathname)) {
+            navigate('/splash');
+        } else if (token && location.pathname !== '/setup-location' && !publicRoutes.includes(location.pathname)) {
+            // Check if user has location set
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    // If strictly no location, redirect to setup
+                    // Note: API returns string or null.
+                    if (!user.latitude) {
+                        navigate('/setup-location');
+                    }
+                } catch (e) {
+                    console.error('Error parsing user', e);
+                }
+            }
+        }
+
         const trackLocation = async () => {
             try {
                 const permissions = await Geolocation.checkPermissions();
@@ -57,7 +91,7 @@ function AppContent() {
                     await Geolocation.requestPermissions();
                 }
                 const position = await Geolocation.getCurrentPosition();
-                const token = localStorage.getItem('token');
+
                 if (token) {
                     await api.post('/api/user/location', {
                         latitude: position.coords.latitude,
@@ -71,10 +105,12 @@ function AppContent() {
             }
         };
 
-        trackLocation();
-        const interval = setInterval(trackLocation, 300000); // 5 mins
-        return () => clearInterval(interval);
-    }, []);
+        if (token) {
+            trackLocation();
+            const interval = setInterval(trackLocation, 300000); // 5 mins
+            return () => clearInterval(interval);
+        }
+    }, [location.pathname]);
 
     return (
         <div className="min-h-screen pb-20 safe-top">
@@ -85,8 +121,14 @@ function AppContent() {
                 <Route path="/awareness/:id" element={<AwarenessDetail />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/services" element={<ServicesStatus />} />
+                <Route path="/water-status" element={<WaterStatus />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/events/:id" element={<EventDetail />} />
+                <Route path="/hashtag" element={<HashtagChat />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/splash" element={<Splash />} />
+                <Route path="/setup-location" element={<SetupLocation />} />
                 <Route path="/add-report" element={<AddReport />} />
                 <Route path="/initiatives" element={<Initiatives />} />
                 <Route path="/discussions" element={<Discussions />} />
@@ -115,6 +157,11 @@ function AppContent() {
                 <Route path="/awareness/detail/:id" element={<AwarenessDetail />} />
                 <Route path="/awareness/campaign/:campaignId" element={<CampaignDetail />} />
                 <Route path="/awareness/campaign/:campaignId/:articleId" element={<ArticleView />} />
+                <Route path="/awareness/campaign/:campaignId" element={<CampaignDetail />} />
+                <Route path="/awareness/campaign/:campaignId/:articleId" element={<ArticleView />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/profile/edit" element={<EditProfile />} />
+                <Route path="/about" element={<About />} />
             </Routes>
 
             <BottomNav />
@@ -126,8 +173,10 @@ function AppContent() {
 
 export default function App() {
     return (
-        <HashRouter>
-            <AppContent />
-        </HashRouter>
+        <ThemeProvider>
+            <HashRouter>
+                <AppContent />
+            </HashRouter>
+        </ThemeProvider>
     );
 }

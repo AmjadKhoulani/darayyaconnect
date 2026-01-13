@@ -306,7 +306,7 @@ export default function AwarenessDetail() {
     if (!topic) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">
             {/* Hero Header */}
             <div className={`relative h-64 bg-gradient-to-br ${topic.bgGradient} overflow-hidden`}>
                 <img
@@ -319,7 +319,7 @@ export default function AwarenessDetail() {
                 {/* Back Button */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 hover:bg-white/30 transition z-10"
+                    className="absolute top-4 right-4 w-10 h-10 bg-white/20 dark:bg-slate-900/40 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 dark:border-white/10 hover:bg-white/30 transition z-10"
                 >
                     <ArrowRight size={20} className="rotate-180" />
                 </button>
@@ -327,35 +327,35 @@ export default function AwarenessDetail() {
                 {/* Hero Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                        <div className="w-14 h-14 rounded-2xl bg-white/20 dark:bg-slate-900/40 backdrop-blur-md flex items-center justify-center border border-white/30 dark:border-white/10">
                             {topic.icon}
                         </div>
                         <div>
                             <span className="text-xs font-bold opacity-90 uppercase tracking-wide">{topic.type}</span>
-                            <h1 className="text-2xl font-black leading-tight">{topic.title}</h1>
+                            <h1 className="text-2xl font-black leading-tight text-white">{topic.title}</h1>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Tab Switcher */}
-            <div className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 py-3">
-                <div className="bg-slate-100 p-1 rounded-xl flex">
+            <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 transition-colors duration-300">
+                <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex">
                     <button
                         onClick={() => setActiveTab('content')}
-                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'content' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}
+                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'content' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
                     >
                         المحتوى
                     </button>
                     <button
                         onClick={() => setActiveTab('tips')}
-                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'tips' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}
+                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'tips' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
                     >
                         نصائح سريعة
                     </button>
                     <button
                         onClick={() => setActiveTab('facts')}
-                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'facts' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}
+                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'facts' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
                     >
                         هل تعلم؟
                     </button>
@@ -365,24 +365,24 @@ export default function AwarenessDetail() {
             <main className="px-5 py-6 space-y-6">
 
                 {/* Summary Card */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                    <p className="text-slate-600 leading-relaxed text-sm font-medium mb-4">{topic.summary}</p>
-                    <p className="text-slate-700 text-sm leading-loose">{topic.intro}</p>
+                <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-premium border border-slate-100 dark:border-slate-700/50">
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-medium mb-4">{topic.summary}</p>
+                    <p className="text-slate-700 dark:text-slate-400 text-sm leading-loose">{topic.intro}</p>
                 </div>
 
                 {activeTab === 'content' && (
                     <>
                         {/* Main Points */}
-                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-6 border border-blue-100">
-                            <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-                                <Lightbulb size={20} className="text-blue-600" />
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-3xl p-6 border border-blue-100 dark:border-blue-900/30">
+                            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                                <Lightbulb size={20} className="text-blue-600 dark:text-blue-400" />
                                 لماذا هذا مهم؟
                             </h3>
                             <ul className="space-y-3">
                                 {topic.mainPoints.map((point: string, i: number) => (
                                     <li key={i} className="flex items-start gap-3">
-                                        <CheckCircle2 size={18} className="text-blue-600 shrink-0 mt-0.5" />
-                                        <span className="text-sm text-slate-700 leading-relaxed">{point}</span>
+                                        <CheckCircle2 size={18} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                                        <span className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{point}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -390,17 +390,17 @@ export default function AwarenessDetail() {
 
                         {/* Steps */}
                         <div>
-                            <h3 className="font-bold text-lg text-slate-800 mb-4 px-2">الخطوات العملية</h3>
+                            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 mb-4 px-2">الخطوات العملية</h3>
                             <div className="space-y-3">
                                 {topic.steps.map((step: any, i: number) => (
-                                    <div key={i} className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                                    <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-premium">
                                         <div className="flex gap-4">
-                                            <div className={`w-8 h-8 rounded-full bg-${topic.color}-100 text-${topic.color}-700 flex items-center justify-center font-bold text-sm shrink-0`}>
+                                            <div className={`w-8 h-8 rounded-full bg-${topic.color}-100 dark:bg-${topic.color}-900/40 text-${topic.color}-700 dark:text-${topic.color}-400 flex items-center justify-center font-bold text-sm shrink-0`}>
                                                 {i + 1}
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="font-bold text-slate-800 text-sm mb-1">{step.title}</h4>
-                                                <p className="text-xs text-slate-600 leading-relaxed">{step.desc}</p>
+                                                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1">{step.title}</h4>
+                                                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{step.desc}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -413,11 +413,11 @@ export default function AwarenessDetail() {
                 {activeTab === 'tips' && (
                     <div className="space-y-3">
                         {topic.quickTips.map((tip: string, i: number) => (
-                            <div key={i} className={`bg-${topic.color}-50 border border-${topic.color}-100 rounded-2xl p-4 flex gap-3`}>
-                                <div className={`w-6 h-6 rounded-full bg-${topic.color}-100 flex items-center justify-center shrink-0 mt-0.5`}>
-                                    <span className={`text-${topic.color}-600 font-bold text-xs`}>💡</span>
+                            <div key={i} className={`bg-${topic.color}-50 dark:bg-${topic.color}-900/10 border border-${topic.color}-100 dark:border-${topic.color}-900/30 rounded-2xl p-4 flex gap-3`}>
+                                <div className={`w-6 h-6 rounded-full bg-${topic.color}-100 dark:bg-${topic.color}-900/40 flex items-center justify-center shrink-0 mt-0.5`}>
+                                    <span className={`text-${topic.color}-600 dark:text-${topic.color}-400 font-bold text-xs`}>💡</span>
                                 </div>
-                                <p className="text-sm text-slate-700 leading-relaxed">{tip}</p>
+                                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{tip}</p>
                             </div>
                         ))}
                     </div>
@@ -426,12 +426,12 @@ export default function AwarenessDetail() {
                 {activeTab === 'facts' && (
                     <div className="space-y-4">
                         {topic.didYouKnow.map((fact: string, i: number) => (
-                            <div key={i} className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-3xl p-5">
+                            <div key={i} className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 border border-purple-100 dark:border-purple-900/30 rounded-3xl p-5 shadow-sm">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                                    <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
                                         <span className="text-2xl">🤔</span>
                                     </div>
-                                    <p className="text-sm text-slate-700 leading-relaxed flex-1 pt-1">{fact}</p>
+                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed flex-1 pt-1">{fact}</p>
                                 </div>
                             </div>
                         ))}

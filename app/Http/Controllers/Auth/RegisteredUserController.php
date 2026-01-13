@@ -36,6 +36,9 @@ class RegisteredUserController extends Controller
             'age' => 'required|integer|min:12|max:100',
             'gender' => 'required|string|in:male,female',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'is_resident' => 'required|boolean',
         ]);
 
         $user = User::create([
@@ -45,6 +48,10 @@ class RegisteredUserController extends Controller
             'gender' => $request->gender,
             'password' => Hash::make($request->password),
             'role' => 'citizen', // Default role
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'is_resident' => $request->is_resident,
+            'location_verified_at' => now(),
         ]);
 
         event(new Registered($user));

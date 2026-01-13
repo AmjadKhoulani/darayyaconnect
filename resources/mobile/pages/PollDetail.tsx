@@ -99,9 +99,9 @@ export default function PollDetail() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center transition-colors duration-300">
                 <div className="animate-pulse">
-                    <div className="w-16 h-16 bg-slate-200 rounded-full"></div>
+                    <div className="w-16 h-16 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
                 </div>
             </div>
         );
@@ -109,10 +109,10 @@ export default function PollDetail() {
 
     if (!poll) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4" dir="rtl">
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4 transition-colors duration-300" dir="rtl">
                 <div className="text-center">
-                    <p className="text-slate-500 font-bold">الاستطلاع غير موجود</p>
-                    <button onClick={() => navigate(-1)} className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold">
+                    <p className="text-slate-500 dark:text-slate-400 font-bold">الاستطلاع غير موجود</p>
+                    <button onClick={() => navigate(-1)} className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold shadow-lg">
                         العودة
                     </button>
                 </div>
@@ -125,17 +125,17 @@ export default function PollDetail() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm transition-colors duration-300">
                 <div className="px-4 py-3 flex items-center justify-between">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-10 h-10 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-xl transition text-slate-600"
+                        className="w-10 h-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
                     >
                         <ArrowRight size={20} />
                     </button>
-                    <h1 className="text-base font-bold text-slate-800">استطلاع الرأي</h1>
+                    <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">استطلاع الرأي</h1>
                     <div className="w-10"></div>
                 </div>
             </header>
@@ -161,19 +161,19 @@ export default function PollDetail() {
 
                 {/* Stats */}
                 <div className="flex gap-3">
-                    <div className="flex-1 bg-white rounded-xl p-4 border border-slate-100 text-center">
+                    <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 text-center shadow-sm">
                         <div className="flex items-center justify-center gap-2 mb-1">
                             <Users size={16} className="text-indigo-500" />
-                            <span className="text-2xl font-black text-slate-800">{poll.total_votes}</span>
+                            <span className="text-2xl font-black text-slate-800 dark:text-slate-100">{poll.total_votes}</span>
                         </div>
-                        <p className="text-xs text-slate-500 font-bold">مشارك</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">مشارك</p>
                     </div>
-                    <div className="flex-1 bg-white rounded-xl p-4 border border-slate-100 text-center">
+                    <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 text-center shadow-sm">
                         <div className="flex items-center justify-center gap-2 mb-1">
                             <Clock size={16} className="text-emerald-500" />
-                            <span className="text-2xl font-black text-slate-800">{poll.options.length}</span>
+                            <span className="text-2xl font-black text-slate-800 dark:text-slate-100">{poll.options.length}</span>
                         </div>
-                        <p className="text-xs text-slate-500 font-bold">خيارات</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">خيارات</p>
                     </div>
                 </div>
 
@@ -190,27 +190,27 @@ export default function PollDetail() {
                                 onClick={() => !hasVoted && setSelectedOption(option.id)}
                                 disabled={hasVoted}
                                 className={`w-full text-right p-4 rounded-2xl border-2 transition-all ${hasVoted
-                                        ? isWinning
-                                            ? 'bg-emerald-50 border-emerald-200'
-                                            : 'bg-white border-slate-100'
-                                        : isSelected
-                                            ? 'bg-indigo-50 border-indigo-500 shadow-md'
-                                            : 'bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30'
+                                    ? isWinning
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700'
+                                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/50'
+                                    : isSelected
+                                        ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 shadow-premium'
+                                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/20 shadow-sm'
                                     }`}
                             >
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className={`text-sm font-bold ${hasVoted && isWinning ? 'text-emerald-700' : 'text-slate-800'}`}>
+                                    <span className={`text-sm font-bold ${hasVoted && isWinning ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-100'}`}>
                                         {option.text}
                                     </span>
                                     {hasVoted && (
-                                        <span className="text-lg font-black text-indigo-600">{percentage}%</span>
+                                        <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">{percentage}%</span>
                                     )}
                                     {isSelected && !hasVoted && (
-                                        <Check size={20} className="text-indigo-600" />
+                                        <Check size={20} className="text-indigo-600 dark:text-indigo-400" />
                                     )}
                                 </div>
                                 {hasVoted && (
-                                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                                         <div
                                             className={`h-full rounded-full transition-all duration-500 ${isWinning ? 'bg-emerald-500' : 'bg-indigo-500'
                                                 }`}
@@ -219,7 +219,7 @@ export default function PollDetail() {
                                     </div>
                                 )}
                                 {hasVoted && (
-                                    <p className="text-xs text-slate-500 mt-2">{option.votes.toLocaleString()} صوت</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">{option.votes.toLocaleString()} صوت</p>
                                 )}
                             </button>
                         );
@@ -232,8 +232,8 @@ export default function PollDetail() {
                         onClick={handleVote}
                         disabled={!selectedOption}
                         className={`w-full py-4 rounded-xl font-bold text-base shadow-lg transition ${selectedOption
-                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98]'
-                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98]'
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                             }`}
                     >
                         {selectedOption ? 'تأكيد التصويت' : 'اختر خياراً للتصويت'}
@@ -241,9 +241,9 @@ export default function PollDetail() {
                 )}
 
                 {hasVoted && (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
-                        <Check size={24} className="text-emerald-600 mx-auto mb-2" />
-                        <p className="text-sm font-bold text-emerald-700">شكراً لمشاركتك! تم تسجيل صوتك</p>
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-4 text-center shadow-premium">
+                        <Check size={24} className="text-emerald-600 dark:text-emerald-400 mx-auto mb-2" />
+                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">شكراً لمشاركتك! تم تسجيل صوتك</p>
                     </div>
                 )}
             </main>

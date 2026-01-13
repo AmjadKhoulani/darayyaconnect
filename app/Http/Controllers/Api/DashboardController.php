@@ -15,7 +15,7 @@ class DashboardController extends Controller
     {
         // Get city statistics
         $stats = [
-            'population' => 78000, // Static for now
+            'population' => User::residents()->count(),
             'activeUsers' => User::where('last_active_at', '>=', now()->subDays(7))->count(),
             'reports' => Report::where('created_at', '>=', now()->subMonth())->count()
         ];

@@ -4,10 +4,13 @@ import { User, Mail, Phone, MapPin, LogOut, Edit2, Shield, Award, ChevronLeft, Z
 import api from '../services/api';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { usePullToRefresh, PullToRefreshContainer } from '../hooks/usePullToRefresh';
+import { useTheme } from '../components/ThemeContext';
+import { Moon, Sun } from 'lucide-react';
 
 export default function Profile() {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const fetchUser = useCallback(async () => {
@@ -46,18 +49,18 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
 
                 {/* Clean Header - Web Style */}
-                <header className="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-4 shadow-sm flex items-center justify-between">
+                <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 px-4 py-4 shadow-sm flex items-center justify-between transition-colors duration-300">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-colors border border-slate-200">
+                        <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 transition-colors border border-slate-200 dark:border-slate-800">
                             <ChevronLeft size={24} />
                         </button>
                         <div>
-                            <h1 className="text-lg font-bold text-slate-800">الملف الشخصي</h1>
-                            <p className="text-[11px] text-slate-500 font-medium">إدارة حسابك ونشاطاتك</p>
+                            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">الملف الشخصي</h1>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">إدارة حسابك ونشاطاتك</p>
                         </div>
                     </div>
                     <button onClick={handleLogout} className="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center border border-rose-100 hover:bg-rose-100 transition">
@@ -67,8 +70,8 @@ export default function Profile() {
 
                 <main className="px-4 py-6 space-y-6">
                     {/* ID Card Style */}
-                    <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden animate-fade-in-up">
-                        <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 rounded-full -ml-10 -mt-10 opacity-50 blur-2xl animate-pulse-slow"></div>
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-premium relative overflow-hidden animate-fade-in-up">
+                        <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 dark:bg-emerald-900/10 rounded-full -ml-10 -mt-10 opacity-50 blur-2xl animate-pulse-slow"></div>
 
                         <div className="relative z-10 flex flex-col items-center text-center">
                             <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center text-slate-400 mb-4 ring-4 ring-white shadow-md relative group">
@@ -78,20 +81,20 @@ export default function Profile() {
                                 </div>
                             </div>
 
-                            <h2 className="text-xl font-black text-slate-900 mb-1">{user.name}</h2>
-                            <span className="text-xs text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 mb-6 inline-flex items-center gap-1 font-bold">
+                            <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 mb-1">{user.name}</h2>
+                            <span className="text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800/50 mb-6 inline-flex items-center gap-1 font-bold">
                                 <Award size={12} />
                                 مواطن فعال
                             </span>
 
                             <div className="grid grid-cols-2 gap-3 w-full">
-                                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100">
+                                <div className="bg-slate-50 dark:bg-slate-900/40 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800/50 flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 shadow-sm border border-slate-100 dark:border-slate-700">
                                         <Mail size={16} />
                                     </div>
                                     <div className="text-right overflow-hidden">
-                                        <p className="text-[10px] text-slate-400 font-bold mb-0.5">البريد الإلكتروني</p>
-                                        <p className="text-xs font-bold text-slate-700 truncate">{user.email}</p>
+                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-0.5">البريد الإلكتروني</p>
+                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{user.email}</p>
                                     </div>
                                 </div>
 
@@ -138,15 +141,15 @@ export default function Profile() {
 
                         <button
                             onClick={() => navigate('/add-report')}
-                            className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm relative overflow-hidden group active:scale-[0.98] transition-all"
+                            className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-premium relative overflow-hidden group active:scale-[0.98] transition-all"
                         >
                             <div className="relative z-10 flex flex-col items-start h-full justify-between gap-4">
-                                <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center border border-rose-100">
-                                    <Edit2 size={20} className="text-rose-500" />
+                                <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/20 rounded-xl flex items-center justify-center border border-rose-100 dark:border-rose-800/50">
+                                    <Edit2 size={20} className="text-rose-500 dark:text-rose-400" />
                                 </div>
                                 <div className="text-right">
-                                    <h4 className="font-bold text-slate-800 text-sm mb-0.5">تقديم شكوى</h4>
-                                    <p className="text-[10px] text-slate-500">أبلغ عن مشكلة</p>
+                                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-0.5">تقديم شكوى</h4>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400">أبلغ عن مشكلة</p>
                                 </div>
                             </div>
                         </button>
@@ -178,7 +181,26 @@ export default function Profile() {
 
                     {/* App Settings / Info */}
                     <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-                        <h3 className="font-bold text-slate-800 mb-2 text-sm px-1 mt-4">الإعدادات والتطبيق</h3>
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-2 text-sm px-1 mt-4">الإعدادات والتطبيق</h3>
+
+                        {/* Theme Toggle in Settings */}
+                        <button
+                            onClick={toggleTheme}
+                            className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700 transition active:scale-[0.99] shadow-sm"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl ${theme === 'light' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-slate-900 text-slate-100 border-slate-800'} flex items-center justify-center border`}>
+                                    {theme === 'light' ? <Sun size={18} /> : <Moon size={18} />}
+                                </div>
+                                <div className="text-right">
+                                    <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">مظهر التطبيق</span>
+                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{theme === 'light' ? 'الوضع الفاتح' : 'الوضع الليلي'}</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded-full text-[10px] font-black text-slate-500 dark:text-slate-400">
+                                {theme === 'light' ? 'تغيير' : 'تبديل'}
+                            </div>
+                        </button>
                         {[
                             { icon: <Shield size={18} />, label: 'الخصوصية والأمان', color: 'emerald' },
                             { icon: <Award size={18} />, label: 'نقاطي ومستواي', color: 'purple' },
