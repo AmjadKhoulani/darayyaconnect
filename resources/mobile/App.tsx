@@ -73,9 +73,9 @@ function AppContent() {
             if (userStr) {
                 try {
                     const user = JSON.parse(userStr);
-                    // If strictly no location, redirect to setup
-                    // Note: API returns string or null.
-                    if (!user.latitude) {
+                    // If user hasn't completed setup (verified location OR skipped), redirect
+                    // Note: location_verified_at is set even if they skip
+                    if (!user.location_verified_at) {
                         navigate('/setup-location');
                     }
                 } catch (e) {

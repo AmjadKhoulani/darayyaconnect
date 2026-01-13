@@ -13,8 +13,8 @@ class UserController extends Controller
         \Illuminate\Support\Facades\Log::info('📍 Location Update Request:', $request->all());
 
         $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'is_resident' => 'boolean',
         ]);
 

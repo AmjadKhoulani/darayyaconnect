@@ -116,9 +116,29 @@ export default function SetupLocation() {
             });
 
             navigate('/');
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError('حدث خطأ أثناء حفظ الموقع via API.');
+            const serverMessage = err.response?.data?.message || err.message || 'Unknown Error';
+            setError(`فشل الحفظ: ${serverMessage} (${err.response?.status || 'No Status'})`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSkip = async () => {
+        setLoading(true);
+        try {
+            // Submit with null location and not resident
+            await api.post('/api/user/location', {
+                latitude: null,
+                longitude: null,
+                is_resident: false
+            });
+            navigate('/');
+        } catch (err: any) {
+            console.error(err);
+            const serverMessage = err.response?.data?.message || err.message || 'Unknown Error';
+            setError(`فشل التخطي: ${serverMessage}`);
         } finally {
             setLoading(false);
         }
@@ -132,9 +152,9 @@ export default function SetupLocation() {
                     <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 dark:text-emerald-400">
                         <MapPin size={32} />
                     </div>
-                    <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-2">تحديد عنوان السكن</h1>
+                    <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-2">تحديد عنوان السكن (اختياري)</h1>
                     <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                        نحن نطلب موقعك فقط لنتمكن من إرسال تنبيهات دقيقة حول توفر الخدمات (الكهرباء والمياه) في حيك، ولمساعدتك في الوصول للخدمات القريبة.
+                        تحديد موقعك يساعدنا في خدمتك بشكل أفضل، ولكن هذه الخطوة ليست إجبارية. يمكنك تخطيها إذا كنت تفضل ذلك أو إذا كنت تقيم خارج داريا.
                     </p>
                 </div>
 
@@ -187,20 +207,30 @@ export default function SetupLocation() {
                 </div>
 
                 {/* Submit Logic */}
-                <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                    {loading ? (
-                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    ) : (
-                        <>
-                            <span>حفظ ومتابعة</span>
-                            <CheckCircle size={20} />
-                        </>
-                    )}
-                </button>
+                <div className="space-y-3 mt-auto">
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                        {loading ? (
+                            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <>
+                                <span>حفظ ومتابعة</span>
+                                <CheckCircle size={20} />
+                            </>
+                        )}
+                    </button>
+
+                    <button
+                        onClick={handleSkip}
+                        disabled={loading}
+                        className="w-full py-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-2xl font-bold text-lg active:scale-[0.98] transition-all"
+                    >
+                        تخطي هذه الخطوة
+                    </button>
+                </div>
             </div>
         </div>
     );
