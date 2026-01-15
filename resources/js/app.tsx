@@ -10,6 +10,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 import { App as CapacitorApp } from '@capacitor/app';
 import OfflineSync from './Components/OfflineSync';
+import ErrorBoundary from './Components/ErrorBoundary';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -31,11 +32,11 @@ createInertiaApp({
         });
 
         root.render(
-            <>
+            <ErrorBoundary>
                 <OfflineSync />
                 {/* <NotificationManager /> */}
                 <App {...props} />
-            </>,
+            </ErrorBoundary>,
         );
     },
     progress: {
