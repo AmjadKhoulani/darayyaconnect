@@ -25,11 +25,11 @@ export default function Home() {
     const fetchDashboardData = useCallback(async () => {
         try {
             const [statsRes, newsRes, discussionsRes, servicesRes, notificationsRes] = await Promise.all([
-                api.get('/api/dashboard/stats'),
-                api.get('/api/dashboard/news'),
-                api.get('/api/dashboard/discussions'),
-                api.get('/api/service-states').catch(() => ({ data: [] })),
-                api.get('/api/notifications/unread-count').catch(() => ({ data: { count: 0 } }))
+                api.get('/dashboard/stats'),
+                api.get('/dashboard/news'),
+                api.get('/dashboard/discussions'),
+                api.get('/service-states').catch(() => ({ data: [] })),
+                api.get('/notifications/unread-count').catch(() => ({ data: { count: 0 } }))
             ]);
 
             setCityStats(statsRes.data);
