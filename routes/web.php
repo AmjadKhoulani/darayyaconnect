@@ -75,6 +75,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('directory', \App\Http\Controllers\Admin\DirectoryController::class)->except(['create', 'edit', 'show']);
         Route::get('/service-states', [\App\Http\Controllers\Admin\ServiceStateController::class, 'index'])->name('service-states.index');
         Route::put('/service-states/{key}', [\App\Http\Controllers\Admin\ServiceStateController::class, 'update'])->name('service-states.update');
+
+        // Volunteering
+        Route::get('/volunteering', [\App\Http\Controllers\Admin\VolunteeringController::class, 'index'])->name('volunteering.index');
+        Route::post('/volunteering', [\App\Http\Controllers\Admin\VolunteeringController::class, 'store'])->name('volunteering.store');
+        Route::put('/volunteering/{id}', [\App\Http\Controllers\Admin\VolunteeringController::class, 'update'])->name('volunteering.update');
+        Route::delete('/volunteering/{id}', [\App\Http\Controllers\Admin\VolunteeringController::class, 'destroy'])->name('volunteering.destroy');
+        // Reports Heatmap
+        Route::get('/reports/heatmap', function () {
+            return Inertia::render('Admin/ReportsHeatmap');
+        })->name('reports.heatmap');
+
+        Route::put('/volunteering/applications/{id}', [\App\Http\Controllers\Admin\VolunteeringController::class, 'updateApplicationStatus'])->name('volunteering.application.update');
     });
 
     // Voting

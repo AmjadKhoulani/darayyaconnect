@@ -1,27 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, Search, Building2, MapPin, Globe, Star, ShieldCheck, Zap, Droplets, Gavel, Landmark } from 'lucide-react';
+import { Phone, Search, Building2, MapPin, Globe, Star, ShieldCheck, Zap, Droplets, Gavel, Landmark, Loader2 } from 'lucide-react';
+import api from '../services/api';
+
+interface DirectoryItem {
+    id: number;
+    name: string;
+    phone: string;
+    icon: string;
+    type: string;
+    category: string;
+    rating?: number;
+    metadata?: any;
+}
 
 export default function Directory() {
     const [searchTerm, setSearchTerm] = useState('');
+    const [items, setItems] = useState<DirectoryItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const officialEntities = [
-        { name: 'بلدية داريا', icon: Landmark, phone: '011-1234567', type: 'خدمي' },
-        { name: 'مخفر داريا', icon: ShieldCheck, phone: '0935738430', type: 'أمني' },
-        { name: 'محكمة داريا', icon: Gavel, phone: '011-7654321', type: 'قضائي' },
-        { name: 'وحدة المياه', icon: Droplets, phone: '011-2233445', type: 'خدمي' },
-        { name: 'طوارئ الكهرباء', icon: Zap, phone: '011-9988776', type: 'طوارئ' },
-    ];
+    useEffect(() => {
+        fetchDirectory();
+    }, []);
 
-    const internetCompanies = [
-        { name: 'طريق الحرير', rating: 4.5, phone: '0912345678', speed: 'عالي' },
-        { name: 'سوا', rating: 4.0, phone: '0923456789', speed: 'متوسط' },
-        { name: 'المتحدة', rating: 3.5, phone: '0934567890', speed: 'جيد' },
-    ];
+    const fetchDirectory = async () => {
+        try {
+            const response = await api.get('/directory');
+            setItems(response.data);
+        } catch (error) {
+            console.error('Failed to fetch directory', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getIcon = (iconName: string) => {
+        const icons: any = { Landmark, ShieldCheck, Gavel, Droplets, Zap, Globe, Building2 };
+        return icons[iconName] || Building2;
+    };
+
+    const officialEntities = items.filter(i => i.category === 'official' || i.category === 'emergency');
+    const internetCompanies = items.filter(i => i.category === 'company');
+
+
 
     const filteredEntities = officialEntities.filter(c => c.name.includes(searchTerm));
     const filteredCompanies = internetCompanies.filter(c => c.name.includes(searchTerm));
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">
@@ -66,24 +99,27 @@ export default function Directory() {
                         الجهات الرسمية
                     </h3>
                     <div className="grid grid-cols-1 gap-3">
-                        {filteredEntities.map((entity, index) => (
-                            <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl flex items-center justify-center border border-slate-100 dark:border-slate-700 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                        <entity.icon size={24} />
+                        {filteredEntities.map((entity, index) => {
+                            const Icon = getIcon(entity.icon);
+                            return (
+                                <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl flex items-center justify-center border border-slate-100 dark:border-slate-700 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                            <Icon size={24} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100">{entity.name}</h4>
+                                            <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-full mt-1 inline-block">
+                                                {entity.type}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-slate-800 dark:text-slate-100">{entity.name}</h4>
-                                        <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-full mt-1 inline-block">
-                                            {entity.type}
-                                        </span>
-                                    </div>
+                                    <a href={`tel:${entity.phone}`} className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors">
+                                        <Phone size={20} />
+                                    </a>
                                 </div>
-                                <a href={`tel:${entity.phone}`} className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors">
-                                    <Phone size={20} />
-                                </a>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
 
@@ -108,7 +144,7 @@ export default function Directory() {
                                                     <Star
                                                         key={i}
                                                         size={10}
-                                                        className={i < Math.floor(company.rating) ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600"}
+                                                        className={i < Math.floor(company.rating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600"}
                                                     />
                                                 ))}
                                                 <span className="text-[10px] text-slate-400 mr-1">({company.rating})</span>
@@ -120,7 +156,7 @@ export default function Directory() {
                                     </a>
                                 </div>
                                 <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl text-xs">
-                                    <span className="text-slate-500 dark:text-slate-400">سرعة الاتصال: <span className="font-bold text-slate-700 dark:text-slate-200">{company.speed}</span></span>
+                                    <span className="text-slate-500 dark:text-slate-400">سرعة الاتصال: <span className="font-bold text-slate-700 dark:text-slate-200">{company.metadata?.speed || 'غير محدد'}</span></span>
                                     <button className="text-blue-600 dark:text-blue-400 font-bold hover:underline">تقييم الأداء</button>
                                 </div>
                             </div>

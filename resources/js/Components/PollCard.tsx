@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import axios from 'axios';
+import { useState } from 'react';
 
 interface PollOption {
     id: number;
@@ -20,7 +20,9 @@ interface PollProps {
 }
 
 export default function PollCard({ poll }: PollProps) {
-    const [selectedOption, setSelectedOption] = useState<number | null>(poll.user_vote_id || null);
+    const [selectedOption, setSelectedOption] = useState<number | null>(
+        poll.user_vote_id || null,
+    );
     const [hasVoted, setHasVoted] = useState(!!poll.user_vote_id);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,7 +39,7 @@ export default function PollCard({ poll }: PollProps) {
                 votable_type: 'post',
                 votable_id: poll.id,
                 option_id: optionId,
-                value: 1
+                value: 1,
             });
 
             setSelectedOption(optionId);
@@ -52,18 +54,18 @@ export default function PollCard({ poll }: PollProps) {
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-2 h-full bg-indigo-500"></div>
+        <div className="relative mb-6 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+            <div className="absolute right-0 top-0 h-full w-2 bg-indigo-500"></div>
 
-            <div className="flex justify-between items-start mb-4">
+            <div className="mb-4 flex items-start justify-between">
                 <div>
-                    <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full mb-2 inline-block">
+                    <span className="mb-2 inline-block rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-bold text-indigo-600">
                         🗳️ استطلاع رأي
                     </span>
-                    <h3 className="text-lg font-bold text-slate-800 leading-snug">
+                    <h3 className="text-lg font-bold leading-snug text-slate-800">
                         {poll.title}
                     </h3>
-                    <p className="text-slate-500 text-sm mt-1">
+                    <p className="mt-1 text-sm text-slate-500">
                         {poll.content}
                     </p>
                 </div>
@@ -75,14 +77,13 @@ export default function PollCard({ poll }: PollProps) {
                         key={option.id}
                         onClick={() => handleVote(option.id)}
                         disabled={hasVoted || isSubmitting}
-                        className={`w-full text-right px-4 py-3 rounded-xl border transition-all relative overflow-hidden group 
-                            ${selectedOption === option.id
-                                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-bold'
-                                : 'bg-slate-50 border-transparent hover:bg-slate-100 text-slate-700'
-                            }
-                        `}
+                        className={`group relative w-full overflow-hidden rounded-xl border px-4 py-3 text-right transition-all ${
+                            selectedOption === option.id
+                                ? 'border-indigo-200 bg-indigo-50 font-bold text-indigo-700'
+                                : 'border-transparent bg-slate-50 text-slate-700 hover:bg-slate-100'
+                        } `}
                     >
-                        <div className="relative z-10 flex justify-between items-center">
+                        <div className="relative z-10 flex items-center justify-between">
                             <span>{option.text}</span>
                             {selectedOption === option.id && <span>✅</span>}
                         </div>
@@ -90,17 +91,26 @@ export default function PollCard({ poll }: PollProps) {
                         {/* Progress Bar Simulation (Visual only for now) */}
                         {showResults && (
                             <div
-                                className="absolute left-0 top-0 bottom-0 bg-indigo-100 opacity-50 transition-all duration-1000"
-                                style={{ width: selectedOption === option.id ? '60%' : '20%' }}
+                                className="absolute bottom-0 left-0 top-0 bg-indigo-100 opacity-50 transition-all duration-1000"
+                                style={{
+                                    width:
+                                        selectedOption === option.id
+                                            ? '60%'
+                                            : '20%',
+                                }}
                             ></div>
                         )}
                     </button>
                 ))}
             </div>
 
-            <div className="mt-4 flex justify-between items-center text-xs text-slate-400">
+            <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
                 <span>شارك بصوتك لتحديد أولويات المدينة</span>
-                {hasVoted && <span className="text-emerald-500 font-bold">تم احتساب صوتك</span>}
+                {hasVoted && (
+                    <span className="font-bold text-emerald-500">
+                        تم احتساب صوتك
+                    </span>
+                )}
             </div>
         </div>
     );

@@ -139,6 +139,18 @@ Route::middleware('auth:sanctum')->group(function () {
 // Book Exchange
 Route::get('/books', [App\Http\Controllers\Api\BookController::class, 'index']);
 
+// Volunteering
+Route::get('/volunteering', [App\Http\Controllers\Api\VolunteeringController::class, 'index']);
+Route::get('/volunteering/{id}', [App\Http\Controllers\Api\VolunteeringController::class, 'show']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/volunteering/{id}/apply', [App\Http\Controllers\Api\VolunteeringController::class, 'apply']);
+
+    // Notifications
+    Route::get('/notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/read/{id?}', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+});
+
 // --- Dynamic Directory & Service Status ---
 Route::get('/directory', [App\Http\Controllers\Api\DirectoryController::class, 'index']);
 Route::get('/service-states', [App\Http\Controllers\Api\ServiceStateController::class, 'index']);

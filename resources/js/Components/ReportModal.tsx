@@ -6,7 +6,11 @@ interface ReportModalProps {
     coordinates: [number, number] | null;
 }
 
-export default function ReportModal({ isOpen, onClose, coordinates }: ReportModalProps) {
+export default function ReportModal({
+    isOpen,
+    onClose,
+    coordinates,
+}: ReportModalProps) {
     const [category, setCategory] = useState('electricity');
     const [severity, setSeverity] = useState(1);
     const [description, setDescription] = useState('');
@@ -25,12 +29,14 @@ export default function ReportModal({ isOpen, onClose, coordinates }: ReportModa
             description,
             longitude: coordinates[0],
             latitude: coordinates[1],
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         };
 
         // Offline Mode Check
         if (!navigator.onLine) {
-            const existing = JSON.parse(localStorage.getItem('offline_reports') || '[]');
+            const existing = JSON.parse(
+                localStorage.getItem('offline_reports') || '[]',
+            );
             existing.push(reportData);
             localStorage.setItem('offline_reports', JSON.stringify(existing));
 
@@ -41,15 +47,18 @@ export default function ReportModal({ isOpen, onClose, coordinates }: ReportModa
                 setDescription('');
                 onClose();
             }, 3000); // clear, show success
-            alert('أنت في وضع عدم الاتصال. تم حفظ البلاغ وسيتم إرساله عند عودة الإنترنت! 📶💾');
+            alert(
+                'أنت في وضع عدم الاتصال. تم حفظ البلاغ وسيتم إرساله عند عودة الإنترنت! 📶💾',
+            );
             return;
         }
 
         try {
-            const response = await fetch('/api/infrastructure/reports', { // CORRECTED ENDPOINT
+            const response = await fetch('/api/infrastructure/reports', {
+                // CORRECTED ENDPOINT
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reportData)
+                body: JSON.stringify(reportData),
             });
 
             if (response.ok) {
@@ -70,25 +79,34 @@ export default function ReportModal({ isOpen, onClose, coordinates }: ReportModa
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-            <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-xl w-full max-w-md p-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
                 {success ? (
-                    <div className="text-center py-8">
-                        <div className="text-green-500 text-5xl mb-4">✓</div>
-                        <h3 className="text-xl font-bold dark:text-white">تم استلام البلاغ</h3>
-                        <p className="text-gray-500 mt-2">شكراً لمساهمتك في تحسين داريا.</p>
+                    <div className="py-8 text-center">
+                        <div className="mb-4 text-5xl text-green-500">✓</div>
+                        <h3 className="text-xl font-bold dark:text-white">
+                            تم استلام البلاغ
+                        </h3>
+                        <p className="mt-2 text-gray-500">
+                            شكراً لمساهمتك في تحسين داريا.
+                        </p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} dir="rtl">
-                        <h3 className="text-xl font-bold mb-4 dark:text-white">إبلاغ عن مشكلة</h3>
-                        <p className="text-sm text-gray-500 mb-4">
-                            الموقع: {coordinates[1].toFixed(5)}, {coordinates[0].toFixed(5)}
+                        <h3 className="mb-4 text-xl font-bold dark:text-white">
+                            إبلاغ عن مشكلة
+                        </h3>
+                        <p className="mb-4 text-sm text-gray-500">
+                            الموقع: {coordinates[1].toFixed(5)},{' '}
+                            {coordinates[0].toFixed(5)}
                         </p>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 dark:text-gray-300">نوع المشكلة</label>
+                            <label className="mb-1 block text-sm font-medium dark:text-gray-300">
+                                نوع المشكلة
+                            </label>
                             <select
-                                className="w-full rounded-md border-gray-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
+                                className="w-full rounded-md border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
                             >
@@ -100,14 +118,18 @@ export default function ReportModal({ isOpen, onClose, coordinates }: ReportModa
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 dark:text-gray-300">درجة الخطورة (1-5)</label>
+                            <label className="mb-1 block text-sm font-medium dark:text-gray-300">
+                                درجة الخطورة (1-5)
+                            </label>
                             <input
                                 type="range"
                                 min="1"
                                 max="5"
                                 className="w-full"
                                 value={severity}
-                                onChange={(e) => setSeverity(parseInt(e.target.value))}
+                                onChange={(e) =>
+                                    setSeverity(parseInt(e.target.value))
+                                }
                             />
                             <div className="flex justify-between text-xs text-gray-500">
                                 <span>بسيطة</span>
@@ -116,9 +138,11 @@ export default function ReportModal({ isOpen, onClose, coordinates }: ReportModa
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 dark:text-gray-300">وصف المشكلة</label>
+                            <label className="mb-1 block text-sm font-medium dark:text-gray-300">
+                                وصف المشكلة
+                            </label>
                             <textarea
-                                className="w-full rounded-md border-gray-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
+                                className="w-full rounded-md border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                                 rows={3}
                                 required
                                 value={description}
@@ -127,18 +151,18 @@ export default function ReportModal({ isOpen, onClose, coordinates }: ReportModa
                             />
                         </div>
 
-                        <div className="flex justify-end gap-2 mt-6">
+                        <div className="mt-6 flex justify-end gap-2">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-zinc-800"
+                                className="rounded-md px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-zinc-800"
                             >
                                 إلغاء
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
                             >
                                 {loading ? 'جاري الإرسال...' : 'إرسال البلاغ'}
                             </button>

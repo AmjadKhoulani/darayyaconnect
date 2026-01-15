@@ -11,14 +11,15 @@ export default function SOSButton() {
 
     return (
         <div className="fixed bottom-20 left-6 z-50 flex flex-col items-center gap-3 md:bottom-6">
-
             {/* Expanded List */}
-            <div className={`flex flex-col gap-3 transition-all duration-300 ${expanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
+            <div
+                className={`flex flex-col gap-3 transition-all duration-300 ${expanded ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-10 opacity-0'}`}
+            >
                 {emergencyContacts.map((contact) => (
                     <a
                         key={contact.name}
                         href={`tel:${contact.number}`}
-                        className={`${contact.color} text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform`}
+                        className={`${contact.color} flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110`}
                         title={contact.name}
                     >
                         <span className="text-xl">{contact.icon}</span>
@@ -29,7 +30,7 @@ export default function SOSButton() {
             {/* Main Button */}
             <button
                 onClick={() => setExpanded(!expanded)}
-                className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center text-2xl transition-all duration-300 ${expanded ? 'bg-slate-800 rotate-45' : 'bg-red-600 animate-pulse-slow'}`}
+                className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl shadow-xl transition-all duration-300 ${expanded ? 'rotate-45 bg-slate-800' : 'animate-pulse-slow bg-red-600'}`}
             >
                 <span className="text-white">🆘</span>
             </button>

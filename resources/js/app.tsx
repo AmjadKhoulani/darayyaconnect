@@ -1,5 +1,5 @@
-import '../css/app.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import '../css/app.css';
 import './bootstrap';
 
 import { createInertiaApp } from '@inertiajs/react';
@@ -10,7 +10,6 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 import { App as CapacitorApp } from '@capacitor/app';
 import OfflineSync from './Components/OfflineSync';
-import NotificationManager from './Components/NotificationManager';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -36,7 +35,7 @@ createInertiaApp({
                 <OfflineSync />
                 {/* <NotificationManager /> */}
                 <App {...props} />
-            </>
+            </>,
         );
     },
     progress: {

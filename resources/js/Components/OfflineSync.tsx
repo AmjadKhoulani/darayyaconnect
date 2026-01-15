@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import axios from 'axios';
+import { useEffect } from 'react';
 
 export default function OfflineSync() {
     useEffect(() => {
@@ -10,7 +10,10 @@ export default function OfflineSync() {
             const reports = JSON.parse(offlineReports);
             if (reports.length === 0) return;
 
-            console.log('🔄 Attempting to sync offline reports...', reports.length);
+            console.log(
+                '🔄 Attempting to sync offline reports...',
+                reports.length,
+            );
 
             const remainingReports = [];
 
@@ -33,7 +36,10 @@ export default function OfflineSync() {
                 localStorage.removeItem('offline_reports');
                 alert('تم مزامنة جميع البلاغات المعلقة بنجاح! 📶✅');
             } else {
-                localStorage.setItem('offline_reports', JSON.stringify(remainingReports));
+                localStorage.setItem(
+                    'offline_reports',
+                    JSON.stringify(remainingReports),
+                );
             }
         };
 

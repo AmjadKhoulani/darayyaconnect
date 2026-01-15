@@ -3,6 +3,7 @@ import axios from 'axios';
 // The base URL for the API. 
 // IMPORTANT: Update this IP if your Mac's IP changes
 // To find your Mac's IP: System Preferences -> Network
+// Update this to your local IP for Android testing
 const BASE_URL = 'https://darayyaconnect.com/api';
 
 const api = axios.create({

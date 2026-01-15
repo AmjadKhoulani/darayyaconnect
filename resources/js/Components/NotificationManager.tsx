@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { usePage } from '@inertiajs/react';
-import { Capacitor } from '@capacitor/core';
+import { useEffect } from 'react';
 
 export default function NotificationManager() {
     const { auth } = usePage().props as any;
@@ -41,30 +41,32 @@ export default function NotificationManager() {
                     notifications.forEach(async (n: any) => {
                         try {
                             await LocalNotifications.schedule({
-                                notifications: [{
-                                    title: n.title,
-                                    body: n.body,
-                                    id: n.id,
-                                    schedule: { at: new Date(Date.now() + 1000) },
-                                    sound: 'beep.wav',
-                                    attachments: undefined,
-                                    actionTypeId: '',
-                                    extra: null
-                                }]
+                                notifications: [
+                                    {
+                                        title: n.title,
+                                        body: n.body,
+                                        id: n.id,
+                                        schedule: {
+                                            at: new Date(Date.now() + 1000),
+                                        },
+                                        sound: 'beep.wav',
+                                        attachments: undefined,
+                                        actionTypeId: '',
+                                        extra: null,
+                                    },
+                                ],
                             });
                         } catch (e) {
                             console.error('🔔 Schedule error:', e);
                         }
                     });
                 }
-
             } catch (err) {
                 console.error('Polling failed', err);
             }
         }, 60000);
 
         return () => clearInterval(interval);
-
     }, [auth.user]);
 
     return null;

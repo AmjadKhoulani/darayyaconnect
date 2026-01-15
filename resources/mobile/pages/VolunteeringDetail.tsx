@@ -7,6 +7,8 @@ import {
 import api from '../services/api';
 import { usePullToRefresh, PullToRefreshContainer } from '../hooks/usePullToRefresh';
 
+import { showToast } from '../components/Toast';
+
 export default function VolunteeringDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -15,46 +17,55 @@ export default function VolunteeringDetail() {
     // Initialize from state if available, otherwise loading
     const [opp, setOpp] = useState<any>(location.state?.opp || null);
     const [loading, setLoading] = useState(!location.state?.opp);
+    const [applying, setApplying] = useState(false);
 
-    // Mock Fetch
+    // Fetch Data
     const fetchData = async () => {
         if (!opp) setLoading(true);
-        // Simulate API
-        await new Promise(r => setTimeout(r, 800));
-
-        // Demo Data matching the list
-        const demoData = {
-            id: Number(id),
-            title: "حملة تشجير الأحياء الجنوبية",
-            org: "جمعية داريا الخضراء",
-            date: "الجمعة القادم, 9:00 ص",
-            duration: "4 ساعات",
-            location: "ساحة البلدية - الحي الجنوبي",
-            description: "ندعوكم للمشاركة في أكبر حملة تشجير هذا الموسم. سنقوم بزراعة 500 شجرة في المناطق الجنوبية للمدينة لتحسين الغطاء النباتي وتجميل شوارعنا. سيتم توفير الأدوات والشتلات للمتطوعين.",
-            requirements: [
-                "العمر فوق 18 سنة",
-                "القدرة على العمل الميداني",
-                "إحضار قبعة شمسية"
-            ],
-            benefits: [
-                "شهادة مشاركة",
-                "وجبة غداء خفيفة",
-                "نقاط تطوع في التطبيق"
-            ],
-            spots: 15,
-            filled: 8,
-            tags: ["بيئة", "ميداني", "زراعة"],
-            image: "https://images.unsplash.com/photo-1542601906990-24ccd08d7455?w=800&q=80",
-            coordinator: {
-                name: "أحمد العلي",
-                phone: "09xx xxx xxx"
-            }
-        };
-        setOpp(demoData);
-        setLoading(false);
+        try {
+            const res = await api.get(`/api/volunteering/${id}`);
+            setOpp(res.data);
+        } catch (error) {
+            console.error(error);
+            showToast('فشل تحميل الفرصة', 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const { isRefreshing, pullMoveY, handlers } = usePullToRefresh(fetchData);
+    const handleApply = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('يجب تسجيل الدخول أولاً', 'error');
+            navigate('/login');
+            return;
+        }
+
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : {};
+
+        // In a real app we might show a modal to confirm details first
+        setApplying(true);
+        try {
+            await api.post(`/api/volunteering/${id}/apply`, {
+                full_name: user?.name || 'Unknown',
+                phone_number: user?.phone || '0000000000', // Should be collected from user if missing
+                availability: 'Flexible' // Placeholder
+            });
+            showToast('تم تقديم طلبك بنجاح! سنتواصل معك قريباً', 'success');
+        } catch (err: any) {
+            console.error(err);
+            if (err.response?.status === 400 && err.response?.data?.message === 'Already applied') {
+                showToast('لقد قدمت على هذه الفرصة مسبقاً', 'info');
+            } else {
+                showToast('فشل التقديم. حاول مرة أخرى', 'error');
+            }
+        } finally {
+            setApplying(false);
+        }
+    };
+
+    const { isRefreshing, containerRef, indicatorRef, handlers } = usePullToRefresh(fetchData);
 
     useEffect(() => {
         fetchData();
@@ -72,7 +83,7 @@ export default function VolunteeringDetail() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-24 transition-colors duration-300" dir="rtl" {...handlers}>
-            <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
+            <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
 
                 {/* Hero Image */}
                 <div className="relative h-72 w-full">
@@ -217,14 +228,23 @@ export default function VolunteeringDetail() {
                 {/* Fixed Bottom Action */}
                 <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 pb-8 z-20 shadow-premium-reverse animate-slide-up transition-colors duration-300">
                     <div className="flex gap-3">
-                        <button className="flex-1 bg-emerald-600 dark:bg-emerald-500 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all">
-                            <img src="/icons/volunteer-icon.svg" className="w-5 h-5 hidden" alt="" />
-                            <span className="text-lg">👋</span>
-                            تطوع الآن
+                        <button
+                            onClick={handleApply}
+                            disabled={applying || (opp.spots_total && opp.spots_filled >= opp.spots_total)}
+                            className="flex-1 bg-emerald-600 dark:bg-emerald-500 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
+                        >
+                            {applying ? (
+                                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            ) : (
+                                <>
+                                    <span className="text-lg">👋</span>
+                                    {opp.spots_total && opp.spots_filled >= opp.spots_total ? 'اكتمل العدد' : 'تطوع الآن'}
+                                </>
+                            )}
                         </button>
                         <div className="flex flex-col items-center justify-center px-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
                             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold">المقاعد</span>
-                            <span className="text-sm font-black text-slate-800 dark:text-slate-100">{opp.spots - opp.filled}</span>
+                            <span className="text-sm font-black text-slate-800 dark:text-slate-100">{opp.spots_total ? (opp.spots_total - opp.spots_filled) : '-'}</span>
                         </div>
                     </div>
                 </div>

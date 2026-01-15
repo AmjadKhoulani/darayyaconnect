@@ -1,14 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GeolocationService } from '../services/GeolocationService';
 import api from '../services/api';
 import { NotificationService } from '../services/notification';
-import { Construction, Trash2, Lightbulb, FileText, MapPin, Send, MessageSquare, AlertTriangle, ArrowRight, Camera, RefreshCw } from 'lucide-react';
+import { OfflineService, OfflineReport } from '../services/OfflineService';
+import { Construction, Trash2, Lightbulb, FileText, MapPin, Send, MessageSquare, AlertTriangle, ArrowRight, Camera, RefreshCw, WifiOff, X } from 'lucide-react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function AddReport() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [type, setType] = useState('infrastructure');
+    const [severity, setSeverity] = useState(3);
     const [location, setLocation] = useState<any>(null);
     const [image, setImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -16,6 +20,13 @@ export default function AddReport() {
     const [locLoading, setLocLoading] = useState(true);
     const [locError, setLocError] = useState<string | null>(null);
     const [isDirty, setIsDirty] = useState(false);
+
+    // Map Picker State
+    const [showMapPicker, setShowMapPicker] = useState(false);
+    const mapContainer = useRef<HTMLDivElement>(null);
+    const map = useRef<maplibregl.Map | null>(null);
+    const marker = useRef<maplibregl.Marker | null>(null);
+
     const navigate = useNavigate();
 
     // Track changes
@@ -27,17 +38,56 @@ export default function AddReport() {
         }
     }, [title, description, image]);
 
-    // Browser close/refresh confirmation
+    // Map Initialization
     useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isDirty) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isDirty]);
+        if (showMapPicker && mapContainer.current && !map.current) {
+            const initialLat = location?.lat || 33.456;
+            const initialLng = location?.lng || 36.236;
+
+            map.current = new maplibregl.Map({
+                container: mapContainer.current,
+                style: {
+                    version: 8,
+                    sources: {
+                        'osm': {
+                            type: 'raster',
+                            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                            tileSize: 256,
+                            attribution: '&copy; OpenStreetMap'
+                        }
+                    },
+                    layers: [
+                        {
+                            id: 'osm',
+                            type: 'raster',
+                            source: 'osm',
+                        }
+                    ]
+                },
+                center: [initialLng, initialLat],
+                zoom: 15,
+            });
+
+            // Add marker
+            marker.current = new maplibregl.Marker({ draggable: true, color: '#10b981' })
+                .setLngLat([initialLng, initialLat])
+                .addTo(map.current);
+
+            marker.current.on('dragend', () => {
+                const lngLat = marker.current?.getLngLat();
+                if (lngLat) {
+                    setLocation({ lat: lngLat.lat, lng: lngLat.lng });
+                    setLocError(null);
+                }
+            });
+
+            map.current.on('click', (e) => {
+                marker.current?.setLngLat(e.lngLat);
+                setLocation({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+                setLocError(null);
+            });
+        }
+    }, [showMapPicker]);
 
     const handleBack = () => {
         if (isDirty) {
@@ -97,18 +147,35 @@ export default function AddReport() {
 
     useEffect(() => {
         fetchLocation();
-        NotificationService.requestPermissions();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
+        // Convert image to Base64 for offline storage or API
+        let imageBase64 = null;
+        if (image) {
+            imageBase64 = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(image);
+            });
+        }
+
         try {
+            // Check online status first
+            if (!navigator.onLine) {
+                throw new Error('OFFLINE_MODE');
+            }
+
             const formData = new FormData();
             formData.append('title', title);
             formData.append('description', description);
-            formData.append('type', type);
+            formData.append('type', type /* mapped to category in controller if needed, or update controller to match */);
+            formData.append('category', type === 'trash' ? 'sanitation' : (type === 'lighting' ? 'electricity' : 'safety')); // Mapping basic types to enum
+            formData.append('severity', severity.toString());
+
             if (location) {
                 formData.append('latitude', location.lat.toString());
                 formData.append('longitude', location.lng.toString());
@@ -120,7 +187,8 @@ export default function AddReport() {
             await api.post('/infrastructure/reports', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                }
+                },
+                timeout: 5000 // Short timeout to trigger offline mode quickly
             });
 
             await NotificationService.schedule(
@@ -128,19 +196,37 @@ export default function AddReport() {
                 'شكراً لمساهمتك في تحسين داريا. سنقوم بمراجعة البلاغ قريباً.'
             );
 
-            setIsDirty(false); // Reset before navigating
-            navigate('/');
+            navigate('/', { replace: true });
+
         } catch (err: any) {
-            console.error('Report submission error:', err);
-            alert('حدث خطأ أثناء إرسال البلاغ. يرجى المحاولة مرة أخرى.');
+            // Check if it's a network error or offline mode
+            if (err.message === 'OFFLINE_MODE' || err.code === 'ECONNABORTED' || err.message === 'Network Error' || !navigator.onLine) {
+                console.log('Saving report offline...');
+
+                await OfflineService.saveReport({
+                    type,
+                    title,
+                    description,
+                    latitude: location?.lat,
+                    longitude: location?.lng,
+                    image: imageBase64 || undefined
+                });
+
+                alert('⚠️ لا يوجد اتصال بالإنترنت.\nتم حفظ البلاغ في جهازك وسيتم إرساله تلقائياً عند عودة الاتصال.');
+                navigate('/', { replace: true });
+            } else {
+                console.error('Report submission error:', err);
+                alert('حدث خطأ أثناء إرسال البلاغ. يرجى المحاولة مرة أخرى.');
+            }
         } finally {
+            setIsDirty(false);
             setLoading(false);
         }
     };
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">
-            {/* Immersive Header */}
+            {/* Header */}
             <div className="bg-slate-900 dark:bg-black pb-12 pt-6 px-4 rounded-b-[40px] relative overflow-hidden shadow-2xl transition-colors duration-300">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-500/10 rounded-full -ml-12 -mb-12 blur-3xl"></div>
@@ -155,28 +241,10 @@ export default function AddReport() {
                             <p className="text-slate-400 dark:text-slate-500 text-xs font-medium">ساهم في تحسين مدينتك</p>
                         </div>
                     </div>
-                    <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 text-white shadow-lg">
-                        <AlertTriangle size={24} />
-                    </div>
                 </header>
             </div>
 
             <main className="px-5 -mt-8 relative z-20 space-y-5">
-                {/* Transparency Widget - Glass Effect */}
-                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-3xl p-5 shadow-premium border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
-                    <div className="flex items-start gap-4 relative z-10">
-                        <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 shrink-0">
-                            <MessageSquare size={24} />
-                        </div>
-                        <div className="text-right">
-                            <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 mb-1">صوتك مسموع</h3>
-                            <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">
-                                بلاغك يساعدنا في تحديد الأولويات. يتم معالجة البلاغات حسب الأهمية وتوفر الإمكانيات.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Report Type Selection */}
                     <div>
@@ -213,7 +281,7 @@ export default function AddReport() {
                         <div className="space-y-4 p-4">
                             {/* Title Input */}
                             <div className="group">
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 mb-2 px-1 peer-focus:text-emerald-600 transition-colors">عنوان البلاغ</label>
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 mb-2 px-1">عنوان البلاغ</label>
                                 <input
                                     type="text"
                                     value={title}
@@ -222,6 +290,33 @@ export default function AddReport() {
                                     placeholder="مثال: حفرة في الطريق الرئيسي"
                                     required
                                 />
+                            </div>
+
+                            {/* Severity Slider */}
+                            <div>
+                                <label className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-500 mb-2 px-1">
+                                    <span>درجة الخطورة ( {severity}/5 )</span>
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${severity === 1 ? 'bg-green-100 text-green-700' :
+                                            severity === 2 ? 'bg-blue-100 text-blue-700' :
+                                                severity === 3 ? 'bg-yellow-100 text-yellow-700' :
+                                                    severity === 4 ? 'bg-orange-100 text-orange-700' :
+                                                        'bg-red-100 text-red-700'
+                                        }`}>
+                                        {severity === 1 ? 'منخفضة' : severity === 2 ? 'عادية' : severity === 3 ? 'متوسطة' : severity === 4 ? 'عالية' : 'حرجة'}
+                                    </span>
+                                </label>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="5"
+                                    value={severity}
+                                    onChange={(e) => setSeverity(parseInt(e.target.value))}
+                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-900 dark:accent-indigo-500"
+                                />
+                                <div className="flex justify-between px-1 mt-1 text-[10px] text-slate-400">
+                                    <span>بسيط</span>
+                                    <span>عاجل</span>
+                                </div>
                             </div>
 
                             {/* Description Textarea */}
@@ -262,49 +357,43 @@ export default function AddReport() {
                                         >
                                             <Trash2 size={20} />
                                         </button>
-                                        <div className="absolute inset-0 border-2 border-emerald-500/30 rounded-2xl pointer-events-none"></div>
                                     </div>
                                 ) : (
                                     <label
                                         htmlFor="image-upload"
-                                        className="w-full py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl text-slate-400 dark:text-slate-600 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-700 transition-all flex flex-col items-center gap-3 bg-slate-50/50 dark:bg-slate-900/30 cursor-pointer"
+                                        className="w-full py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl text-slate-400 dark:text-slate-600 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex flex-col items-center gap-3 bg-slate-50/50 dark:bg-slate-900/30 cursor-pointer"
                                     >
                                         <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-card border border-slate-100 dark:border-slate-700">
                                             <Camera size={32} />
                                         </div>
-                                        <div className="text-center">
-                                            <span className="text-xs font-black block mb-1">إرفاق صورة توضيحية</span>
-                                            <span className="text-[10px] opacity-60">تساعدنا الصور في فهم المشكلة بشكل أسرع</span>
-                                        </div>
+                                        <span className="text-xs font-black">إرفاق صورة توضيحية</span>
                                     </label>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Location Info with Retry */}
-                    <div className={`bg-white dark:bg-slate-800 border ${locError ? 'border-red-200 dark:border-red-900/50' : 'border-slate-200 dark:border-slate-700/50'} p-4 rounded-3xl flex items-center gap-4 shadow-sm transition-colors`}>
+                    {/* Location Info with Map Picker */}
+                    <div className={`bg-white dark:bg-slate-800 border ${locError ? 'border-red-200' : 'border-slate-200 dark:border-slate-700/50'} p-4 rounded-3xl flex items-center gap-4 shadow-sm transition-colors`}>
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all ${locError
-                            ? 'bg-red-50 dark:bg-red-900/20 text-red-500 border-red-100'
-                            : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800/50 animate-bounce-slow'
+                            ? 'bg-red-50 text-red-500 border-red-100'
+                            : 'bg-indigo-50 text-indigo-600 border-indigo-100'
                             }`}>
                             {locError ? <AlertTriangle size={24} /> : <MapPin size={24} />}
                         </div>
                         <div className="flex-1 text-right">
                             <div className="flex items-center justify-between mb-1">
-                                <div className={`font-black text-xs ${locError ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-100'}`}>
+                                <div className={`font-black text-xs ${locError ? 'text-red-600' : 'text-slate-800 dark:text-slate-100'}`}>
                                     {locLoading ? 'جاري تحديد موقعك...' : (locError ? 'تعذر تحديد الموقع' : 'موقع البلاغ')}
                                 </div>
-                                {!locLoading && (locError || !location) && (
-                                    <button
-                                        type="button"
-                                        onClick={fetchLocation}
-                                        className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-lg"
-                                    >
-                                        <RefreshCw size={10} />
-                                        إعادة المحاولة
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => setShowMapPicker(true)}
+                                    className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-lg hover:bg-indigo-100 transition-colors"
+                                >
+                                    <MapPin size={10} />
+                                    تحديد على الخريطة
+                                </button>
                             </div>
 
                             {location ? (
@@ -313,11 +402,7 @@ export default function AddReport() {
                                     <span className="font-mono" dir="ltr">{location.lat.toFixed(5)}, {location.lng.toFixed(5)}</span>
                                 </div>
                             ) : (
-                                locLoading ? (
-                                    <div className="h-4 w-24 bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
-                                ) : (
-                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{locError || 'يرجى تفعيل الموقع للمتابعة'}</span>
-                                )
+                                !locLoading && <span className="text-[10px] text-slate-400">يرجى تحديد الموقع</span>
                             )}
                         </div>
                     </div>
@@ -326,23 +411,47 @@ export default function AddReport() {
                     <button
                         type="submit"
                         disabled={loading || locLoading || !location}
-                        className="w-full py-5 bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white rounded-3xl font-black text-base shadow-xl dark:shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 relative overflow-hidden group"
+                        className="w-full py-5 bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 text-white rounded-3xl font-black text-base shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                     >
                         {loading ? (
-                            <>
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span>جاري الإرسال...</span>
-                            </>
+                            <span>جاري الإرسال...</span>
                         ) : (
                             <>
-                                <span className="relative z-10">إرسال البلاغ</span>
-                                <Send size={20} className="relative z-10 rtl:rotate-180 group-hover:translate-x-1 transition-transform" />
+                                <span>إرسال البلاغ</span>
+                                <Send size={20} className="rtl:rotate-180" />
                             </>
                         )}
                     </button>
                     <div className="h-4"></div>
                 </form>
             </main>
+
+            {/* Map Selection Modal */}
+            {showMapPicker && (
+                <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 z-10 shadow-md">
+                        <h3 className="font-bold text-slate-800 dark:text-white">تحديد الموقع</h3>
+                        <button onClick={() => setShowMapPicker(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
+                            <X size={20} className="text-slate-600 dark:text-slate-300" />
+                        </button>
+                    </div>
+                    <div className="flex-1 relative bg-slate-200">
+                        <div ref={mapContainer} className="absolute inset-0" />
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg border border-emerald-500/30 text-xs font-bold text-emerald-700 z-10 pointer-events-none">
+                            اسحب الدبوس لتحديد الموقع
+                        </div>
+                    </div>
+                    <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+                        <button
+                            onClick={() => setShowMapPicker(false)}
+                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                        >
+                            تأكيد الموقع
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+

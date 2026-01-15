@@ -37,10 +37,15 @@ export default function TimeSlider({ onChange }: TimeSliderProps) {
     };
 
     return (
-        <div className="absolute bottom-24 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 bg-white/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-slate-200 z-30 w-auto md:w-96" dir="rtl">
-            <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-slate-500">آلة الزمن ⏳</span>
-                <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
+        <div
+            className="absolute bottom-24 left-4 right-4 z-30 w-auto rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-lg backdrop-blur md:left-1/2 md:right-auto md:w-96 md:-translate-x-1/2"
+            dir="rtl"
+        >
+            <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">
+                    آلة الزمن ⏳
+                </span>
+                <span className="rounded-md bg-blue-50 px-2 py-1 text-sm font-bold text-blue-600">
                     {getLabel(stops[stepIndex])}
                 </span>
             </div>
@@ -52,10 +57,10 @@ export default function TimeSlider({ onChange }: TimeSliderProps) {
                 step="1"
                 value={stepIndex}
                 onChange={handleStepChange}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-blue-600"
             />
 
-            <div className="flex justify-between mt-1 text-[10px] text-slate-400 font-mono">
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-slate-400">
                 <span>الآن</span>
                 <span>الماضي</span>
             </div>

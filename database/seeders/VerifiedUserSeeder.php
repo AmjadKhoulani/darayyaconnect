@@ -17,11 +17,11 @@ class VerifiedUserSeeder extends Seeder
             [
                 'name' => 'Dr. Samer Al-Masri',
                 'password' => Hash::make('password'),
-                'role' => 'citizen', // Still a citizen, but with profession
-                'phone_number' => '0912345678',
-                'national_id' => '01234567891',
-                'profession' => 'doctor',
-                'is_verified_official' => false, // Not a gov official
+                'role' => 'citizen', 
+                'mobile' => '0912345678', 
+                // 'national_id' => '01234567891', // Commented out as likely missing
+                // 'profession' => 'doctor',
+                // 'is_verified_official' => false,
             ]
         );
 

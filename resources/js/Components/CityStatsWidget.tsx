@@ -1,35 +1,69 @@
-import React, { useEffect, useState } from 'react';
-
-export default function CityStatsWidget({ stats, minimal = false }: { stats: any, minimal?: boolean }) {
+export default function CityStatsWidget({
+    stats,
+    minimal = false,
+}: {
+    stats: any;
+    minimal?: boolean;
+}) {
     if (!stats) return null;
 
     if (minimal) {
         return (
-            <div className="flex justify-between w-full divide-x divide-x-reverse divide-slate-100">
-                <MinimalStat icon="⚡" label="محولة" value={stats.transformers || 0} />
+            <div className="flex w-full justify-between divide-x divide-x-reverse divide-slate-100">
+                <MinimalStat
+                    icon="⚡"
+                    label="محولة"
+                    value={stats.transformers || 0}
+                />
                 <MinimalStat icon="💧" label="بئر" value={stats.wells || 0} />
-                <MinimalStat icon="🏫" label="مدرسة" value={stats.schools || 0} />
+                <MinimalStat
+                    icon="🏫"
+                    label="مدرسة"
+                    value={stats.schools || 0}
+                />
                 <MinimalStat icon="🏥" label="صحي" value={stats.clinics || 0} />
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <StatCard icon="⚡" label="محولة كهرباء" value={stats.transformers || 0} color="amber" />
-            <StatCard icon="💧" label="بئر مياه" value={stats.wells || 0} color="blue" />
-            <StatCard icon="🏫" label="مدرسة" value={stats.schools || 0} color="emerald" />
-            <StatCard icon="🏥" label="مركز صحي" value={stats.clinics || 0} color="rose" />
+        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <StatCard
+                icon="⚡"
+                label="محولة كهرباء"
+                value={stats.transformers || 0}
+                color="amber"
+            />
+            <StatCard
+                icon="💧"
+                label="بئر مياه"
+                value={stats.wells || 0}
+                color="blue"
+            />
+            <StatCard
+                icon="🏫"
+                label="مدرسة"
+                value={stats.schools || 0}
+                color="emerald"
+            />
+            <StatCard
+                icon="🏥"
+                label="مركز صحي"
+                value={stats.clinics || 0}
+                color="rose"
+            />
         </div>
     );
 }
 
 function MinimalStat({ icon, label, value }: any) {
     return (
-        <div className="flex flex-col items-center px-2 flex-1 text-center">
-            <span className="text-sm mb-1">{icon}</span>
-            <span className="font-bold text-lg text-slate-800 leading-none">{value}</span>
-            <span className="text-[10px] text-slate-400 mt-1">{label}</span>
+        <div className="flex flex-1 flex-col items-center px-2 text-center">
+            <span className="mb-1 text-sm">{icon}</span>
+            <span className="text-lg font-bold leading-none text-slate-800">
+                {value}
+            </span>
+            <span className="mt-1 text-[10px] text-slate-400">{label}</span>
         </div>
     );
 }
@@ -43,9 +77,11 @@ function StatCard({ icon, label, value, color }: any) {
     };
 
     return (
-        <div className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition hover:shadow-md ${colors[color] || 'bg-gray-50'}`}>
-            <div className="text-3xl mb-2">{icon}</div>
-            <div className="text-2xl font-black mb-1">{value}</div>
+        <div
+            className={`flex flex-col items-center justify-center rounded-2xl border p-4 transition hover:shadow-md ${colors[color] || 'bg-gray-50'}`}
+        >
+            <div className="mb-2 text-3xl">{icon}</div>
+            <div className="mb-1 text-2xl font-black">{value}</div>
             <div className="text-xs font-bold opacity-80">{label}</div>
         </div>
     );

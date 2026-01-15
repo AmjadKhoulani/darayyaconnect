@@ -16,6 +16,8 @@ class Report extends Model
         'description',
         'location_id',
         'coordinates',
+        'latitude',
+        'longitude',
         'status',
         'images',
         'user_id',

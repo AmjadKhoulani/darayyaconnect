@@ -1,10 +1,9 @@
-import { useEffect, FormEventHandler } from 'react';
-import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, useEffect } from 'react';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -28,33 +27,43 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-cyan-50 p-6" dir="rtl">
+        <div
+            className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 to-cyan-50 p-6"
+            dir="rtl"
+        >
             <Head title="إنشاء حساب جديد" />
 
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl">
                 {/* Header */}
-                <div className="bg-emerald-600 p-8 text-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div className="relative overflow-hidden bg-emerald-600 p-8 text-center">
+                    <div className="absolute left-0 top-0 h-full w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                     <div className="relative z-10">
-                        <div className="w-16 h-16 bg-white rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-lg mb-4">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-3xl shadow-lg">
                             💎
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">أهلاً بك في داريا</h2>
-                        <p className="text-emerald-100 text-sm">أنشئ حسابك وشارك في بناء مدينتك</p>
+                        <h2 className="mb-2 text-2xl font-bold text-white">
+                            أهلاً بك في داريا
+                        </h2>
+                        <p className="text-sm text-emerald-100">
+                            أنشئ حسابك وشارك في بناء مدينتك
+                        </p>
                     </div>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={submit} className="p-8 space-y-5">
-
+                <form onSubmit={submit} className="space-y-5 p-8">
                     {/* Name */}
                     <div>
-                        <InputLabel htmlFor="name" value="الاسم الكامل" className="text-gray-700 font-bold mb-1" />
+                        <InputLabel
+                            htmlFor="name"
+                            value="الاسم الكامل"
+                            className="mb-1 font-bold text-gray-700"
+                        />
                         <TextInput
                             id="name"
                             name="name"
                             value={data.name}
-                            className="mt-1 block w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50"
+                            className="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 focus:border-emerald-500 focus:ring-emerald-500"
                             autoComplete="name"
                             isFocused={true}
                             onChange={(e) => setData('name', e.target.value)}
@@ -66,13 +75,17 @@ export default function Register() {
 
                     {/* Email */}
                     <div>
-                        <InputLabel htmlFor="email" value="البريد الإلكتروني" className="text-gray-700 font-bold mb-1" />
+                        <InputLabel
+                            htmlFor="email"
+                            value="البريد الإلكتروني"
+                            className="mb-1 font-bold text-gray-700"
+                        />
                         <TextInput
                             id="email"
                             type="email"
                             name="email"
                             value={data.email}
-                            className="mt-1 block w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50"
+                            className="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 focus:border-emerald-500 focus:ring-emerald-500"
                             autoComplete="username"
                             onChange={(e) => setData('email', e.target.value)}
                             required
@@ -84,13 +97,17 @@ export default function Register() {
                     {/* Age & Gender Grid */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <InputLabel htmlFor="age" value="العمر" className="text-gray-700 font-bold mb-1" />
+                            <InputLabel
+                                htmlFor="age"
+                                value="العمر"
+                                className="mb-1 font-bold text-gray-700"
+                            />
                             <TextInput
                                 id="age"
                                 type="number"
                                 name="age"
                                 value={data.age}
-                                className="mt-1 block w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 text-center"
+                                className="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 text-center focus:border-emerald-500 focus:ring-emerald-500"
                                 onChange={(e) => setData('age', e.target.value)}
                                 required
                                 min="12"
@@ -99,64 +116,94 @@ export default function Register() {
                             <InputError message={errors.age} className="mt-2" />
                         </div>
                         <div>
-                            <InputLabel htmlFor="gender" value="الجنس" className="text-gray-700 font-bold mb-1" />
+                            <InputLabel
+                                htmlFor="gender"
+                                value="الجنس"
+                                className="mb-1 font-bold text-gray-700"
+                            />
                             <select
                                 id="gender"
                                 name="gender"
                                 value={data.gender}
-                                onChange={(e) => setData('gender', e.target.value)}
-                                className="mt-1 block w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50"
+                                onChange={(e) =>
+                                    setData('gender', e.target.value)
+                                }
+                                className="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 focus:border-emerald-500 focus:ring-emerald-500"
                                 required
                             >
                                 <option value="male">ذكر 👨</option>
                                 <option value="female">أنثى 👩</option>
                             </select>
-                            <InputError message={errors.gender} className="mt-2" />
+                            <InputError
+                                message={errors.gender}
+                                className="mt-2"
+                            />
                         </div>
                     </div>
 
                     {/* Password */}
                     <div>
-                        <InputLabel htmlFor="password" value="كلمة المرور" className="text-gray-700 font-bold mb-1" />
+                        <InputLabel
+                            htmlFor="password"
+                            value="كلمة المرور"
+                            className="mb-1 font-bold text-gray-700"
+                        />
                         <TextInput
                             id="password"
                             type="password"
                             name="password"
                             value={data.password}
-                            className="mt-1 block w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50"
+                            className="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 focus:border-emerald-500 focus:ring-emerald-500"
                             autoComplete="new-password"
-                            onChange={(e) => setData('password', e.target.value)}
+                            onChange={(e) =>
+                                setData('password', e.target.value)
+                            }
                             required
                         />
-                        <InputError message={errors.password} className="mt-2" />
+                        <InputError
+                            message={errors.password}
+                            className="mt-2"
+                        />
                     </div>
 
                     {/* Confirm Password */}
                     <div>
-                        <InputLabel htmlFor="password_confirmation" value="تأكيد كلمة المرور" className="text-gray-700 font-bold mb-1" />
+                        <InputLabel
+                            htmlFor="password_confirmation"
+                            value="تأكيد كلمة المرور"
+                            className="mb-1 font-bold text-gray-700"
+                        />
                         <TextInput
                             id="password_confirmation"
                             type="password"
                             name="password_confirmation"
                             value={data.password_confirmation}
-                            className="mt-1 block w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50"
+                            className="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 focus:border-emerald-500 focus:ring-emerald-500"
                             autoComplete="new-password"
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            onChange={(e) =>
+                                setData('password_confirmation', e.target.value)
+                            }
                             required
                         />
-                        <InputError message={errors.password_confirmation} className="mt-2" />
+                        <InputError
+                            message={errors.password_confirmation}
+                            className="mt-2"
+                        />
                     </div>
 
                     <div className="pt-2">
-                        <PrimaryButton className="w-full justify-center py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-lg font-bold shadow-lg shadow-emerald-200" disabled={processing}>
+                        <PrimaryButton
+                            className="w-full justify-center rounded-xl bg-emerald-600 py-4 text-lg font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700"
+                            disabled={processing}
+                        >
                             {processing ? 'جاري الإنشاء...' : 'إنشاء الحساب 🚀'}
                         </PrimaryButton>
                     </div>
 
-                    <div className="text-center mt-4">
+                    <div className="mt-4 text-center">
                         <Link
                             href={route('login')}
-                            className="text-sm text-gray-500 hover:text-emerald-600 font-bold transition"
+                            className="text-sm font-bold text-gray-500 transition hover:text-emerald-600"
                         >
                             لديك حساب بالفعل؟ تسجيل الدخول
                         </Link>

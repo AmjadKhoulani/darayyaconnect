@@ -11,11 +11,24 @@ class VolunteerOpportunity extends Model
 
     protected $fillable = [
         'title',
+        'organization',
         'description',
         'role_type',
         'location',
         'time_commitment',
+        'start_date',
+        'end_date',
+        'spots_total',
+        'spots_filled',
+        'image',
+        'tags',
         'status'
+    ];
+
+    protected $casts = [
+        'tags' => 'array',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
 
     public function applications()

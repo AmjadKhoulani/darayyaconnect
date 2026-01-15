@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import PrimaryButton from '@/Components/PrimaryButton';
+import { Head, useForm } from '@inertiajs/react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Head, useForm } from '@inertiajs/react';
-import PrimaryButton from '@/Components/PrimaryButton';
+import React, { useEffect, useRef, useState } from 'react';
 
 export default function LocationPicker() {
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -29,17 +29,23 @@ export default function LocationPicker() {
                 sources: {
                     'carto-voyager': {
                         type: 'raster',
-                        tiles: ['https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'],
+                        tiles: [
+                            'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                        ],
                         tileSize: 256,
-                        attribution: '&copy; CartoDB'
-                    }
+                        attribution: '&copy; CartoDB',
+                    },
                 },
                 layers: [
-                    { id: 'carto-voyager', type: 'raster', source: 'carto-voyager' }
-                ]
+                    {
+                        id: 'carto-voyager',
+                        type: 'raster',
+                        source: 'carto-voyager',
+                    },
+                ],
             },
             center: coords,
-            zoom: 15
+            zoom: 15,
         });
 
         // Force resize after load to fix blank canvas on mobile
@@ -50,7 +56,7 @@ export default function LocationPicker() {
         // Add Marker
         marker.current = new maplibregl.Marker({
             draggable: true,
-            color: '#10b981' // Emerald 500
+            color: '#10b981', // Emerald 500
         })
             .setLngLat(coords)
             .addTo(map.current);
@@ -70,7 +76,6 @@ export default function LocationPicker() {
             setData('latitude', e.lngLat.lat);
             setData('longitude', e.lngLat.lng);
         });
-
     }, []);
 
     const submit = (e: React.FormEvent) => {
@@ -79,29 +84,36 @@ export default function LocationPicker() {
     };
 
     return (
-        <div className="h-screen w-full relative bg-slate-100">
+        <div className="relative h-screen w-full bg-slate-100">
             <Head title="حدد موقع منزلك" />
 
             {/* Map Layer (Background) */}
             <div className="absolute inset-0 z-0">
-                <div ref={mapContainer} className="w-full h-full" />
+                <div ref={mapContainer} className="h-full w-full" />
             </div>
 
             {/* Top Overlay: Instructions */}
-            <div className="absolute top-0 left-0 right-0 z-10 p-4">
-                <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl text-center border border-white/50">
-                    <h2 className="text-lg font-bold text-gray-800">أين تسكن؟ 📍</h2>
-                    <p className="text-gray-600 text-xs mt-1 mb-2">حرك الدبوس لتحديد موقع منزلك</p>
-                    <div className="bg-emerald-50 text-emerald-800 p-2 rounded-lg text-[10px] leading-relaxed border border-emerald-100">
+            <div className="absolute left-0 right-0 top-0 z-10 p-4">
+                <div className="rounded-2xl border border-white/50 bg-white/90 p-4 text-center shadow-xl backdrop-blur-md">
+                    <h2 className="text-lg font-bold text-gray-800">
+                        أين تسكن؟ 📍
+                    </h2>
+                    <p className="mb-2 mt-1 text-xs text-gray-600">
+                        حرك الدبوس لتحديد موقع منزلك
+                    </p>
+                    <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-2 text-[10px] leading-relaxed text-emerald-800">
                         نستخدم الموقع لإرسال تنبيهات الحي (الكهرباء والماء) فقط.
                     </div>
                 </div>
             </div>
 
             {/* Bottom Overlay: Action */}
-            <div className="absolute bottom-0 left-0 right-0 z-10 p-4 bg-gradient-to-t from-white via-white/80 to-transparent pt-12">
+            <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-white via-white/80 to-transparent p-4 pt-12">
                 <form onSubmit={submit}>
-                    <PrimaryButton className="w-full justify-center py-4 text-lg bg-slate-900 shadow-xl rounded-xl" disabled={processing}>
+                    <PrimaryButton
+                        className="w-full justify-center rounded-xl bg-slate-900 py-4 text-lg shadow-xl"
+                        disabled={processing}
+                    >
                         تأكيد موقع المنزل ✅
                     </PrimaryButton>
                 </form>

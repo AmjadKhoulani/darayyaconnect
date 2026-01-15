@@ -1,11 +1,11 @@
+import InputLabel from '@/Components/InputLabel';
+import Modal from '@/Components/Modal';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
+import TextInput from '@/Components/TextInput';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import Modal from '@/Components/Modal';
-import InputLabel from '@/Components/InputLabel';
-import SecondaryButton from '@/Components/SecondaryButton';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { useEffect, useState } from 'react';
 
 interface Book {
     id: number;
@@ -37,12 +37,18 @@ export default function BooksIndex({ auth, books, filters }: Props) {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(route('admin.books.index'), { search }, { preserveState: true });
+        router.get(
+            route('admin.books.index'),
+            { search },
+            { preserveState: true },
+        );
     };
 
     const deleteItem = (id: number) => {
         if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
-            router.delete(route('admin.books.destroy', id), { preserveScroll: true });
+            router.delete(route('admin.books.destroy', id), {
+                preserveScroll: true,
+            });
         }
     };
 
@@ -52,33 +58,45 @@ export default function BooksIndex({ auth, books, filters }: Props) {
     };
 
     return (
-        <AdminLayout user={auth.user} header={<h2 className="font-bold text-xl text-slate-800">📚 مكتبة داريا التبادلية</h2>}>
+        <AdminLayout
+            user={auth.user}
+            header={
+                <h2 className="text-xl font-bold text-slate-800">
+                    📚 مكتبة داريا التبادلية
+                </h2>
+            }
+        >
             <Head title="المكتبة" />
 
-            <div className="py-12 px-6 lg:px-8" dir="rtl">
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
+            <div className="px-6 py-12 lg:px-8" dir="rtl">
+                <div className="mb-6 flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                     <form onSubmit={handleSearch} className="relative w-96">
                         <input
                             type="text"
                             placeholder="بحث عن كتاب..."
-                            className="w-full pl-10 pr-4 py-2 border-slate-300 rounded-lg focus:ring-emerald-500"
+                            className="w-full rounded-lg border-slate-300 py-2 pl-10 pr-4 focus:ring-emerald-500"
                             value={search}
-                            onChange={e => setSearch(e.target.value)}
+                            onChange={(e) => setSearch(e.target.value)}
                         />
-                        <button type="submit" className="absolute left-2 top-2 text-slate-400">🔍</button>
+                        <button
+                            type="submit"
+                            className="absolute left-2 top-2 text-slate-400"
+                        >
+                            🔍
+                        </button>
                     </form>
 
                     <button
                         onClick={() => openModal()}
-                        className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-emerald-700 transition flex items-center gap-2"
+                        className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-bold text-white transition hover:bg-emerald-700"
                     >
                         <span>+</span> إضافة كتاب
                     </button>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     <table className="w-full text-right">
-                        <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-200">
+                        <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-500">
                             <tr>
                                 <th className="px-6 py-4">عنوان الكتاب</th>
                                 <th className="px-6 py-4">المؤلف</th>
@@ -90,34 +108,70 @@ export default function BooksIndex({ auth, books, filters }: Props) {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {books.data.map((item) => (
-                                <tr key={item.id} className="hover:bg-slate-50 transition">
+                                <tr
+                                    key={item.id}
+                                    className="transition hover:bg-slate-50"
+                                >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             {item.cover_image ? (
-                                                <img src={item.cover_image} alt="" className="w-10 h-10 rounded shadow-sm object-cover" />
+                                                <img
+                                                    src={item.cover_image}
+                                                    alt=""
+                                                    className="h-10 w-10 rounded object-cover shadow-sm"
+                                                />
                                             ) : (
-                                                <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center text-xl">📘</div>
+                                                <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-xl">
+                                                    📘
+                                                </div>
                                             )}
                                             <div>
-                                                <div className="font-bold text-slate-800">{item.title}</div>
-                                                <div className="text-xs text-slate-500">{item.condition}</div>
+                                                <div className="font-bold text-slate-800">
+                                                    {item.title}
+                                                </div>
+                                                <div className="text-xs text-slate-500">
+                                                    {item.condition}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-600 font-medium">{item.author}</td>
-                                    <td className="px-6 py-4 text-slate-600">{item.category}</td>
+                                    <td className="px-6 py-4 font-medium text-slate-600">
+                                        {item.author}
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600">
+                                        {item.category}
+                                    </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold ${item.status === 'available' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                                            }`}>
-                                            {item.status === 'available' ? 'متاح للتبادل' : 'تم التبادل'}
+                                        <span
+                                            className={`rounded px-2 py-1 text-xs font-bold ${
+                                                item.status === 'available'
+                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                    : 'bg-slate-100 text-slate-500'
+                                            }`}
+                                        >
+                                            {item.status === 'available'
+                                                ? 'متاح للتبادل'
+                                                : 'تم التبادل'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-500">
-                                        {new Date(item.created_at).toLocaleDateString()}
+                                        {new Date(
+                                            item.created_at,
+                                        ).toLocaleDateString()}
                                     </td>
-                                    <td className="px-6 py-4 flex gap-2">
-                                        <button onClick={() => openModal(item)} className="p-2 text-blue-600 hover:bg-blue-50 rounded">✏️</button>
-                                        <button onClick={() => deleteItem(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded">🗑️</button>
+                                    <td className="flex gap-2 px-6 py-4">
+                                        <button
+                                            onClick={() => openModal(item)}
+                                            className="rounded p-2 text-blue-600 hover:bg-blue-50"
+                                        >
+                                            ✏️
+                                        </button>
+                                        <button
+                                            onClick={() => deleteItem(item.id)}
+                                            className="rounded p-2 text-red-600 hover:bg-red-50"
+                                        >
+                                            🗑️
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -135,7 +189,15 @@ export default function BooksIndex({ auth, books, filters }: Props) {
     );
 }
 
-function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, onClose: () => void }) {
+function BookModal({
+    show,
+    item,
+    onClose,
+}: {
+    show: boolean;
+    item: Book | null;
+    onClose: () => void;
+}) {
     const { data, setData, post, processing, reset, errors } = useForm({
         title: '',
         author: '',
@@ -144,7 +206,7 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
         status: 'available',
         contact_info: '',
         cover_image: null as File | null,
-        _method: 'POST'
+        _method: 'POST',
     });
 
     useEffect(() => {
@@ -157,7 +219,7 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                 status: item.status,
                 contact_info: item.contact_info,
                 cover_image: null,
-                _method: 'PUT'
+                _method: 'PUT',
             });
         } else {
             setData({
@@ -168,14 +230,16 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                 status: 'available',
                 contact_info: '',
                 cover_image: null,
-                _method: 'POST'
+                _method: 'POST',
             });
         }
     }, [item]);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        const url = item ? route('admin.books.update', item.id) : route('admin.books.store');
+        const url = item
+            ? route('admin.books.update', item.id)
+            : route('admin.books.store');
 
         post(url, {
             onSuccess: () => {
@@ -189,7 +253,7 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
     return (
         <Modal show={show} onClose={onClose}>
             <form onSubmit={submit} className="p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-6">
+                <h2 className="mb-6 text-lg font-bold text-slate-900">
                     {item ? 'تعديل بيانات الكتاب' : 'إضافة كتاب جديد'}
                 </h2>
 
@@ -198,11 +262,15 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                         <InputLabel value="عنوان الكتاب" />
                         <TextInput
                             value={data.title}
-                            onChange={e => setData('title', e.target.value)}
-                            className="w-full mt-1"
+                            onChange={(e) => setData('title', e.target.value)}
+                            className="mt-1 w-full"
                             placeholder="اسم الكتاب..."
                         />
-                        {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                        {errors.title && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.title}
+                            </p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -210,17 +278,25 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                             <InputLabel value="المؤلف" />
                             <TextInput
                                 value={data.author}
-                                onChange={e => setData('author', e.target.value)}
-                                className="w-full mt-1"
+                                onChange={(e) =>
+                                    setData('author', e.target.value)
+                                }
+                                className="mt-1 w-full"
                             />
-                            {errors.author && <p className="text-red-500 text-xs mt-1">{errors.author}</p>}
+                            {errors.author && (
+                                <p className="mt-1 text-xs text-red-500">
+                                    {errors.author}
+                                </p>
+                            )}
                         </div>
                         <div>
                             <InputLabel value="التصنيف" />
                             <select
                                 value={data.category}
-                                onChange={e => setData('category', e.target.value)}
-                                className="w-full mt-1 border-slate-300 rounded-lg"
+                                onChange={(e) =>
+                                    setData('category', e.target.value)
+                                }
+                                className="mt-1 w-full rounded-lg border-slate-300"
                             >
                                 <option value="">اختر..</option>
                                 <option value="روايات">روايات</option>
@@ -238,8 +314,10 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                             <InputLabel value="حالة الكتاب" />
                             <select
                                 value={data.condition}
-                                onChange={e => setData('condition', e.target.value)}
-                                className="w-full mt-1 border-slate-300 rounded-lg"
+                                onChange={(e) =>
+                                    setData('condition', e.target.value)
+                                }
+                                className="mt-1 w-full rounded-lg border-slate-300"
                             >
                                 <option value="جديدة">جديدة</option>
                                 <option value="جيدة جداً">جيدة جداً</option>
@@ -251,10 +329,14 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                             <InputLabel value="حالة التوفر" />
                             <select
                                 value={data.status}
-                                onChange={e => setData('status', e.target.value)}
-                                className="w-full mt-1 border-slate-300 rounded-lg"
+                                onChange={(e) =>
+                                    setData('status', e.target.value)
+                                }
+                                className="mt-1 w-full rounded-lg border-slate-300"
                             >
-                                <option value="available">متاح للتبادل ✅</option>
+                                <option value="available">
+                                    متاح للتبادل ✅
+                                </option>
                                 <option value="exchanged">تم التبادل 🤝</option>
                             </select>
                         </div>
@@ -265,8 +347,10 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                             <InputLabel value="معلومات التواصل" />
                             <TextInput
                                 value={data.contact_info}
-                                onChange={e => setData('contact_info', e.target.value)}
-                                className="w-full mt-1"
+                                onChange={(e) =>
+                                    setData('contact_info', e.target.value)
+                                }
+                                className="mt-1 w-full"
                                 placeholder="رقم هاتف أو حساب..."
                             />
                         </div>
@@ -274,8 +358,15 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
                             <InputLabel value="صورة الغلاف (اختياري)" />
                             <input
                                 type="file"
-                                onChange={e => setData('cover_image', e.target.files ? e.target.files[0] : null)}
-                                className="w-full mt-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                                onChange={(e) =>
+                                    setData(
+                                        'cover_image',
+                                        e.target.files
+                                            ? e.target.files[0]
+                                            : null,
+                                    )
+                                }
+                                className="mt-1 w-full text-sm text-slate-500 file:mr-4 file:rounded-full file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100"
                             />
                         </div>
                     </div>
@@ -283,7 +374,10 @@ function BookModal({ show, item, onClose }: { show: boolean, item: Book | null, 
 
                 <div className="mt-8 flex justify-end gap-3">
                     <SecondaryButton onClick={onClose}>إلغاء</SecondaryButton>
-                    <PrimaryButton disabled={processing} className="bg-emerald-600 hover:bg-emerald-700">
+                    <PrimaryButton
+                        disabled={processing}
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                    >
                         {item ? 'حفظ التغييرات' : 'إضافة الكتاب'}
                     </PrimaryButton>
                 </div>

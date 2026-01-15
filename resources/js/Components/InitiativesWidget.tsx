@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function InitiativesWidget() {
     const initiatives = [
         {
@@ -10,7 +8,7 @@ export default function InitiativesWidget() {
             volunteers: 25,
             icon: '🧹',
             status: 'جاري التنفيذ',
-            color: 'emerald'
+            color: 'emerald',
         },
         {
             id: 2,
@@ -20,7 +18,7 @@ export default function InitiativesWidget() {
             volunteers: 12,
             icon: '💡',
             status: 'جمع تبرعات',
-            color: 'blue'
+            color: 'blue',
         },
         {
             id: 3,
@@ -30,14 +28,14 @@ export default function InitiativesWidget() {
             volunteers: 40,
             icon: '📚',
             status: 'مكتملة',
-            color: 'amber'
-        }
+            color: 'amber',
+        },
     ];
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
-                <h2 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
+                <h2 className="flex items-center gap-2 text-sm font-bold text-slate-800">
                     <span className="text-emerald-600">❤️</span> مبادرات أهلية
                 </h2>
                 <button className="text-[10px] font-bold text-emerald-600 hover:underline">
@@ -47,47 +45,67 @@ export default function InitiativesWidget() {
 
             <div className="divide-y divide-slate-50">
                 {initiatives.map((init) => (
-                    <div key={init.id} className="p-3 hover:bg-slate-50/50 transition-colors group">
-                        <div className="flex gap-3 items-start mb-2 text-right">
-                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-lg shrink-0 group-hover:scale-110 transition-transform">
+                    <div
+                        key={init.id}
+                        className="group p-3 transition-colors hover:bg-slate-50/50"
+                    >
+                        <div className="mb-2 flex items-start gap-3 text-right">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg transition-transform group-hover:scale-110">
                                 {init.icon}
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-start">
-                                    <h3 className="font-bold text-xs text-slate-800 truncate group-hover:text-emerald-600 transition-colors">
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between">
+                                    <h3 className="truncate text-xs font-bold text-slate-800 transition-colors group-hover:text-emerald-600">
                                         {init.title}
                                     </h3>
-                                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${init.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
-                                            init.color === 'blue' ? 'bg-blue-50 text-blue-600' :
-                                                'bg-slate-100 text-slate-500'
-                                        }`}>
+                                    <span
+                                        className={`rounded-full px-1.5 py-0.5 text-[8px] font-bold ${
+                                            init.color === 'emerald'
+                                                ? 'bg-emerald-50 text-emerald-600'
+                                                : init.color === 'blue'
+                                                  ? 'bg-blue-50 text-blue-600'
+                                                  : 'bg-slate-100 text-slate-500'
+                                        }`}
+                                    >
                                         {init.status}
                                     </span>
                                 </div>
-                                <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{init.desc}</p>
+                                <p className="mt-0.5 line-clamp-1 text-[10px] text-slate-500">
+                                    {init.desc}
+                                </p>
                             </div>
                         </div>
 
                         {/* Progress Bar */}
                         <div className="space-y-1">
-                            <div className="flex justify-between items-center text-[9px] font-medium text-slate-400">
+                            <div className="flex items-center justify-between text-[9px] font-medium text-slate-400">
                                 <span>{init.volunteers} متطوع/مساهم</span>
-                                <span className={init.progress === 100 ? 'text-emerald-500' : ''}>
+                                <span
+                                    className={
+                                        init.progress === 100
+                                            ? 'text-emerald-500'
+                                            : ''
+                                    }
+                                >
                                     {init.progress}%
                                 </span>
                             </div>
-                            <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                            <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100">
                                 <div
-                                    className={`h-full transition-all duration-1000 ${init.progress === 100 ? 'bg-emerald-500' :
-                                            init.color === 'blue' ? 'bg-blue-500' : 'bg-emerald-400'
-                                        }`}
+                                    className={`h-full transition-all duration-1000 ${
+                                        init.progress === 100
+                                            ? 'bg-emerald-500'
+                                            : init.color === 'blue'
+                                              ? 'bg-blue-500'
+                                              : 'bg-emerald-400'
+                                    }`}
                                     style={{ width: `${init.progress}%` }}
                                 ></div>
                             </div>
                         </div>
 
-                        <div className="mt-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="flex-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-[9px] font-bold py-1 rounded transition-colors text-slate-600">
+                        <div className="mt-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                            <button className="flex-1 rounded bg-slate-100 py-1 text-[9px] font-bold text-slate-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700">
                                 دعم المبادرة
                             </button>
                         </div>
@@ -95,8 +113,8 @@ export default function InitiativesWidget() {
                 ))}
             </div>
 
-            <div className="p-2 border-t border-slate-50 bg-slate-50/30 text-center">
-                <button className="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
+            <div className="border-t border-slate-50 bg-slate-50/30 p-2 text-center">
+                <button className="text-[10px] font-bold text-slate-500 transition-colors hover:text-slate-800">
                     عرض جميع المبادرات (12)
                 </button>
             </div>

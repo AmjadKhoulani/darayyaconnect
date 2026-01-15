@@ -1,59 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Heart, Users, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
 import { usePullToRefresh, PullToRefreshContainer } from '../hooks/usePullToRefresh';
 
+import api from '../services/api';
+
 export default function Volunteering() {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [opportunities, setOpportunities] = useState<any[]>([]);
 
-    const refreshData = async () => {
-        setLoading(true);
-        await new Promise(r => setTimeout(r, 1000));
-        setLoading(false);
+    const fetchData = async () => {
+        try {
+            const res = await api.get('/api/volunteering');
+            setOpportunities(res.data);
+        } catch (error) {
+            console.error('Failed to fetch opportunities:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const { isRefreshing, pullMoveY, handlers } = usePullToRefresh(refreshData);
+    const { isRefreshing, containerRef, indicatorRef, handlers } = usePullToRefresh(fetchData);
 
-    const opportunities = [
-        {
-            id: 1,
-            title: "حملة تشجير الأحياء الجنوبية",
-            org: "جمعية داريا الخضراء",
-            date: "الجمعة القادم, 9:00 ص",
-            location: "ساحة البلدية",
-            spots: 15,
-            filled: 8,
-            tags: ["بيئة", "ميداني"],
-            image: "https://images.unsplash.com/photo-1542601906990-24ccd08d7455?w=800&q=80"
-        },
-        {
-            id: 2,
-            title: "توزيع السلال الغذائية - رمضان",
-            org: "فريق الإخاء",
-            date: "يومياً",
-            location: "مركز التوزيع",
-            spots: 50,
-            filled: 42,
-            tags: ["إغاثة", "تنظيم"],
-            image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&q=80"
-        },
-        {
-            id: 3,
-            title: "مساعد إداري لتنظيم الأرشيف",
-            org: "المجلس المحلي",
-            date: "دوام جزئي",
-            location: "مبنى البلدية",
-            spots: 2,
-            filled: 0,
-            tags: ["إداري", "مكتبي"],
-            image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80"
-        }
-    ];
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
-            <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
+            <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
 
                 {/* Clean Header */}
                 <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 px-4 py-4 shadow-sm flex items-center justify-between transition-colors duration-300">
@@ -92,11 +68,12 @@ export default function Volunteering() {
                     {/* Stats Bar */}
                     <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-premium flex items-center justify-between animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                         <div className="text-center flex-1 border-l border-slate-100 dark:border-slate-700 last:border-0 px-2">
+                            {/* Use mock stat for now, or aggregate if backend sends stats */}
                             <div className="text-xl font-bold text-slate-800 dark:text-slate-100">125</div>
                             <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">متطوع</div>
                         </div>
                         <div className="text-center flex-1 border-l border-slate-100 dark:border-slate-700 last:border-0 px-2">
-                            <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">12</div>
+                            <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{opportunities.length}</div>
                             <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">فرصة</div>
                         </div>
                         <div className="text-center flex-1 px-2">
@@ -108,6 +85,9 @@ export default function Volunteering() {
                     {/* Opportunities List */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm px-1">فرص متاحة الآن</h3>
+                        {opportunities.length === 0 && !loading && (
+                            <div className="text-center py-8 text-slate-500">لا يوجد فرص تطوع حالياً</div>
+                        )}
                         {opportunities.map((opp, index) => (
                             <button
                                 key={opp.id}
@@ -131,22 +111,22 @@ export default function Volunteering() {
                                                 <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 line-clamp-2 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors leading-relaxed">
                                                     {opp.title}
                                                 </h3>
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${opp.filled >= opp.spots ? 'bg-rose-50 text-rose-500 border-rose-100' : 'bg-emerald-50 text-emerald-500 border-emerald-100'}`}>
-                                                    {opp.filled}/{opp.spots}
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${opp.spots_filled >= opp.spots_total ? 'bg-rose-50 text-rose-500 border-rose-100' : 'bg-emerald-50 text-emerald-500 border-emerald-100'}`}>
+                                                    {opp.spots_filled}/{opp.spots_total}
                                                 </span>
                                             </div>
                                             <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium mt-1">
                                                 <Users size={12} className="text-slate-400 dark:text-slate-500" />
-                                                <span className="text-slate-600 dark:text-slate-300">{opp.org}</span>
+                                                <span className="text-slate-600 dark:text-slate-300">{opp.organization || 'منظمة'}</span>
                                                 <span className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></span>
-                                                <span className="text-emerald-600 dark:text-emerald-400">{opp.date}</span>
+                                                <span className="text-emerald-600 dark:text-emerald-400">{new Date(opp.start_date || Date.now()).toLocaleDateString('ar-EG')}</span>
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between border-t border-slate-50 dark:border-slate-700/50 pt-3 mt-1">
                                         <div className="flex items-center gap-2">
-                                            {opp.tags.map(tag => (
+                                            {opp.tags && opp.tags.length > 0 && opp.tags.map((tag: any) => (
                                                 <span key={tag} className="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-2 py-1 rounded-lg text-[10px] font-bold border border-slate-100 dark:border-slate-700">
                                                     {tag}
                                                 </span>

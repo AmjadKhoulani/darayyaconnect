@@ -114,6 +114,18 @@ function AppContent() {
             const interval = setInterval(trackLocation, 300000); // 5 mins
             return () => clearInterval(interval);
         }
+
+        // Global Sync Logic
+        const handleSync = async () => {
+            if (navigator.onLine) {
+                await import('./services/OfflineService').then(m => m.OfflineService.syncReports());
+            }
+        };
+
+        window.addEventListener('online', handleSync);
+        handleSync(); // Initial check
+
+        return () => window.removeEventListener('online', handleSync);
     }, [location.pathname]);
 
     return (
@@ -176,13 +188,17 @@ function AppContent() {
     );
 }
 
+import { ErrorBoundary } from './components/ErrorBoundary';
+
 export default function App() {
     return (
-        <ThemeProvider>
-            <HashRouter>
-                <ScrollToTop />
-                <AppContent />
-            </HashRouter>
-        </ThemeProvider>
+        <ErrorBoundary>
+            <ThemeProvider>
+                <HashRouter>
+                    <ScrollToTop />
+                    <AppContent />
+                </HashRouter>
+            </ThemeProvider>
+        </ErrorBoundary>
     );
 }

@@ -1,10 +1,10 @@
+import InputLabel from '@/Components/InputLabel';
+import Modal from '@/Components/Modal';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import Modal from '@/Components/Modal';
-import InputLabel from '@/Components/InputLabel';
-import SecondaryButton from '@/Components/SecondaryButton';
-import PrimaryButton from '@/Components/PrimaryButton';
 
 interface User {
     id: number;
@@ -39,57 +39,87 @@ export default function UsersIndex({ auth, users, filters }: Props) {
     // Search Handler
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(route('admin.users.index'), { search, role: filters.role, status: filters.status }, { preserveState: true });
+        router.get(
+            route('admin.users.index'),
+            { search, role: filters.role, status: filters.status },
+            { preserveState: true },
+        );
     };
 
     // Filter Handler
     const handleFilterChange = (key: string, value: string) => {
-        router.get(route('admin.users.index'), { ...filters, search, [key]: value }, { preserveState: true });
+        router.get(
+            route('admin.users.index'),
+            { ...filters, search, [key]: value },
+            { preserveState: true },
+        );
     };
 
     const handleDelete = (id: number) => {
         if (confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟')) {
-            router.delete(route('admin.users.destroy', id), { preserveScroll: true });
+            router.delete(route('admin.users.destroy', id), {
+                preserveScroll: true,
+            });
         }
     };
 
     const toggleVerification = (user: User) => {
-        router.put(route('admin.users.update', user.id), {
-            role: user.role,
-            is_verified_official: !user.is_verified_official
-        }, { preserveScroll: true });
+        router.put(
+            route('admin.users.update', user.id),
+            {
+                role: user.role,
+                is_verified_official: !user.is_verified_official,
+            },
+            { preserveScroll: true },
+        );
     };
 
     return (
-        <AdminLayout user={auth.user} header={<h2 className="font-bold text-xl text-slate-800">👥 إدارة المستخدمين</h2>}>
+        <AdminLayout
+            user={auth.user}
+            header={
+                <h2 className="text-xl font-bold text-slate-800">
+                    👥 إدارة المستخدمين
+                </h2>
+            }
+        >
             <Head title="المستخدمين" />
 
-            <div className="py-12 px-6 lg:px-8" dir="rtl">
-
+            <div className="px-6 py-12 lg:px-8" dir="rtl">
                 {/* Filters & Actions */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-                    <form onSubmit={handleSearch} className="relative w-full md:w-96">
+                <div className="mb-6 flex flex-col items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row">
+                    <form
+                        onSubmit={handleSearch}
+                        className="relative w-full md:w-96"
+                    >
                         <input
                             type="text"
                             placeholder="بحث بالاسم أو البريد..."
-                            className="w-full pl-10 pr-4 py-2 border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                            className="w-full rounded-lg border-slate-300 py-2 pl-10 pr-4 focus:border-emerald-500 focus:ring-emerald-500"
                             value={search}
-                            onChange={e => setSearch(e.target.value)}
+                            onChange={(e) => setSearch(e.target.value)}
                         />
-                        <button type="submit" className="absolute left-2 top-2 text-slate-400">🔍</button>
+                        <button
+                            type="submit"
+                            className="absolute left-2 top-2 text-slate-400"
+                        >
+                            🔍
+                        </button>
                     </form>
 
-                    <div className="flex gap-2 w-full md:w-auto overflow-x-auto items-center">
+                    <div className="flex w-full items-center gap-2 overflow-x-auto md:w-auto">
                         <Link
                             href={route('admin.users.map')}
-                            className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-100 transition whitespace-nowrap flex items-center gap-2 border border-indigo-200"
+                            className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100"
                         >
                             <span>🗺️</span> الخريطة الحرارية
                         </Link>
                         <select
-                            className="border-slate-300 rounded-lg text-sm"
+                            className="rounded-lg border-slate-300 text-sm"
                             value={filters.role || 'all'}
-                            onChange={e => handleFilterChange('role', e.target.value)}
+                            onChange={(e) =>
+                                handleFilterChange('role', e.target.value)
+                            }
                         >
                             <option value="all">كل الأدوار</option>
                             <option value="user">مواطن</option>
@@ -99,9 +129,11 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                         </select>
 
                         <select
-                            className="border-slate-300 rounded-lg text-sm"
+                            className="rounded-lg border-slate-300 text-sm"
                             value={filters.status || ''}
-                            onChange={e => handleFilterChange('status', e.target.value)}
+                            onChange={(e) =>
+                                handleFilterChange('status', e.target.value)
+                            }
                         >
                             <option value="">كل الحالات</option>
                             <option value="verified">موثق ✅</option>
@@ -111,10 +143,10 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                 </div>
 
                 {/* Users Table */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-right">
-                            <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-200">
+                            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-500">
                                 <tr>
                                     <th className="px-6 py-4">المستخدم</th>
                                     <th className="px-6 py-4">الدور</th>
@@ -124,58 +156,91 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {users.data.map(user => (
-                                    <tr key={user.id} className="hover:bg-slate-50 transition">
+                                {users.data.map((user) => (
+                                    <tr
+                                        key={user.id}
+                                        className="transition hover:bg-slate-50"
+                                    >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 font-bold text-slate-600">
                                                     {user.name.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-slate-900">{user.name}</div>
-                                                    <div className="text-xs text-slate-500">{user.email}</div>
+                                                    <div className="font-bold text-slate-900">
+                                                        {user.name}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500">
+                                                        {user.email}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded text-xs font-bold
-                                                ${user.role === 'admin' ? 'bg-rose-100 text-rose-700' :
-                                                    user.role === 'official' ? 'bg-blue-100 text-blue-700' :
-                                                        user.role === 'institution' ? 'bg-purple-100 text-purple-700' :
-                                                            'bg-slate-100 text-slate-700'}
-                                            `}>
-                                                {user.role === 'admin' ? 'مدير عام' :
-                                                    user.role === 'official' ? 'مسؤول' :
-                                                        user.role === 'institution' ? 'مؤسسة' : 'مواطن'}
+                                            <span
+                                                className={`rounded px-2 py-1 text-xs font-bold ${
+                                                    user.role === 'admin'
+                                                        ? 'bg-rose-100 text-rose-700'
+                                                        : user.role ===
+                                                            'official'
+                                                          ? 'bg-blue-100 text-blue-700'
+                                                          : user.role ===
+                                                              'institution'
+                                                            ? 'bg-purple-100 text-purple-700'
+                                                            : 'bg-slate-100 text-slate-700'
+                                                } `}
+                                            >
+                                                {user.role === 'admin'
+                                                    ? 'مدير عام'
+                                                    : user.role === 'official'
+                                                      ? 'مسؤول'
+                                                      : user.role ===
+                                                          'institution'
+                                                        ? 'مؤسسة'
+                                                        : 'مواطن'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <button
-                                                onClick={() => toggleVerification(user)}
-                                                className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded transition border
-                                                    ${user.is_verified_official
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                                                        : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200'}
-                                                `}
-                                                title={user.is_verified_official ? 'انقر لإلغاء التوثيق' : 'انقر للتوثيق'}
+                                                onClick={() =>
+                                                    toggleVerification(user)
+                                                }
+                                                className={`flex items-center gap-1 rounded border px-2 py-1 text-xs font-bold transition ${
+                                                    user.is_verified_official
+                                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+                                                        : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700'
+                                                } `}
+                                                title={
+                                                    user.is_verified_official
+                                                        ? 'انقر لإلغاء التوثيق'
+                                                        : 'انقر للتوثيق'
+                                                }
                                             >
-                                                {user.is_verified_official ? '✅ موثق' : '⬜ غير موثق'}
+                                                {user.is_verified_official
+                                                    ? '✅ موثق'
+                                                    : '⬜ غير موثق'}
                                             </button>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">
-                                            {new Date(user.created_at).toLocaleDateString()}
+                                            {new Date(
+                                                user.created_at,
+                                            ).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-4 flex items-center gap-2">
+                                        <td className="flex items-center gap-2 px-6 py-4">
                                             <button
-                                                onClick={() => setEditingUser(user)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                onClick={() =>
+                                                    setEditingUser(user)
+                                                }
+                                                className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50"
                                                 title="تعديل الصلاحيات"
                                             >
                                                 ✏️
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(user.id)}
-                                                className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                                                onClick={() =>
+                                                    handleDelete(user.id)
+                                                }
+                                                className="rounded-lg p-2 text-rose-600 transition hover:bg-rose-50"
                                                 title="حذف المستخدم"
                                             >
                                                 🗑️
@@ -187,14 +252,16 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                         </table>
                     </div>
                     {/* Simplified Pagination */}
-                    <div className="bg-slate-50 p-4 border-t border-slate-200 flex justify-center">
+                    <div className="flex justify-center border-t border-slate-200 bg-slate-50 p-4">
                         <div className="flex gap-1">
                             {users.links.map((link: any, i: number) => (
                                 <Link
                                     key={i}
                                     href={link.url || '#'}
-                                    className={`px-3 py-1 rounded text-sm ${link.active ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'} ${!link.url ? 'opacity-50 pointer-events-none' : ''}`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    className={`rounded px-3 py-1 text-sm ${link.active ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'} ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                                    dangerouslySetInnerHTML={{
+                                        __html: link.label,
+                                    }}
                                 />
                             ))}
                         </div>
@@ -202,18 +269,27 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                 </div>
             </div>
 
-            <UserEditModal user={editingUser} onClose={() => setEditingUser(null)} />
+            <UserEditModal
+                user={editingUser}
+                onClose={() => setEditingUser(null)}
+            />
         </AdminLayout>
     );
 }
 
-function UserEditModal({ user, onClose }: { user: User | null, onClose: () => void }) {
+function UserEditModal({
+    user,
+    onClose,
+}: {
+    user: User | null;
+    onClose: () => void;
+}) {
     if (!user) return null;
 
     const { data, setData, put, processing, reset } = useForm({
         role: user.role,
         department_id: user.department_id || '',
-        is_verified_official: user.is_verified_official
+        is_verified_official: user.is_verified_official,
     });
 
     const submit = (e: React.FormEvent) => {
@@ -222,26 +298,34 @@ function UserEditModal({ user, onClose }: { user: User | null, onClose: () => vo
             onSuccess: () => {
                 onClose();
                 reset();
-            }
+            },
         });
     };
 
     return (
         <Modal show={!!user} onClose={onClose}>
             <form onSubmit={submit} className="p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-4">تعديل بيانات: {user.name}</h2>
+                <h2 className="mb-4 text-lg font-bold text-slate-900">
+                    تعديل بيانات: {user.name}
+                </h2>
 
                 <div className="space-y-4">
                     <div>
                         <InputLabel value="الدور (Role)" />
                         <select
-                            className="w-full border-slate-300 rounded-lg"
+                            className="w-full rounded-lg border-slate-300"
                             value={data.role}
-                            onChange={e => setData('role', e.target.value as any)}
+                            onChange={(e) =>
+                                setData('role', e.target.value as any)
+                            }
                         >
                             <option value="user">مواطن (User)</option>
-                            <option value="official">مسؤول حكومي (Official)</option>
-                            <option value="institution">مؤسسة (Institution)</option>
+                            <option value="official">
+                                مسؤول حكومي (Official)
+                            </option>
+                            <option value="institution">
+                                مؤسسة (Institution)
+                            </option>
                             <option value="admin">مدير (Admin)</option>
                         </select>
                     </div>
@@ -252,15 +336,28 @@ function UserEditModal({ user, onClose }: { user: User | null, onClose: () => vo
                             id="verified"
                             className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                             checked={data.is_verified_official}
-                            onChange={e => setData('is_verified_official', e.target.checked)}
+                            onChange={(e) =>
+                                setData(
+                                    'is_verified_official',
+                                    e.target.checked,
+                                )
+                            }
                         />
-                        <label htmlFor="verified" className="text-sm font-bold text-slate-700">حساب موثق رسمياً</label>
+                        <label
+                            htmlFor="verified"
+                            className="text-sm font-bold text-slate-700"
+                        >
+                            حساب موثق رسمياً
+                        </label>
                     </div>
                 </div>
 
                 <div className="mt-6 flex justify-end gap-3">
                     <SecondaryButton onClick={onClose}>إلغاء</SecondaryButton>
-                    <PrimaryButton disabled={processing} className="bg-emerald-600 hover:bg-emerald-700">
+                    <PrimaryButton
+                        disabled={processing}
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                    >
                         حفظ التعديلات
                     </PrimaryButton>
                 </div>
