@@ -1,6 +1,10 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import InfrastructureList from './InfrastructureList';
+import {
+    LineChart, Line, AreaChart, Area, BarChart, Bar,
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+} from 'recharts';
 
 interface Props {
     auth: any;
@@ -11,6 +15,11 @@ interface Props {
         avg_stall_days: number;
         citizens_count: number;
         active_alerts: number;
+    };
+    trends: {
+        reports: any[];
+        users: any[];
+        services: any;
     };
     bottlenecks: {
         summary: any;
@@ -34,6 +43,7 @@ export default function Dashboard({
     users,
     services,
     departments,
+    trends
 }: Props) {
     // Safety Checks
     if (!stats)
@@ -142,6 +152,128 @@ export default function Dashboard({
                         </div>
                     </div>
 
+                    {/* 2. Visual Analytics (Charts) - Premium Command Center Style */}
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        {/* Reports Trend Line Chart */}
+                        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm overflow-hidden transition-all hover:shadow-md">
+                            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-slate-800">
+                                <span className="p-2 bg-orange-50 text-orange-500 rounded-lg">📈</span>
+                                نشاط البلاغات الواردة
+                            </h3>
+                            <div className="h-[250px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={trends.reports}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <XAxis
+                                            dataKey="date"
+                                            tick={{ fontSize: 10, fill: '#64748b' }}
+                                            tickFormatter={(val) => val.split('-').slice(1).reverse().join('/')}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+                                        <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                        <Tooltip
+                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' }}
+                                            cursor={{ stroke: '#f97316', strokeWidth: 1 }}
+                                        />
+                                        <Line
+                                            type="monotone"
+                                            dataKey="count"
+                                            name="بلاغات"
+                                            stroke="#f97316"
+                                            strokeWidth={4}
+                                            dot={{ r: 4, fill: '#f97316', strokeWidth: 2, stroke: '#fff' }}
+                                            activeDot={{ r: 7, strokeWidth: 0 }}
+                                            animationDuration={1500}
+                                        />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Service Availability Bar Chart */}
+                        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm overflow-hidden transition-all hover:shadow-md">
+                            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-slate-800">
+                                <span className="p-2 bg-blue-50 text-blue-500 rounded-lg">🔌</span>
+                                استقرار الشبكات الحيوية
+                            </h3>
+                            <div className="h-[250px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={Object.entries(trends.services).map(([type, logs]: [string, any]) => {
+                                        const avg = logs.length > 0
+                                            ? logs.reduce((acc: number, curr: any) => acc + (curr.available / curr.total), 0) / logs.length
+                                            : 0;
+                                        return {
+                                            name: type === 'electricity' ? 'كهرباء' : 'مياه',
+                                            percentage: Math.round(avg * 100)
+                                        };
+                                    })}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 'bold', fill: '#475569' }} axisLine={false} tickLine={false} />
+                                        <YAxis domain={[0, 100]} tickFormatter={(val) => `${val}%`} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                                        <Tooltip
+                                            cursor={{ fill: '#f8fafc' }}
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        />
+                                        <Bar dataKey="percentage" name="نسبة التشغيل" radius={[8, 8, 8, 8]} barSize={40}>
+                                            {/* We manually map colors based on the data index or name */}
+                                            {Object.keys(trends.services).map((key, index) => (
+                                                <rect key={`cell-${index}`} fill={key === 'electricity' ? '#fbbf24' : '#3b82f6'} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* User Growth Area Chart - Full Width */}
+                        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2 transition-all hover:shadow-md">
+                            <div className="mb-6 flex items-center justify-between">
+                                <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800">
+                                    <span className="p-2 bg-emerald-50 text-emerald-500 rounded-lg">📊</span>
+                                    توسع القاعدة الجماهيرية
+                                </h3>
+                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                                    + {trends.users.reduce((acc, curr) => acc + curr.count, 0)} هذا الأسبوع
+                                </span>
+                            </div>
+                            <div className="h-[200px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={trends.users}>
+                                        <defs>
+                                            <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <XAxis
+                                            dataKey="date"
+                                            tick={{ fontSize: 10, fill: '#64748b' }}
+                                            tickFormatter={(val) => val.split('-').slice(1).reverse().join('/')}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+                                        <YAxis hide />
+                                        <Tooltip
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        />
+                                        <Area
+                                            type="stepAfter"
+                                            dataKey="count"
+                                            name="مستخدمين جدد"
+                                            stroke="#10b981"
+                                            fillOpacity={1}
+                                            fill="url(#colorUsers)"
+                                            strokeWidth={3}
+                                            animationDuration={2000}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                         {/* 2. User Management (Takes 2 Columns) */}
                         <div className="space-y-8 lg:col-span-2">
@@ -198,17 +330,17 @@ export default function Dashboard({
                                                     </td>
                                                     <td className="px-6 py-4 text-sm">
                                                         {user.role ===
-                                                        'admin' ? (
+                                                            'admin' ? (
                                                             <span className="font-bold text-rose-600">
                                                                 Admin
                                                             </span>
                                                         ) : user.role ===
-                                                          'official' ? (
+                                                            'official' ? (
                                                             <span className="font-bold text-blue-600">
                                                                 مسؤول
                                                             </span>
                                                         ) : user.role ===
-                                                          'institution' ? (
+                                                            'institution' ? (
                                                             <span className="font-bold text-purple-600">
                                                                 مؤسسة
                                                             </span>
@@ -222,7 +354,7 @@ export default function Dashboard({
                                                         {user.department_id
                                                             ? `قسم ${user.department_id}`
                                                             : user.profession ||
-                                                              '-'}
+                                                            '-'}
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         {user.is_verified_official ? (
@@ -278,13 +410,14 @@ export default function Dashboard({
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-bold text-slate-400 capitalize">
+                                                        بواسطة: {report.user?.name || 'مواطن'}
+                                                    </span>
                                                     <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
-                                                        {report.department_id
-                                                            ? `موجه للقسم ${report.department_id}`
-                                                            : 'عام'}
+                                                        {report.category || 'عام'}
                                                     </span>
                                                     <span
-                                                        className={`rounded px-2 py-0.5 text-xs font-bold ${report.status === 'received' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}
+                                                        className={`rounded px-2 py-0.5 text-xs font-bold ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}
                                                     >
                                                         {report.status}
                                                     </span>

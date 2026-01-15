@@ -7,36 +7,68 @@ use App\Models\Report;
 // use App\Models\Project;
 use App\Models\ServiceAlert;
 use App\Models\User;
+use App\Models\ServiceLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Compute Bottleneck Stats (Temporarily disabled or mapped to Initiatives)
-        // $stalledProjects = Project::whereNotNull('bottleneck_reason')->get(); 
-        // $bottlenecksByReason = $stalledProjects->groupBy('bottleneck_reason')->map->count();
+        // Fetch Report Trends (Last 7 Days)
+        $reportTrends = Report::select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('count(*) as count')
+            )
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
-        // Calculate Average "Patience Index" (Days Stalled)
-        // $avgStallDays = $stalledProjects->avg(function($p) {
-        //      return $p->bottleneck_date ? now()->diffInDays($p->bottleneck_date) : 0;
-        // });
+        // Fetch User Growth (Last 7 Days)
+        $userTrends = User::select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('count(*) as count')
+            )
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Fetch Service Availability (Last 7 Days Average)
+        $serviceTrends = ServiceLog::select(
+                DB::raw('DATE(log_date) as date'),
+                'service_type',
+                DB::raw('count(*) as total'),
+                DB::raw('sum(case when status = "available" then 1 else 0 end) as available')
+            )
+            ->where('log_date', '>=', now()->subDays(7))
+            ->groupBy('date', 'service_type')
+            ->orderBy('date')
+            ->get()
+            ->groupBy('service_type');
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'reports_pending' => Report::where('status', 'received')->count(),
-                'projects_ongoing' => \App\Models\Initiative::where('status', 'active')->count(), // Use Initiative
-                'projects_stalled' => 0, // $stalledProjects->count(), 
-                'avg_stall_days' => 0, // round($avgStallDays),
+                'projects_ongoing' => \App\Models\Initiative::where('status', 'active')->count(),
+                'projects_stalled' => 0,
+                'avg_stall_days' => 0,
                 'citizens_count' => User::count(),
                 'active_alerts' => ServiceAlert::active()->count(),
             ],
+            'trends' => [
+                'reports' => $reportTrends,
+                'users' => $userTrends,
+                'services' => $serviceTrends,
+            ],
             'bottlenecks' => [
-                'summary' => [], // $bottlenecksByReason,
+                'summary' => [],
                 'list' => []
             ],
-            'recent_reports' => Report::latest()->take(5)->get(),
+            'recent_reports' => Report::latest()->take(5)->with('user')->get(),
             'active_alerts' => ServiceAlert::active()->latest()->get(),
             'infrastructure_points' => \App\Models\InfrastructurePoint::orderBy('type')->orderBy('name')->get(),
             'users' => User::latest()->take(10)->get(),
