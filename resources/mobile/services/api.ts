@@ -45,7 +45,6 @@ api.interceptors.response.use(
 
         if (error.code === 'ECONNABORTED') {
             console.error('⏱️ Request timeout - Server took too long');
-            alert('⏱️ انتهت مهلة الطلب. السيرفر بطيء جداً.');
         } else if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
             console.error('🌐 Network Error - Cannot reach server');
             console.error(`Trying to connect to: ${BASE_URL}`);
