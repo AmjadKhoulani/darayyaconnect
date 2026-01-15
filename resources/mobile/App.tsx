@@ -183,7 +183,7 @@ function AppContent() {
             </Routes>
 
             {/* Only show BottomNav on main tab pages */}
-            {['/', '/news', '/discussions', '/notifications', '/profile'].includes(location.pathname) && <BottomNav />}
+            {['/', '/news', '/discussions', '/notifications', '/profile', '/skills', '/initiatives'].includes(location.pathname) && <BottomNav />}
 
             <Toast />
             <OfflineIndicator />
