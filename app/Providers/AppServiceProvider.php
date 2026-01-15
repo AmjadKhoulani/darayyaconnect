@@ -20,7 +20,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \App\Models\ServiceLog::observe(\App\Observers\ServiceLogObserver::class);
+        try {
+            if (class_exists(\App\Models\ServiceLog::class) && class_exists(\App\Observers\ServiceLogObserver::class)) {
+                \App\Models\ServiceLog::observe(\App\Observers\ServiceLogObserver::class);
+            }
+        } catch (\Throwable $e) {
+            // Ignore during boot if class not found
+        }
         Vite::prefetch(concurrency: 3);
     }
 }

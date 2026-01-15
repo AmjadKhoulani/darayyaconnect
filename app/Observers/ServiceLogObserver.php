@@ -22,7 +22,12 @@ class ServiceLogObserver
                 default => 'municipality',
             };
 
-            $department = Department::where('slug', $slug)->first();
+            try {
+                $department = Department::where('slug', $slug)->first();
+            } catch (\Throwable $e) {
+                // Ignore missing table during migration or boot
+                $department = null;
+            }
             
             if ($department) {
                 $serviceLog->department_id = $department->id;
