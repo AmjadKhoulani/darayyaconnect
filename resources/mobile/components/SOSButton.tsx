@@ -23,7 +23,7 @@ export default function SOSButton() {
             setStatus('sending');
 
             // 2. Send to API
-            await api.post('/api/sos/trigger', {
+            await api.post('/sos/trigger', {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
                 emergency_type: type,
