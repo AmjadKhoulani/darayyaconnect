@@ -37,8 +37,9 @@ interface Props {
 
 export default function Dashboard({
     auth,
+    auth,
     stats,
-    bottlenecks,
+    bottlenecks = { summary: [], list: [] },
     recent_reports,
     active_alerts,
     infrastructure_points,
