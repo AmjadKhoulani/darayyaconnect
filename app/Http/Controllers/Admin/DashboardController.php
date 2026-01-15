@@ -67,15 +67,28 @@ class DashboardController extends Controller
              \Log::error('Dashboard Service Trends Error: ' . $e->getMessage());
         }
 
+        // Helper to safely fetch data or return default
+        $safeFetch = function($callback, $default = []) {
+            try {
+                return $callback();
+            } catch (\Exception $e) {
+                \Log::error('Dashboard Fetch Error: ' . $e->getMessage());
+                return $default;
+            }
+        };
+
+        // Stats
+        $stats = [
+            'reports_pending' => $safeFetch(fn() => Report::where('status', 'received')->count(), 0),
+            'projects_ongoing' => $safeFetch(fn() => \App\Models\Initiative::where('status', 'active')->count(), 0),
+            'projects_stalled' => 0,
+            'avg_stall_days' => 0,
+            'citizens_count' => $safeFetch(fn() => User::count(), 0),
+            'active_alerts' => $safeFetch(fn() => ServiceAlert::active()->count(), 0),
+        ];
+
         return Inertia::render('Admin/Dashboard', [
-            'stats' => [
-                'reports_pending' => Report::where('status', 'received')->count(),
-                'projects_ongoing' => \App\Models\Initiative::where('status', 'active')->count(),
-                'projects_stalled' => 0,
-                'avg_stall_days' => 0,
-                'citizens_count' => User::count(),
-                'active_alerts' => ServiceAlert::active()->count(),
-            ],
+            'stats' => $stats,
             'trends' => [
                 'reports' => $reportTrends,
                 'users' => $userTrends,
@@ -85,13 +98,13 @@ class DashboardController extends Controller
                 'summary' => [],
                 'list' => []
             ],
-            'recent_reports' => Report::latest()->take(5)->with('user')->get(),
-            'active_alerts' => ServiceAlert::active()->latest()->get(),
-            'active_sos_alerts' => \App\Models\SosAlert::where('status', 'active')->with('user')->latest()->get(),
-            'infrastructure_points' => \App\Models\InfrastructurePoint::orderBy('type')->orderBy('name')->get(),
-            'users' => User::latest()->take(10)->get(),
-            'services' => \App\Models\Service::all(),
-            'departments' => \App\Models\Department::withCount('users')->get(),
+            'recent_reports' => $safeFetch(fn() => Report::latest()->take(5)->with('user')->get(), []),
+            'active_alerts' => $safeFetch(fn() => ServiceAlert::active()->latest()->get(), []),
+            'active_sos_alerts' => $safeFetch(fn() => \App\Models\SosAlert::where('status', 'active')->with('user')->latest()->get(), []),
+            'infrastructure_points' => $safeFetch(fn() => \App\Models\InfrastructurePoint::orderBy('type')->orderBy('name')->get(), []),
+            'users' => $safeFetch(fn() => User::latest()->take(10)->get(), []),
+            'services' => $safeFetch(fn() => \App\Models\Service::all(), []),
+            'departments' => $safeFetch(fn() => \App\Models\Department::withCount('users')->get(), []),
         ]);
     }
 
