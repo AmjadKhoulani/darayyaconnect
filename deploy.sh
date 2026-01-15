@@ -8,6 +8,8 @@ cd /home/darayya/domains/darayyaconnect.com/public_html
 
 # Pull the latest changes from the main branch
 echo "📥 Pulling latest changes..."
+git reset --hard HEAD
+git clean -fd
 git pull origin main
 
 # Install PHP dependencies

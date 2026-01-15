@@ -19,4 +19,6 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd /home/darayya/domains/darayyaconnect.com/public_html
+            git reset --hard HEAD
+            git clean -fd
             bash deploy.sh
