@@ -179,9 +179,12 @@ function AppContent() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/profile/edit" element={<EditProfile />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/about" element={<About />} />
             </Routes>
 
-            <BottomNav />
+            {/* Only show BottomNav on main tab pages */}
+            {['/', '/news', '/discussions', '/notifications', '/profile'].includes(location.pathname) && <BottomNav />}
+
             <Toast />
             <OfflineIndicator />
         </div>
