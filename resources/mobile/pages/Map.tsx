@@ -351,7 +351,8 @@ export default function Map() {
             });
         });
 
-        map.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
+        // Removed default NavigationControl as per user request (buttons behind bar) and mobile preference (pinch zoom).
+        // map.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
     }, []);
 
     // Handle Active Layers Changes
@@ -535,7 +536,7 @@ export default function Map() {
 
 
                 {/* FABs - Adjusted Bottom Position for Nav Bar */}
-                <div className="absolute bottom-32 left-4 z-10 flex flex-col gap-3 pointer-events-auto">
+                <div className="absolute bottom-48 left-4 z-10 flex flex-col gap-3 pointer-events-auto pb-safe">
                     <button
                         onClick={() => setShowLayersMenu(true)}
                         className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border ${showLayersMenu ? 'bg-emerald-600 dark:bg-emerald-500 text-white border-emerald-700 dark:border-emerald-400' : 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border-slate-100 dark:border-slate-700'}`}
@@ -567,7 +568,7 @@ export default function Map() {
                             </button>
                         </div>
 
-                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar overscroll-contain pb-10" onTouchStart={(e) => e.stopPropagation()}>
+                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar overscroll-contain pb-10 touch-pan-y" onTouchStart={(e) => e.stopPropagation()}>
                             <div className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                                 <label className="flex items-center gap-3 cursor-pointer">
                                     <div className="relative">
