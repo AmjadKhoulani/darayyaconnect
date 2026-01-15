@@ -49,7 +49,7 @@ api.interceptors.response.use(
         } else if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
             console.error('🌐 Network Error - Cannot reach server');
             console.error(`Trying to connect to: ${BASE_URL}`);
-            alert(`🌐 فشل الاتصال بالسيرفر.\n\nالسيرفر: ${BASE_URL}\n\nتأكد من:\n1. أنك متصل بنفس WiFi (${getWiFiName()})\n2. السيرفر شغال\n3. الـ firewall مش بلوك الاتصال`);
+            // Alert removed to avoid annoyance in production
         } else if (error.response) {
             console.error(`❌ Response error: ${error.response.status}`, error.response.data);
             if (error.response.status === 404) {
