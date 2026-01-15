@@ -4,20 +4,27 @@ import api from '../services/api';
 export default function ServicesStatus() {
     const [services, setServices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [debugError, setDebugError] = useState<string>('');
 
     useEffect(() => {
         const fetchStatus = async () => {
             try {
                 const response = await api.get('/infrastructure/status-summary');
-                setServices(response.data);
-            } catch (error) {
+                console.log('Services API Response:', response.data);
+
+                if (Array.isArray(response.data)) {
+                    setServices(response.data);
+                } else {
+                    throw new Error('Invalid data format received');
+                }
+            } catch (error: any) {
                 console.error("Failed to fetch services status", error);
-                // Fallback Mock data in case of error
+                setDebugError(error.message || 'Unknown Error');
+
+                // Fallback Mock data
                 setServices([
-                    { id: 'water', name: 'المياه', status: 'stable', icon: '💧', label: 'يعمل بشكل طبيعي' },
-                    { id: 'electricity', name: 'الكهرباء', status: 'stable', icon: '⚡', label: 'يعمل بشكل طبيعي' },
-                    { id: 'internet', name: 'الإنترنت', status: 'down', icon: '🌐', label: 'توقف مؤقت' },
-                    { id: 'phone', name: 'الاتصالات', status: 'stable', icon: '📱', label: 'يعمل بشكل طبيعي' },
+                    { id: 'water', name: 'المياه', status: 'stable', icon: '💧', label: 'تجريبي (فشل الاتصال)' },
+                    { id: 'electricity', name: 'الكهرباء', status: 'stable', icon: '⚡', label: 'تجريبي (فشل الاتصال)' },
                 ]);
             } finally {
                 setLoading(false);
@@ -64,6 +71,13 @@ export default function ServicesStatus() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-3">
+                        {services.length === 0 && (
+                            <div className="text-center p-8 text-slate-400">
+                                <p>لا توجد بيانات للعرض</p>
+                                {debugError && <p className="text-xs text-red-400 mt-2 ltr">{debugError}</p>}
+                            </div>
+                        )}
+
                         {services.map(service => (
                             <div key={service.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-4 shadow-premium flex items-center justify-between group hover:border-blue-200 dark:hover:border-blue-700 transition-all">
                                 <div className="flex items-center gap-4">

@@ -98,7 +98,11 @@ Route::get('/dashboard/discussions', [App\Http\Controllers\Api\DashboardControll
 
 // Initiatives
 Route::get('/portal/projects', [App\Http\Controllers\Api\InitiativeController::class, 'index']);
-Route::middleware('auth:sanctum')->post('/portal/projects/{id}/vote', [App\Http\Controllers\Api\InitiativeController::class, 'vote']);
+Route::get('/portal/projects/{id}', [App\Http\Controllers\Api\InitiativeController::class, 'show']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/portal/projects', [App\Http\Controllers\Api\InitiativeController::class, 'store']);
+    Route::post('/portal/projects/{id}/vote', [App\Http\Controllers\Api\InitiativeController::class, 'vote']);
+});
 
 // Lost & Found
 Route::get('/lost-found', [App\Http\Controllers\Api\LostFoundController::class, 'index']);
@@ -106,6 +110,10 @@ Route::get('/lost-found/stats', [App\Http\Controllers\Api\LostFoundController::c
 Route::get('/lost-found/{id}', [App\Http\Controllers\Api\LostFoundController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    // --- Chat System ---
+    Route::get('/chat/{channel}', [App\Http\Controllers\Api\ChatController::class, 'index']);
+    Route::post('/chat/{channel}', [App\Http\Controllers\Api\ChatController::class, 'store']);
+
     Route::post('/lost-found', [App\Http\Controllers\Api\LostFoundController::class, 'store']);
     Route::put('/lost-found/{id}', [App\Http\Controllers\Api\LostFoundController::class, 'update']);
     Route::post('/lost-found/{id}/resolve', [App\Http\Controllers\Api\LostFoundController::class, 'resolve']);
@@ -130,6 +138,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Book Exchange
 Route::get('/books', [App\Http\Controllers\Api\BookController::class, 'index']);
+
+// --- Dynamic Directory & Service Status ---
+Route::get('/directory', [App\Http\Controllers\Api\DirectoryController::class, 'index']);
+Route::get('/service-states', [App\Http\Controllers\Api\ServiceStateController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Directory Management
+    Route::post('/directory', [App\Http\Controllers\Api\DirectoryController::class, 'store']);
+    Route::put('/directory/{id}', [App\Http\Controllers\Api\DirectoryController::class, 'update']);
+    Route::delete('/directory/{id}', [App\Http\Controllers\Api\DirectoryController::class, 'destroy']);
+
+    // Service Status Management
+    Route::put('/service-states/{key}', [App\Http\Controllers\Api\ServiceStateController::class, 'update']);
+});
 Route::get('/books/{id}', [App\Http\Controllers\Api\BookController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {

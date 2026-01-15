@@ -109,11 +109,22 @@ export default function SetupLocation() {
             // CHECK: The plan said "Backend: updateLocation: Ensure it handles the initial setup scenario."
             // So I will need to update UserController later.
 
-            await api.post('/api/user/location', {
+            await api.post('/user/location', {
                 latitude: formData.latitude,
                 longitude: formData.longitude,
                 is_resident: formData.is_resident
             });
+
+            // Update local user state immediately to pass the Auth Guard
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                user.latitude = formData.latitude;
+                user.longitude = formData.longitude;
+                user.is_resident = formData.is_resident;
+                user.location_verified_at = new Date().toISOString(); // Mock timestamp to pass guard
+                localStorage.setItem('user', JSON.stringify(user));
+            }
 
             navigate('/');
         } catch (err: any) {
@@ -129,11 +140,20 @@ export default function SetupLocation() {
         setLoading(true);
         try {
             // Submit with null location and not resident
-            await api.post('/api/user/location', {
+            await api.post('/user/location', {
                 latitude: null,
                 longitude: null,
                 is_resident: false
             });
+
+            // Update local user state immediately to pass the Auth Guard
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                user.location_verified_at = new Date().toISOString(); // Mock timestamp to pass guard
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+
             navigate('/');
         } catch (err: any) {
             console.error(err);

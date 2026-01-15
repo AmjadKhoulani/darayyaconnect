@@ -9,6 +9,9 @@ const config: CapacitorConfig = {
     androidScheme: 'http'
   },
   plugins: {
+    Keyboard: {
+      resize: 'body',
+    },
     Geolocation: {
       // Request permissions if needed
     }

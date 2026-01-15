@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Upload, MapPin, Calendar, AlertCircle } from 'lucide-react';
 import api from '../services/api';
@@ -26,6 +26,38 @@ export default function AddLostFound() {
         date: new Date().toISOString().split('T')[0],
         contact_info: ''
     });
+    const [isDirty, setIsDirty] = useState(false);
+
+    // Track changes
+    useEffect(() => {
+        if (formData.title || formData.description || formData.location) {
+            setIsDirty(true);
+        } else {
+            setIsDirty(false);
+        }
+    }, [formData]);
+
+    // Browser close/refresh confirmation
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    const handleBack = () => {
+        if (isDirty) {
+            if (window.confirm('هل أنت متأكد من الخروج؟ ستفقد البيانات المدخلة.')) {
+                navigate(-1);
+            }
+        } else {
+            navigate(-1);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,6 +70,7 @@ export default function AddLostFound() {
         setLoading(true);
         try {
             await api.post('/lost-found', formData);
+            setIsDirty(false);
             alert('تم إضافة الإعلان بنجاح!');
             navigate('/lost-found');
         } catch (err: any) {
@@ -53,8 +86,8 @@ export default function AddLostFound() {
             {/* Header */}
             <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 px-4 py-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                    <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-slate-800 dark:text-slate-100 transition-colors">
-                        <ArrowRight size={20} className="rotate-180" />
+                    <button onClick={handleBack} className="w-10 h-10 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-slate-800 dark:text-slate-100 transition-colors">
+                        <ArrowRight size={20} className="" />
                     </button>
                     <div>
                         <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">إضافة إعلان</h1>

@@ -13,14 +13,39 @@ export default function Profile() {
     const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
+    const [address, setAddress] = useState<string>('');
+
+    const fetchAddress = async (lat: number, lon: number) => {
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=ar`);
+            const data = await res.json();
+            if (data.display_name) {
+                // Try to construct a shorter address
+                const addr = data.address;
+                const shortAddr = [
+                    addr.road || addr.pedestrian || addr.suburb,
+                    addr.neighbourhood || addr.quarter,
+                    addr.city || addr.town || addr.village
+                ].filter(Boolean).join('، ');
+
+                setAddress(shortAddr || data.display_name);
+            }
+        } catch (e) {
+            console.error('Failed to resolve address', e);
+            setAddress('تعذر تحديد العنوان');
+        }
+    };
+
     const fetchUser = useCallback(async () => {
         try {
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
-                setUser(JSON.parse(storedUser));
-                // In a real app, you would fetch fresh data here:
-                // const res = await api.get('/user');
-                // setUser(res.data);
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+
+                if (parsedUser.latitude && parsedUser.longitude) {
+                    fetchAddress(parsedUser.latitude, parsedUser.longitude);
+                }
             }
         } catch (err) {
             console.error(err);
@@ -113,8 +138,10 @@ export default function Profile() {
                                         <MapPin size={16} />
                                     </div>
                                     <div className="text-right overflow-hidden">
-                                        <p className="text-[10px] text-slate-400 font-bold mb-0.5">الحي</p>
-                                        <p className="text-xs font-bold text-slate-700 truncate">{user.neighborhood || 'غير محدد'}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold mb-0.5">العنوان</p>
+                                        <p className="text-xs font-bold text-slate-700 truncate" dir="auto">
+                                            {address || user.neighborhood || (user.is_resident ? 'جاري التحديد...' : 'غير مقيم')}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

@@ -11,7 +11,39 @@ export default function AddDiscussion() {
     const [selectedCategory, setSelectedCategory] = useState('general');
     const [submitting, setSubmitting] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [isDirty, setIsDirty] = useState(false);
     const navigate = useNavigate();
+
+    // Track changes
+    useEffect(() => {
+        if (title || content || image) {
+            setIsDirty(true);
+        } else {
+            setIsDirty(false);
+        }
+    }, [title, content, image]);
+
+    // Browser close/refresh confirmation
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    const handleBack = () => {
+        if (isDirty) {
+            if (window.confirm('هل أنت متأكد من الخروج؟ ستفقد البيانات المدخلة.')) {
+                navigate(-1);
+            }
+        } else {
+            navigate(-1);
+        }
+    };
 
     const categories = [
         { id: 'general', name: 'عام', icon: '💬', color: 'slate' },
@@ -53,6 +85,7 @@ export default function AddDiscussion() {
             await api.post('/portal/discussions', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+            setIsDirty(false);
             showToast('تم نشر الموضوع بنجاح 🎉', 'success');
             navigate('/discussions');
         } catch (err) {
@@ -69,10 +102,10 @@ export default function AddDiscussion() {
             <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 px-4 py-4 shadow-sm transition-colors duration-300">
                 <div className="flex items-center gap-4 px-1">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={handleBack}
                         className="w-12 h-12 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-800 active:scale-90 shadow-sm"
                     >
-                        <ArrowRight size={22} className="rotate-180" />
+                        <ArrowRight size={22} className="" />
                     </button>
                     <div>
                         <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">موضوع جديد ✨</h1>

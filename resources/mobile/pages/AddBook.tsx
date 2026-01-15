@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import api from '../services/api';
@@ -25,6 +25,57 @@ export default function AddBook() {
         language: 'arabic',
         condition: 'good'
     });
+    const [image, setImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isDirty, setIsDirty] = useState(false);
+
+    // Track changes
+    useEffect(() => {
+        if (book.title || book.author || book.description || image) {
+            setIsDirty(true);
+        } else {
+            setIsDirty(false);
+        }
+    }, [book, image]);
+
+    // Browser close/refresh confirmation
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    const handleBack = () => {
+        if (isDirty) {
+            if (window.confirm('هل أنت متأكد من الخروج؟ ستفقد البيانات المدخلة.')) {
+                navigate(-1);
+            }
+        } else {
+            navigate(-1);
+        }
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setImage(null);
+        setPreviewUrl(null);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,11 +87,30 @@ export default function AddBook() {
 
         setLoading(true);
         try {
-            await api.post('/books', book);
+            const formData = new FormData();
+            formData.append('title', book.title);
+            formData.append('author', book.author);
+            formData.append('description', book.description || '');
+            formData.append('category', book.category);
+            formData.append('language', book.language);
+            formData.append('condition', book.condition);
+
+            if (image) {
+                formData.append('cover_image', image);
+            }
+
+            await api.post('/books', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            setIsDirty(false);
             alert('تم إضافة الكتاب بنجاح!');
-            navigate('/books/my-library');
+            navigate('/books');
         } catch (err: any) {
-            alert(err.response?.data?.message || 'حدث خطأ');
+            console.error('Add book error:', err);
+            alert(err.response?.data?.message || 'حدث خطأ أثناء إضافة الكتاب');
         } finally {
             setLoading(false);
         }
@@ -50,8 +120,8 @@ export default function AddBook() {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">
             <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 px-4 py-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                    <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-slate-800 dark:text-slate-100 transition-colors">
-                        <ArrowRight size={20} className="rotate-180" />
+                    <button onClick={handleBack} className="w-10 h-10 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-slate-800 dark:text-slate-100 transition-colors">
+                        <ArrowRight size={20} className="" />
                     </button>
                     <div>
                         <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">إضافة كتاب</h1>
@@ -154,6 +224,48 @@ export default function AddBook() {
                             </button>
                         ))}
                     </div>
+                </div>
+
+                {/* Image Selection */}
+                <div className="space-y-3">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 px-1">صورة غلاف الكتاب (اختياري)</label>
+                    <input
+                        type="file"
+                        id="book-image-upload"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                    />
+
+                    {previewUrl ? (
+                        <div className="relative group">
+                            <img
+                                src={previewUrl}
+                                alt="Book Preview"
+                                className="w-full h-48 object-cover rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md"
+                            />
+                            <button
+                                type="button"
+                                onClick={removeImage}
+                                className="absolute top-3 right-3 w-10 h-10 bg-black/60 backdrop-blur-md text-white rounded-xl flex items-center justify-center hover:bg-black/80 transition-all border border-white/20"
+                            >
+                                <ArrowRight className="rotate-45" size={20} />
+                            </button>
+                        </div>
+                    ) : (
+                        <label
+                            htmlFor="book-image-upload"
+                            className="w-full py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl text-slate-400 dark:text-slate-600 hover:text-teal-600 dark:hover:text-teal-400 hover:border-teal-200 dark:hover:border-teal-700 transition-all flex flex-col items-center gap-3 bg-white dark:bg-slate-800/50 cursor-pointer"
+                        >
+                            <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                <BookOpen size={32} className="text-teal-500" />
+                            </div>
+                            <div className="text-center">
+                                <span className="text-xs font-bold block mb-1">تصوير الكتاب أو اختيار صورة</span>
+                                <span className="text-[10px] opacity-60">تساعد الصورة الآخرين في التعرف على الكتاب</span>
+                            </div>
+                        </label>
+                    )}
                 </div>
 
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-2xl p-4">

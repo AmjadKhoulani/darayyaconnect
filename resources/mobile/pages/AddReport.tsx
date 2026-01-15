@@ -10,10 +10,61 @@ export default function AddReport() {
     const [description, setDescription] = useState('');
     const [type, setType] = useState('infrastructure');
     const [location, setLocation] = useState<any>(null);
+    const [image, setImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [locLoading, setLocLoading] = useState(true);
     const [locError, setLocError] = useState<string | null>(null);
+    const [isDirty, setIsDirty] = useState(false);
     const navigate = useNavigate();
+
+    // Track changes
+    useEffect(() => {
+        if (title || description || image) {
+            setIsDirty(true);
+        } else {
+            setIsDirty(false);
+        }
+    }, [title, description, image]);
+
+    // Browser close/refresh confirmation
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    const handleBack = () => {
+        if (isDirty) {
+            if (window.confirm('هل أنت متأكد من الخروج؟ ستفقد البيانات المدخلة.')) {
+                navigate(-1);
+            }
+        } else {
+            navigate(-1);
+        }
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setImage(null);
+        setPreviewUrl(null);
+    };
 
     const reportTypes = [
         { id: 'infrastructure', label: 'بنية تحتية', icon: <Construction size={24} />, color: 'bg-orange-50 text-orange-600 border-orange-100' },
@@ -54,12 +105,22 @@ export default function AddReport() {
         setLoading(true);
 
         try {
-            await api.post('/infrastructure/reports', {
-                title,
-                description,
-                type,
-                latitude: location?.lat,
-                longitude: location?.lng,
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('type', type);
+            if (location) {
+                formData.append('latitude', location.lat.toString());
+                formData.append('longitude', location.lng.toString());
+            }
+            if (image) {
+                formData.append('image', image);
+            }
+
+            await api.post('/infrastructure/reports', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
             });
 
             await NotificationService.schedule(
@@ -67,9 +128,11 @@ export default function AddReport() {
                 'شكراً لمساهمتك في تحسين داريا. سنقوم بمراجعة البلاغ قريباً.'
             );
 
+            setIsDirty(false); // Reset before navigating
             navigate('/');
         } catch (err: any) {
-            alert('حدث خطأ أثناء إرسال البلاغ.');
+            console.error('Report submission error:', err);
+            alert('حدث خطأ أثناء إرسال البلاغ. يرجى المحاولة مرة أخرى.');
         } finally {
             setLoading(false);
         }
@@ -84,8 +147,8 @@ export default function AddReport() {
 
                 <header className="relative z-10 flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => navigate(-1)} className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/20 hover:bg-white/20 transition-all">
-                            <span className="text-xl transform rotate-180">➜</span>
+                        <button onClick={handleBack} className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/20 hover:bg-white/20 transition-all">
+                            <ArrowRight size={20} />
                         </button>
                         <div>
                             <h1 className="text-2xl font-black text-white">إضافة بلاغ</h1>
@@ -173,11 +236,49 @@ export default function AddReport() {
                                 />
                             </div>
 
-                            {/* Photo Placeholder (Visual Only) */}
-                            <button type="button" className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 transition-colors flex flex-col items-center gap-2">
-                                <span className="text-slate-400 dark:text-slate-600"><Camera size={24} /></span>
-                                <span className="text-xs font-bold">إرفاق صورة (اختياري)</span>
-                            </button>
+                            {/* Photo Selection */}
+                            <div className="space-y-3">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 px-1">صورة البلاغ</label>
+
+                                <input
+                                    type="file"
+                                    id="image-upload"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageChange}
+                                />
+
+                                {previewUrl ? (
+                                    <div className="relative group">
+                                        <img
+                                            src={previewUrl}
+                                            alt="Preview"
+                                            className="w-full h-48 object-cover rounded-2xl border border-slate-200 dark:border-slate-700 shadow-premium"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={removeImage}
+                                            className="absolute top-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-md text-white rounded-xl flex items-center justify-center hover:bg-black/70 transition-all border border-white/20"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                        <div className="absolute inset-0 border-2 border-emerald-500/30 rounded-2xl pointer-events-none"></div>
+                                    </div>
+                                ) : (
+                                    <label
+                                        htmlFor="image-upload"
+                                        className="w-full py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl text-slate-400 dark:text-slate-600 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-700 transition-all flex flex-col items-center gap-3 bg-slate-50/50 dark:bg-slate-900/30 cursor-pointer"
+                                    >
+                                        <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-card border border-slate-100 dark:border-slate-700">
+                                            <Camera size={32} />
+                                        </div>
+                                        <div className="text-center">
+                                            <span className="text-xs font-black block mb-1">إرفاق صورة توضيحية</span>
+                                            <span className="text-[10px] opacity-60">تساعدنا الصور في فهم المشكلة بشكل أسرع</span>
+                                        </div>
+                                    </label>
+                                )}
+                            </div>
                         </div>
                     </div>
 

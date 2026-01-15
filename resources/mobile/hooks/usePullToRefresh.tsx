@@ -1,55 +1,97 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 export function usePullToRefresh(onRefresh: () => Promise<void>) {
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [pullStartY, setPullStartY] = useState(0);
-    const [pullMoveY, setPullMoveY] = useState(0);
+    const pullStartY = useRef(0);
+    const pullMoveY = useRef(0);
     const containerRef = useRef<HTMLDivElement>(null);
+    const indicatorRef = useRef<HTMLDivElement>(null);
 
     const MIN_DIST_TO_REFRESH = 80;
 
+    const updatePosition = (y: number) => {
+        if (containerRef.current) {
+            containerRef.current.style.transform = `translateY(${y}px)`;
+            containerRef.current.style.transition = 'none';
+        }
+        if (indicatorRef.current) {
+            indicatorRef.current.style.opacity = y > 20 ? '1' : '0';
+            const icon = indicatorRef.current.querySelector('.pull-icon');
+            if (icon) {
+                (icon as HTMLElement).style.transform = `rotate(${Math.min(y * 2, 180)}deg)`;
+            }
+        }
+    };
+
     const handleTouchStart = (e: React.TouchEvent) => {
-        const scrollTop = window.scrollY;
-        if (scrollTop === 0) {
-            setPullStartY(e.touches[0].clientY);
+        if (window.scrollY === 0) {
+            pullStartY.current = e.touches[0].clientY;
         }
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
-        if (pullStartY === 0) return;
+        if (pullStartY.current === 0) return;
 
         const touchY = e.touches[0].clientY;
-        const diff = touchY - pullStartY;
+        const diff = touchY - pullStartY.current;
 
-        // Only allow pulling if we are at the top and pulling down
         if (diff > 0 && window.scrollY === 0) {
-            // Add resistance
-            setPullMoveY(Math.min(diff * 0.5, 120));
+            // Apply resistance
+            const moveY = Math.min(diff * 0.4, 100);
+            pullMoveY.current = moveY;
+
+            // Direct DOM update for 60fps performance
+            updatePosition(moveY);
+
+            // Prevent native scroll/overscroll during pull
+            if (e.cancelable) e.preventDefault();
         }
     };
 
     const handleTouchEnd = async () => {
-        if (pullMoveY > MIN_DIST_TO_REFRESH) {
+        if (pullStartY.current === 0) return;
+
+        const finalY = pullMoveY.current;
+
+        if (finalY > MIN_DIST_TO_REFRESH) {
             setIsRefreshing(true);
-            setPullMoveY(60); // Keep it visible while refreshing
+
+            // Set refresh position with transition
+            if (containerRef.current) {
+                containerRef.current.style.transition = 'transform 0.3s cubic-bezier(0.2, 0, 0, 1)';
+                containerRef.current.style.transform = 'translateY(60px)';
+            }
+
             try {
                 await onRefresh();
             } finally {
+                // Reset with transition
+                if (containerRef.current) {
+                    containerRef.current.style.transition = 'transform 0.4s cubic-bezier(0.2, 0, 0, 1)';
+                    containerRef.current.style.transform = 'translateY(0px)';
+                }
+
                 setTimeout(() => {
                     setIsRefreshing(false);
-                    setPullMoveY(0);
-                    setPullStartY(0);
-                }, 500);
+                    pullMoveY.current = 0;
+                    pullStartY.current = 0;
+                }, 400);
             }
         } else {
-            setPullMoveY(0);
-            setPullStartY(0);
+            // Cancel with transition
+            if (containerRef.current) {
+                containerRef.current.style.transition = 'transform 0.3s cubic-bezier(0.2, 0, 0, 1)';
+                containerRef.current.style.transform = 'translateY(0px)';
+            }
+            pullMoveY.current = 0;
+            pullStartY.current = 0;
         }
     };
 
     return {
         isRefreshing,
-        pullMoveY,
+        containerRef,
+        indicatorRef,
         handlers: {
             onTouchStart: handleTouchStart,
             onTouchMove: handleTouchMove,
@@ -58,15 +100,28 @@ export function usePullToRefresh(onRefresh: () => Promise<void>) {
     };
 }
 
-export function PullToRefreshContainer({ children, isRefreshing, pullMoveY }: { children: React.ReactNode, isRefreshing: boolean, pullMoveY: number }) {
+export function PullToRefreshContainer({
+    children,
+    isRefreshing,
+    containerRef,
+    indicatorRef
+}: {
+    children: React.ReactNode,
+    isRefreshing: boolean,
+    containerRef: React.RefObject<HTMLDivElement>,
+    indicatorRef: React.RefObject<HTMLDivElement>
+}) {
     return (
-        <div style={{ transform: `translateY(${pullMoveY}px)`, transition: isRefreshing ? 'transform 0.2s' : 'transform 0.1s' }}>
+        <div ref={containerRef} className="will-change-transform">
             <div
-                className="absolute top-0 left-0 right-0 flex justify-center -mt-10"
-                style={{ opacity: pullMoveY > 20 ? 1 : 0 }}
+                ref={indicatorRef}
+                className="absolute top-0 left-0 right-0 flex justify-center -mt-12 pointer-events-none transition-opacity duration-200"
+                style={{ opacity: 0 }}
             >
-                <div className={`w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-emerald-600 ${isRefreshing ? 'animate-spin' : ''}`}>
-                    {isRefreshing ? '⏳' : '⬇️'}
+                <div className={`w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-premium flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-slate-100 dark:border-slate-700`}>
+                    <div className={`pull-icon text-xl ${isRefreshing ? 'animate-spin' : 'transition-transform'}`}>
+                        {isRefreshing ? '⌛' : '↓'}
+                    </div>
                 </div>
             </div>
             {children}

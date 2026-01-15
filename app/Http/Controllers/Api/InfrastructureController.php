@@ -5,10 +5,60 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\InfrastructureLine;
 use App\Models\InfrastructureNode;
+use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InfrastructureController extends Controller
 {
+    public function storeReport(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'type' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'image' => 'nullable|image|max:10240', // 10MB max
+        ]);
+
+        $reportData = [
+            'user_id' => $request->user()?->id,
+            'category' => $this->mapTypeToCategory($validated['type']),
+            'description' => $validated['title'] . "\n\n" . $validated['description'],
+            'status' => 'pending',
+            'severity' => 2, // Default middle severity
+        ];
+
+        if ($validated['latitude'] && $validated['longitude']) {
+            $point = "POINT({$validated['longitude']} {$validated['latitude']})";
+            $reportData['coordinates'] = DB::raw("ST_GeomFromText('$point')");
+        }
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('reports', 'public');
+            $reportData['images'] = json_encode([asset('storage/' . $path)]);
+        }
+
+        $report = Report::create($reportData);
+
+        return response()->json([
+            'message' => 'تم استلام البلاغ بنجاح',
+            'id' => $report->id
+        ], 201);
+    }
+
+    private function mapTypeToCategory($type)
+    {
+        $map = [
+            'infrastructure' => 'sanitation', // generic mapping
+            'trash' => 'sanitation',
+            'lighting' => 'electricity',
+            'other' => 'safety'
+        ];
+        return $map[$type] ?? 'safety';
+    }
+
     public function index()
     {
         return response()->json([

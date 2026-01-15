@@ -2,25 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Report extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
-        'type',
+        'category',
+        'severity',
         'description',
-        'infrastructure_point_id',
-        'latitude',
-        'longitude',
-        'photo_url',
+        'location_id',
+        'coordinates',
         'status',
-        'is_anonymous',
+        'images',
+        'user_id',
         'department_id',
-        'department_assigned',
-        'user_id'
+        'department_assigned'
     ];
 
     public function infrastructurePoint()

@@ -70,6 +70,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Infrastructure Controls (For Admins/Institutions)
         Route::post('/infrastructure/{id}/toggle', [InfrastructureManagerController::class, 'toggleStatus'])
             ->middleware('verified');
+
+        // New Directory & Service Status Management
+        Route::resource('directory', \App\Http\Controllers\Admin\DirectoryController::class)->except(['create', 'edit', 'show']);
+        Route::get('/service-states', [\App\Http\Controllers\Admin\ServiceStateController::class, 'index'])->name('service-states.index');
+        Route::put('/service-states/{key}', [\App\Http\Controllers\Admin\ServiceStateController::class, 'update'])->name('service-states.update');
     });
 
     // Voting

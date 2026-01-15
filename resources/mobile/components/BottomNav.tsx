@@ -1,8 +1,25 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Globe, MessageCircle, Users, User } from 'lucide-react';
+import { HapticService } from '../services/HapticService';
 
 export default function BottomNav() {
     const location = useLocation();
+
+    const hideOnRoutes = [
+        '/add-report',
+        '/initiatives/add',
+        '/discussions/add',
+        '/lost-found/add',
+        '/books/add',
+        '/login',
+        '/register',
+        '/splash',
+        '/setup-location'
+    ];
+
+    if (hideOnRoutes.includes(location.pathname)) {
+        return null;
+    }
 
     const navItems = [
         { path: '/', icon: <Home size={22} />, label: 'الرئيسية' },
@@ -13,17 +30,18 @@ export default function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/60 flex justify-around items-center z-50 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] safe-bottom transition-colors duration-300">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/60 flex justify-around items-center z-50 shadow-premium-xl safe-bottom transition-colors duration-300">
             {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
                     <NavLink
                         key={item.path}
                         to={item.path}
+                        onClick={() => HapticService.lightImpact()}
                         className={`flex flex-col items-center justify-center w-full h-16 transition-colors relative ${isActive ? 'text-emerald-600' : 'text-slate-400'
                             }`}
                     >
-                        <span className={`mb-1 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}>
+                        <span className={`mb-1 transition-transform ${isActive ? 'scale-110 -translate-y-0.5' : ''}`}>
                             {item.icon}
                         </span>
                         <span className={`text-[10px] font-bold ${isActive ? 'opacity-100' : 'opacity-60'}`}>
@@ -32,7 +50,7 @@ export default function BottomNav() {
 
                         {/* Active Indicator */}
                         {isActive && (
-                            <div className="absolute bottom-0 w-12 h-1 bg-emerald-600 rounded-t-full shadow-[0_-2px_6px_rgba(5,150,105,0.3)]"></div>
+                            <div className="absolute bottom-0 w-12 h-1 bg-emerald-600 rounded-t-full shadow-[0_-2px_6px_rgba(5,150,105,0.3)]" />
                         )}
                     </NavLink>
                 );

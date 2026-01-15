@@ -11,12 +11,15 @@ import WaterStatus from './pages/WaterStatus';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import HashtagChat from './pages/HashtagChat';
+import SkillsPortal from './pages/SkillsPortal';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Splash from './pages/Splash';
 import SetupLocation from './pages/SetupLocation';
 import AddReport from './pages/AddReport';
 import Initiatives from './pages/Initiatives';
+import AddInitiative from './pages/AddInitiative';
+import InitiativeDetail from './pages/InitiativeDetail';
 import Discussions from './pages/Discussions';
 import AddDiscussion from './pages/AddDiscussion';
 import DiscussionDetail from './pages/DiscussionDetail';
@@ -48,6 +51,7 @@ import About from './pages/About';
 import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
 import OfflineIndicator from './components/OfflineIndicator';
+import ScrollToTop from './components/ScrollToTop';
 import { ThemeProvider } from './components/ThemeContext';
 import api from './services/api';
 import './animations.css';
@@ -120,17 +124,20 @@ function AppContent() {
                 <Route path="/study/:id" element={<StudyDetail />} />
                 <Route path="/awareness/:id" element={<AwarenessDetail />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/services" element={<ServicesStatus />} />
+                <Route path="/services-status" element={<ServicesStatus />} />
                 <Route path="/water-status" element={<WaterStatus />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/events/:id" element={<EventDetail />} />
                 <Route path="/hashtag" element={<HashtagChat />} />
+                <Route path="/skills" element={<SkillsPortal />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/splash" element={<Splash />} />
                 <Route path="/setup-location" element={<SetupLocation />} />
                 <Route path="/add-report" element={<AddReport />} />
                 <Route path="/initiatives" element={<Initiatives />} />
+                <Route path="/initiatives/add" element={<AddInitiative />} />
+                <Route path="/initiatives/:id" element={<InitiativeDetail />} />
                 <Route path="/discussions" element={<Discussions />} />
                 <Route path="/discussions/add" element={<AddDiscussion />} />
                 <Route path="/discussions/:id" element={<DiscussionDetail />} />
@@ -157,8 +164,6 @@ function AppContent() {
                 <Route path="/awareness/detail/:id" element={<AwarenessDetail />} />
                 <Route path="/awareness/campaign/:campaignId" element={<CampaignDetail />} />
                 <Route path="/awareness/campaign/:campaignId/:articleId" element={<ArticleView />} />
-                <Route path="/awareness/campaign/:campaignId" element={<CampaignDetail />} />
-                <Route path="/awareness/campaign/:campaignId/:articleId" element={<ArticleView />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/profile/edit" element={<EditProfile />} />
                 <Route path="/about" element={<About />} />
@@ -175,6 +180,7 @@ export default function App() {
     return (
         <ThemeProvider>
             <HashRouter>
+                <ScrollToTop />
                 <AppContent />
             </HashRouter>
         </ThemeProvider>

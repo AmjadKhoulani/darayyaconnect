@@ -50,7 +50,7 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'cover_image' => 'nullable|string',
+            'cover_image' => 'nullable|image|max:5120', // 5MB max
             'category' => 'required|in:novel,science,religious,history,children,cooking,self_development,other',
             'language' => 'required|in:arabic,english,french,other',
             'condition' => 'required|in:new,good,acceptable',
@@ -58,6 +58,11 @@ class BookController extends Controller
 
         $validated['user_id'] = Auth::id();
         $validated['status'] = 'available';
+
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('books', 'public');
+            $validated['cover_image'] = asset('storage/' . $path);
+        }
 
         $book = Book::create($validated);
 
