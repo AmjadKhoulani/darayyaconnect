@@ -278,7 +278,7 @@ export default function Dashboard({
                             </h3>
                             <div className="h-[250px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart data={trends.reports}>
+                                    <LineChart data={trends?.reports || []}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <XAxis
                                             dataKey="date"
@@ -315,7 +315,7 @@ export default function Dashboard({
                             </h3>
                             <div className="h-[250px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={Object.entries(trends.services).map(([type, logs]: [string, any]) => {
+                                    <BarChart data={Object.entries(trends?.services || {}).map(([type, logs]: [string, any]) => {
                                         const avg = logs.length > 0
                                             ? logs.reduce((acc: number, curr: any) => acc + (curr.available / curr.total), 0) / logs.length
                                             : 0;
@@ -350,12 +350,12 @@ export default function Dashboard({
                                     توسع القاعدة الجماهيرية
                                 </h3>
                                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                                    + {trends.users.reduce((acc, curr) => acc + curr.count, 0)} هذا الأسبوع
+                                    + {(trends?.users || []).reduce((acc: any, curr: any) => acc + curr.count, 0)} هذا الأسبوع
                                 </span>
                             </div>
                             <div className="h-[200px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={trends.users}>
+                                    <AreaChart data={trends?.users || []}>
                                         <defs>
                                             <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
