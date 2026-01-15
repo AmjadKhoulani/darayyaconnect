@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Crosshair, Layers, X } from 'lucide-react';
+import { ArrowRight, X } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { GeolocationService } from '../services/GeolocationService';
@@ -93,7 +93,7 @@ export default function Map() {
     const map = useRef<maplibregl.Map | null>(null);
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
-    const [showLayersMenu, setShowLayersMenu] = useState(false);
+
 
     // Layer States
     const [activeLayers, setActiveLayers] = useState({
@@ -528,102 +528,14 @@ export default function Map() {
                     </div>
                 </div>
 
-                {/* FABs - Adjusted Bottom Position for Nav Bar */}
-                <div className="absolute bottom-32 left-4 z-10 flex flex-col gap-3 pointer-events-auto">
-                    <button
-                        onClick={() => setShowLayersMenu(true)}
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border ${showLayersMenu ? 'bg-emerald-600 dark:bg-emerald-500 text-white border-emerald-700 dark:border-emerald-400' : 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border-slate-100 dark:border-slate-700'}`}
-                    >
-                        <Layers size={22} />
-                    </button>
-                    <button
-                        onClick={locateUser}
-                        className="w-12 h-12 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-100 dark:border-slate-700"
-                    >
-                        <Crosshair size={24} />
-                    </button>
-                </div>
 
-                {/* Horizontal Scroll List - Raised above Bottom Nav */}
-                <div className="absolute bottom-24 right-0 left-20 z-10 pointer-events-auto overflow-x-auto pb-4 px-4 no-scrollbar">
-                    <div className="flex gap-3 pr-2">
-                        {filteredServices.map((loc) => (
-                            <button
-                                key={loc.id}
-                                onClick={() => map.current?.flyTo({ center: [loc.lng, loc.lat], zoom: 17 })}
-                                className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-2xl min-w-[120px] shadow-lg border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center active:scale-95 transition-all w-28 snap-start"
-                            >
-                                <div className="text-2xl mb-2 bg-slate-50 dark:bg-slate-700/50 w-10 h-10 rounded-full flex items-center justify-center">{loc.emoji}</div>
-                                <div className="font-bold text-slate-800 dark:text-slate-100 text-xs truncate w-full">{loc.name}</div>
-                                <div className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">{loc.type}</div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
 
-                {/* Bottom Shadow Gradient for Text Readability */}
-                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-900/10 to-transparent pointer-events-none z-0"></div>
+
+
+
             </div>
 
-            {/* Layers Bottom Sheet - Improved Z-Index */}
-            {showLayersMenu && (
-                <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLayersMenu(false)}>
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] p-6 animate-in slide-in-from-bottom duration-300 mb-safe" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                <span className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                                    <Layers size={18} />
-                                </span>
-                                طبقات الخريطة
-                            </h3>
-                            <button onClick={() => setShowLayersMenu(false)} className="bg-slate-50 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
 
-                        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
-                            <div className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <div className="relative">
-                                        <input type="checkbox" checked={activeLayers.heatmap} onChange={() => toggleLayer('heatmap')} className="peer sr-only" />
-                                        <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
-                                    </div>
-                                    <div className="flex-1 text-right">
-                                        <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">الكثافة السكانية</span>
-                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">خريطة حرارية لتوزيع السكان</span>
-                                    </div>
-                                    <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-blue-300 to-red-500 shadow-sm"></div>
-                                </label>
-                            </div>
-
-                            <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right uppercase tracking-wider">البنية التحتية</div>
-
-                            {[
-                                { id: 'water', label: 'شبكة المياه', color: 'bg-blue-500', sub: 'خطوط التوزيع الرئيسية' },
-                                { id: 'electricity', label: 'الكهرباء', color: 'bg-yellow-500', sub: 'المجرورات الرئيسية' },
-                                { id: 'sewage', label: 'الصرف الصحي', color: 'bg-orange-800', sub: 'المجرورات الرئيسية' },
-                                { id: 'phone', label: 'الهاتف', color: 'bg-emerald-500', sub: 'كابلات الاتصالات' },
-                            ].map(layer => (
-                                <label key={layer.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-800/50">
-                                    <div className="relative item-center flex">
-                                        <input
-                                            type="checkbox"
-                                            checked={activeLayers[layer.id as keyof typeof activeLayers]}
-                                            onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
-                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 transition-all"
-                                        />
-                                    </div>
-                                    <div className="flex-1 text-right">
-                                        <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
-                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
-                                    </div>
-                                    <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

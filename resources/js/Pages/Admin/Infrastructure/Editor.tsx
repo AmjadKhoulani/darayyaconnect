@@ -276,16 +276,24 @@ export default function InfrastructureEditor({ auth }: Props) {
 
         // Group by type
         const networks = {
-            water: { color: '#3b82f6', lines: [], nodes: [] },
-            electricity: { color: '#eab308', lines: [], nodes: [] },
-            sewage: { color: '#78350f', lines: [], nodes: [] },
-            phone: { color: '#10b981', lines: [], nodes: [] },
+            water: { color: '#3b82f6', lines: [] as any[], nodes: [] as any[] },
+            electricity: {
+                color: '#eab308',
+                lines: [] as any[],
+                nodes: [] as any[],
+            },
+            sewage: {
+                color: '#78350f',
+                lines: [] as any[],
+                nodes: [] as any[],
+            },
+            phone: { color: '#10b981', lines: [] as any[], nodes: [] as any[] },
         };
 
         linesData.forEach((l) => {
-            //@ts-ignore
-            if (networks[l.type])
-                networks[l.type].lines.push({
+            const type = l.type as keyof typeof networks;
+            if (networks[type]) {
+                networks[type].lines.push({
                     type: 'Feature',
                     geometry: {
                         type: 'LineString',
@@ -293,6 +301,7 @@ export default function InfrastructureEditor({ auth }: Props) {
                     },
                     properties: { id: l.id, type: l.type },
                 });
+            }
         });
 
         nodesData.forEach((n) => {
