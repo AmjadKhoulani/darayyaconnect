@@ -567,7 +567,7 @@ export default function Map() {
                             </button>
                         </div>
 
-                        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar overscroll-contain pb-10" onTouchStart={(e) => e.stopPropagation()}>
                             <div className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                                 <label className="flex items-center gap-3 cursor-pointer">
                                     <div className="relative">
