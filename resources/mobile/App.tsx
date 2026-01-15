@@ -181,32 +181,7 @@ function AppContent() {
                 <Route path="/about" element={<About />} />
             </Routes>
 
-            {/* Bottom Nav Visibility Logic - Robust */}
-            {(() => {
-                const mainRoutes = [
-                    '/',
-                    '/news',
-                    '/discussions',
-                    '/notifications',
-                    '/profile',
-                    '/skills',
-                    '/initiatives',
-                    '/awareness',
-                    '/studies'
-                ];
-
-                const currentPath = location.pathname.endsWith('/') && location.pathname.length > 1
-                    ? location.pathname.slice(0, -1)
-                    : location.pathname;
-
-                const showNav = mainRoutes.some(route =>
-                    currentPath === route ||
-                    (route !== '/' && currentPath.startsWith(route + '/'))
-                );
-
-                return showNav ? <BottomNav /> : null;
-            })()}
-
+            <BottomNav />
             <Toast />
             <OfflineIndicator />
         </div>

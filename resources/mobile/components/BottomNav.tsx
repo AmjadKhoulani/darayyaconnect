@@ -5,19 +5,30 @@ import { HapticService } from '../services/HapticService';
 export default function BottomNav() {
     const location = useLocation();
 
-    const hideOnRoutes = [
-        '/add-report',
-        '/initiatives/add',
-        '/discussions/add',
-        '/lost-found/add',
-        '/books/add',
-        '/login',
-        '/register',
-        '/splash',
-        '/setup-location'
+    // Whitelist: Pages where we SHOULD show the Bottom Nav
+    const showNavRoutes = [
+        '/',
+        '/news',
+        '/discussions',
+        '/notifications',
+        '/profile',
+        '/skills',
+        '/initiatives',
+        '/awareness',
+        '/studies'
     ];
 
-    if (hideOnRoutes.includes(location.pathname)) {
+    // Robust path matching: remove trailing slash and check start
+    const currentPath = location.pathname.endsWith('/') && location.pathname.length > 1
+        ? location.pathname.slice(0, -1)
+        : location.pathname;
+
+    const shouldShow = showNavRoutes.some(route =>
+        currentPath === route ||
+        (route !== '/' && currentPath.startsWith(route + '/'))
+    );
+
+    if (!shouldShow) {
         return null;
     }
 
@@ -30,7 +41,7 @@ export default function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/60 flex justify-around items-center z-50 shadow-premium-xl safe-bottom transition-colors duration-300">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/98 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/60 flex justify-around items-center z-[100] shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)] safe-bottom transition-all duration-300">
             {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -38,7 +49,7 @@ export default function BottomNav() {
                         key={item.path}
                         to={item.path}
                         onClick={() => HapticService.lightImpact()}
-                        className={`flex flex-col items-center justify-center w-full h-16 transition-colors relative ${isActive ? 'text-emerald-600' : 'text-slate-400'
+                        className={`flex flex-col items-center justify-center w-full h-16 transition-all relative ${isActive ? 'text-emerald-600' : 'text-slate-400'
                             }`}
                     >
                         <span className={`mb-1 transition-transform ${isActive ? 'scale-110 -translate-y-0.5' : ''}`}>
