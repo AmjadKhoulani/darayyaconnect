@@ -607,6 +607,29 @@ export default function Map() {
                                     <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
                                 </label>
                             ))}
+
+                            <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right uppercase tracking-wider">حالة الشبكة (مجتمعي)</div>
+
+                            {[
+                                { id: 'crowdElectricity', label: 'كهرباء (بلاغات)', color: 'bg-yellow-500', sub: 'حالة الكهرباء الآن' },
+                                { id: 'crowdWater', label: 'مياه (بلاغات)', color: 'bg-blue-500', sub: 'حالة المياه الآن' },
+                            ].map(layer => (
+                                <label key={layer.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-800/50">
+                                    <div className="relative item-center flex">
+                                        <input
+                                            type="checkbox"
+                                            checked={activeLayers[layer.id as keyof typeof activeLayers]}
+                                            onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
+                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 transition-all"
+                                        />
+                                    </div>
+                                    <div className="flex-1 text-right">
+                                        <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
+                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
+                                    </div>
+                                    <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
+                                </label>
+                            ))}
                         </div>
                     </div>
                 </div>
