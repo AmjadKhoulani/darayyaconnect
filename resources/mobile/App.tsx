@@ -179,11 +179,33 @@ function AppContent() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/profile/edit" element={<EditProfile />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/about" element={<About />} />
             </Routes>
 
-            {/* Only show BottomNav on main tab pages */}
-            {['/', '/news', '/discussions', '/notifications', '/profile', '/skills', '/initiatives'].includes(location.pathname) && <BottomNav />}
+            {/* Bottom Nav Visibility Logic - Robust */}
+            {(() => {
+                const mainRoutes = [
+                    '/',
+                    '/news',
+                    '/discussions',
+                    '/notifications',
+                    '/profile',
+                    '/skills',
+                    '/initiatives',
+                    '/awareness',
+                    '/studies'
+                ];
+
+                const currentPath = location.pathname.endsWith('/') && location.pathname.length > 1
+                    ? location.pathname.slice(0, -1)
+                    : location.pathname;
+
+                const showNav = mainRoutes.some(route =>
+                    currentPath === route ||
+                    (route !== '/' && currentPath.startsWith(route + '/'))
+                );
+
+                return showNav ? <BottomNav /> : null;
+            })()}
 
             <Toast />
             <OfflineIndicator />
