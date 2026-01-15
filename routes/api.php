@@ -13,6 +13,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::post('/sos/trigger', [\App\Http\Controllers\Api\SosController::class, 'trigger']);
+    Route::get('/sos/status/{alert}', [\App\Http\Controllers\Api\SosController::class, 'status']);
     Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
 });
 

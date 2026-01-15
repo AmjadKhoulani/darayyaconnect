@@ -70,6 +70,7 @@ class DashboardController extends Controller
             ],
             'recent_reports' => Report::latest()->take(5)->with('user')->get(),
             'active_alerts' => ServiceAlert::active()->latest()->get(),
+            'active_sos_alerts' => \App\Models\SosAlert::where('status', 'active')->with('user')->latest()->get(),
             'infrastructure_points' => \App\Models\InfrastructurePoint::orderBy('type')->orderBy('name')->get(),
             'users' => User::latest()->take(10)->get(),
             'services' => \App\Models\Service::all(),

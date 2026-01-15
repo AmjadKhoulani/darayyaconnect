@@ -111,6 +111,19 @@
     animation: gradient-x 15s ease infinite;
 }
 
+@keyframes ping-slow {
+
+    75%,
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.animate-ping-slow {
+    animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
 .animate-spin-slow {
     animation: spin-slow 12s linear infinite;
 }

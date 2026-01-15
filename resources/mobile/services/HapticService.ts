@@ -23,25 +23,21 @@ export const HapticService = {
         }
     },
 
-    /**
-     * Success notification pulse
-     */
-    async successNotification() {
+    async heavyImpact() {
         try {
-            await Haptics.notification({ type: NotificationType.Success });
-        } catch (e) {
-            // Ignore
-        }
+            await Haptics.impact({ style: ImpactStyle.Heavy });
+        } catch (e) { }
     },
 
-    /**
-     * Warning/Error notification pulse
-     */
-    async errorNotification() {
+    async notificationSuccess() {
+        try {
+            await Haptics.notification({ type: NotificationType.Success });
+        } catch (e) { }
+    },
+
+    async notificationError() {
         try {
             await Haptics.notification({ type: NotificationType.Error });
-        } catch (e) {
-            // Ignore
-        }
+        } catch (e) { }
     }
 };

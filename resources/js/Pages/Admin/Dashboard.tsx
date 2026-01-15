@@ -27,6 +27,7 @@ interface Props {
     };
     recent_reports: any[];
     active_alerts: any[];
+    active_sos_alerts: any[];
     infrastructure_points: any[];
     users: any[];
     services: any[];
@@ -43,7 +44,8 @@ export default function Dashboard({
     users,
     services,
     departments,
-    trends
+    trends,
+    active_sos_alerts,
 }: Props) {
     // Safety Checks
     if (!stats)
@@ -76,6 +78,60 @@ export default function Dashboard({
 
             <div className="py-12" dir="rtl">
                 <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+                    {/* EMERGENCY SIGNALS (SOS) */}
+                    {active_sos_alerts && active_sos_alerts.length > 0 && (
+                        <div className="animate-pulse-slow">
+                            <div className="rounded-2xl border-2 border-red-500 bg-red-50 p-6 shadow-xl shadow-red-200">
+                                <h3 className="mb-4 flex items-center justify-between text-xl font-black text-red-700">
+                                    <span className="flex items-center gap-3">
+                                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-white animate-ping-slow">
+                                            🚨
+                                        </span>
+                                        إشارات استغاثة نشطة (SOS)
+                                    </span>
+                                    <span className="rounded-full bg-red-600 px-3 py-1 text-sm text-white">
+                                        {active_sos_alerts.length} إشارة نشطة
+                                    </span>
+                                </h3>
+                                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                    {active_sos_alerts.map((sos) => (
+                                        <div key={sos.id} className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm border border-red-100">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-12 w-12 overflow-hidden rounded-full bg-slate-100">
+                                                    {sos.user?.avatar ? (
+                                                        <img src={sos.user.avatar} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center text-xl font-bold text-slate-400">
+                                                            {sos.user?.name?.charAt(0) || '؟'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div className="font-black text-slate-800">{sos.user?.name || 'مواطن غير معروف'}</div>
+                                                    <div className="text-xs font-bold text-red-500 uppercase tracking-tighter">
+                                                        {sos.emergency_type === 'medical' ? '🚑 حالة طبية' : sos.emergency_type === 'fire' ? '🔥 حريق' : sos.emergency_type === 'security' ? '👮 أمن' : '🚨 استغاثة عامة'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <a
+                                                    href={`https://www.google.com/maps?q=${sos.latitude},${sos.longitude}`}
+                                                    target="_blank"
+                                                    className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-700"
+                                                >
+                                                    📍 الموقع
+                                                </a>
+                                                <button className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800">
+                                                    استجابة
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* 1. Services Health & Quick Stats */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                         {/* Services Status */}
