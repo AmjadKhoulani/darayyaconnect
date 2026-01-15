@@ -71,7 +71,7 @@ class DashboardController extends Controller
         $safeFetch = function($callback, $default = []) {
             try {
                 return $callback();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 \Log::error('Dashboard Fetch Error: ' . $e->getMessage());
                 return $default;
             }
