@@ -130,4 +130,14 @@ class DashboardController extends Controller
             'user_vote_id' => $userVote ? $userVote->option_id : null
         ]);
     }
+
+    public function resolveSos(\App\Models\SosAlert $alert)
+    {
+        $alert->update([
+            'status' => 'resolved',
+            'resolved_at' => now()
+        ]);
+
+        return redirect()->back()->with('success', 'تم إنهاء حالة الاستغاثة بنجاح.');
+    }
 }

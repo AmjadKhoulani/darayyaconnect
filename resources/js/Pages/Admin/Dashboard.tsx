@@ -1,5 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import InfrastructureList from './InfrastructureList';
 import {
     LineChart, Line, AreaChart, Area, BarChart, Bar,
@@ -121,8 +121,15 @@ export default function Dashboard({
                                                 >
                                                     📍 الموقع
                                                 </a>
-                                                <button className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800">
-                                                    استجابة
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm('هل أنت متأكد من إنهاء حالة الاستغاثة؟')) {
+                                                            router.post(route('admin.sos.resolve', sos.id));
+                                                        }
+                                                    }}
+                                                    className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800"
+                                                >
+                                                    إغلاق البلاغ
                                                 </button>
                                             </div>
                                         </div>

@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // AI Studies Management
         Route::resource('ai-studies', AiStudyController::class);
         Route::post('/alerts', [DashboardController::class, 'sendAlert'])->name('alerts.send');
+        Route::post('/sos/{alert}/resolve', [DashboardController::class, 'resolveSos'])->name('sos.resolve');
         
         // The "Unknown" Registry
         // Route name becomes admin.missing-data
