@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Initiative extends Model
 {
     protected $fillable = [
-        'user_id', 'title', 'description', 'image', 'status', 'votes_count'
+        'user_id', 'title', 'description', 'image', 'status', 'votes_count', 'moderation_status'
     ];
 
     public function user()

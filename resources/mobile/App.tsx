@@ -61,9 +61,9 @@ import './styles/global.css';
 function AppContent() {
     const location = useLocation();
     const navigate = useNavigate();
-    const hideFabRoutes = ['/login', '/register', '/add-report', '/study', '/splash'];
-    // Check if current path starts with any of the restricted paths
-    const showFab = !hideFabRoutes.some(path => location.pathname.startsWith(path));
+    const hideNavRoutes = ['/login', '/register', '/splash', '/skills', '/add-report', '/study'];
+    const showBottomNav = !hideNavRoutes.some(path => location.pathname.includes(path));
+    const showFab = showBottomNav;
 
     useEffect(() => {
         // Auth Guard
@@ -130,7 +130,7 @@ function AppContent() {
     }, [location.pathname]);
 
     return (
-        <div className="min-h-screen pb-20 safe-top">
+        <div className={`min-h-screen safe-top ${showBottomNav ? 'pb-20' : ''}`}>
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/studies" element={<Studies />} />
@@ -183,7 +183,7 @@ function AppContent() {
             </Routes>
 
             {showFab && <SOSButton />}
-            <BottomNav />
+            {showBottomNav && <BottomNav />}
             <Toast />
             <OfflineIndicator />
         </div>

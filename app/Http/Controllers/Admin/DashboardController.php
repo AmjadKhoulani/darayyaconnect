@@ -17,38 +17,55 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Fetch Report Trends (Last 7 Days)
-        $reportTrends = Report::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('count(*) as count')
-            )
-            ->where('created_at', '>=', now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        // Initialize defaults
+        $reportTrends = [];
+        $userTrends = [];
+        $serviceTrends = [];
 
-        // Fetch User Growth (Last 7 Days)
-        $userTrends = User::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('count(*) as count')
-            )
-            ->where('created_at', '>=', now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        try {
+            // Fetch Report Trends (Last 7 Days)
+            $reportTrends = Report::select(
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('count(*) as count')
+                )
+                ->where('created_at', '>=', now()->subDays(7))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+        } catch (\Exception $e) {
+            \Log::error('Dashboard Report Trends Error: ' . $e->getMessage());
+        }
 
-        // Fetch Service Availability (Last 7 Days Average)
-        $serviceTrends = ServiceLog::select(
-                DB::raw('DATE(log_date) as date'),
-                'service_type',
-                DB::raw('count(*) as total'),
-                DB::raw('sum(case when status = "available" then 1 else 0 end) as available')
-            )
-            ->where('log_date', '>=', now()->subDays(7))
-            ->groupBy('date', 'service_type')
-            ->orderBy('date')
-            ->get()
-            ->groupBy('service_type');
+        try {
+            // Fetch User Growth (Last 7 Days)
+            $userTrends = User::select(
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('count(*) as count')
+                )
+                ->where('created_at', '>=', now()->subDays(7))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+        } catch (\Exception $e) {
+            \Log::error('Dashboard User Trends Error: ' . $e->getMessage());
+        }
+
+        try {
+            // Fetch Service Availability (Last 7 Days Average)
+            $serviceTrends = ServiceLog::select(
+                    DB::raw('DATE(log_date) as date'),
+                    'service_type',
+                    DB::raw('count(*) as total'),
+                    DB::raw('sum(case when status = "available" then 1 else 0 end) as available')
+                )
+                ->where('log_date', '>=', now()->subDays(7))
+                ->groupBy('date', 'service_type')
+                ->orderBy('date')
+                ->get()
+                ->groupBy('service_type');
+        } catch (\Exception $e) {
+             \Log::error('Dashboard Service Trends Error: ' . $e->getMessage());
+        }
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [

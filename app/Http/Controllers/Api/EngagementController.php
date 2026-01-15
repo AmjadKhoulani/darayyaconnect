@@ -13,7 +13,11 @@ class EngagementController extends Controller
     public function getDiscussions()
     {
         return response()->json(
-            Discussion::with('user:id,name')->withCount(['votes', 'replies'])->latest()->get()
+            Discussion::where('moderation_status', 'approved')
+                ->with('user:id,name')
+                ->withCount(['votes', 'replies'])
+                ->latest()
+                ->get()
         );
     }
 
@@ -46,6 +50,7 @@ class EngagementController extends Controller
             'body' => $request->body,
             'category' => $request->category,
             'image_path' => $imagePath,
+            'moderation_status' => 'pending',
         ]);
 
         return response()->json($discussion, 201);
@@ -66,9 +71,16 @@ class EngagementController extends Controller
 
         $discussion = Discussion::findOrFail($id);
 
+        $body = $request->body;
+        $forbiddenWords = \App\Models\ForbiddenWord::pluck('word')->toArray();
+        foreach ($forbiddenWords as $word) {
+            if (empty($word)) continue;
+            $body = preg_replace('/' . preg_quote($word, '/') . '/iu', str_repeat('*', mb_strlen($word)), $body);
+        }
+
         $reply = $discussion->replies()->create([
             'user_id' => $request->user()->id,
-            'body' => $request->body,
+            'body' => $body,
             'image_path' => $imagePath,
             'parent_id' => $request->parent_id,
         ]);

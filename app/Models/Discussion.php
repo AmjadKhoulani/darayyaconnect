@@ -10,7 +10,7 @@ class Discussion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'title', 'body', 'category', 'views', 'image_path'];
+    protected $fillable = ['user_id', 'title', 'body', 'category', 'views', 'image_path', 'moderation_status'];
 
     protected $appends = ['votes_count', 'replies_count', 'current_user_vote', 'image_url'];
 

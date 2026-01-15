@@ -87,6 +87,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return Inertia::render('Admin/ReportsHeatmap');
         })->name('reports.heatmap');
 
+        // Moderation & Chat Filter
+        Route::get('/moderation', [\App\Http\Controllers\Admin\ModerationController::class, 'index'])->name('moderation.index');
+        Route::post('/moderation/approve/{type}/{id}', [\App\Http\Controllers\Admin\ModerationController::class, 'approve'])->name('moderation.approve');
+        Route::post('/moderation/reject/{type}/{id}', [\App\Http\Controllers\Admin\ModerationController::class, 'reject'])->name('moderation.reject');
+        Route::post('/moderation/forbidden-words', [\App\Http\Controllers\Admin\ModerationController::class, 'storeForbiddenWord'])->name('moderation.forbidden-words.store');
+        Route::delete('/moderation/forbidden-words/{id}', [\App\Http\Controllers\Admin\ModerationController::class, 'deleteForbiddenWord'])->name('moderation.forbidden-words.destroy');
+
         Route::put('/volunteering/applications/{id}', [\App\Http\Controllers\Admin\VolunteeringController::class, 'updateApplicationStatus'])->name('volunteering.application.update');
     });
 

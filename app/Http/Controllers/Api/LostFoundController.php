@@ -12,7 +12,7 @@ class LostFoundController extends Controller
 {
     public function index(Request $request)
     {
-        $query = LostFoundItem::with('user:id,name')->active();
+        $query = LostFoundItem::where('moderation_status', 'approved')->with('user:id,name')->active();
 
         // Filter by type
         if ($request->has('type') && in_array($request->type, ['lost', 'found'])) {
@@ -69,6 +69,7 @@ class LostFoundController extends Controller
 
         $validated['user_id'] = Auth::id();
         $validated['status'] = 'active';
+        $validated['moderation_status'] = 'pending';
 
         $item = LostFoundItem::create($validated);
 

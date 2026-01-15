@@ -22,7 +22,8 @@ class VolunteerOpportunity extends Model
         'spots_filled',
         'image',
         'tags',
-        'status'
+        'status',
+        'moderation_status'
     ];
 
     protected $casts = [

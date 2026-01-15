@@ -53,8 +53,6 @@ api.interceptors.response.use(
             console.error(`❌ Response error: ${error.response.status}`, error.response.data);
             if (error.response.status === 404) {
                 console.error('📭 Endpoint not found:', error.config.url);
-            } else if (error.response.status === 500) {
-                console.error('💥 Server Error (500) - Check Laravel logs');
             }
         } else if (error.request) {
             console.error('📡 No response received from server');

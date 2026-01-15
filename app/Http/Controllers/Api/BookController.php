@@ -13,7 +13,7 @@ class BookController extends Controller
     // Get all available books
     public function index(Request $request)
     {
-        $query = Book::with(['user'])->available();
+        $query = Book::where('moderation_status', 'approved')->with(['user'])->available();
 
         if ($request->has('category')) {
             $query->category($request->category);
@@ -58,6 +58,7 @@ class BookController extends Controller
 
         $validated['user_id'] = Auth::id();
         $validated['status'] = 'available';
+        $validated['moderation_status'] = 'pending';
 
         if ($request->hasFile('cover_image')) {
             $path = $request->file('cover_image')->store('books', 'public');

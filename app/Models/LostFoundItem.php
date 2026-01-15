@@ -22,6 +22,7 @@ class LostFoundItem extends Model
         'images',
         'contact_info',
         'status',
+        'moderation_status',
     ];
 
     protected $casts = [

@@ -28,10 +28,19 @@ class ChatController extends Controller
             'reply_to_id' => 'nullable|exists:chat_messages,id'
         ]);
 
+        $body = $request->body;
+        $forbiddenWords = \App\Models\ForbiddenWord::pluck('word')->toArray();
+
+        foreach ($forbiddenWords as $word) {
+            if (empty($word)) continue;
+            // Case-insensitive replacement
+            $body = preg_replace('/' . preg_quote($word, '/') . '/iu', str_repeat('*', mb_strlen($word)), $body);
+        }
+
         $message = ChatMessage::create([
             'user_id' => $request->user()->id,
             'channel' => $channel,
-            'body' => $request->body,
+            'body' => $body,
             'reply_to_id' => $request->reply_to_id,
             'type' => 'text'
         ]);

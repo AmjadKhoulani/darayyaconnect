@@ -22,30 +22,43 @@ class InfrastructureController extends Controller
             'image' => 'nullable|image|max:10240', // 10MB max
         ]);
 
-        $reportData = [
-            'user_id' => $request->user()?->id,
-            'category' => $this->mapTypeToCategory($validated['type']),
-            'description' => $validated['title'] . "\n\n" . $validated['description'],
-            'status' => 'pending',
-            'severity' => 2, // Default middle severity
-        ];
+        try {
+            $reportData = [
+                'user_id' => $request->user()?->id,
+                'category' => $this->mapTypeToCategory($validated['type']),
+                'description' => $validated['title'] . "\n\n" . $validated['description'],
+                'status' => 'pending',
+                'severity' => 2,
+            ];
 
-        if ($validated['latitude'] && $validated['longitude']) {
-            $point = "POINT({$validated['longitude']} {$validated['latitude']})";
-            $reportData['coordinates'] = DB::raw("ST_GeomFromText('$point')");
+            // Save textual lat/long for backup and ease of use
+            if (isset($validated['latitude']) && isset($validated['longitude'])) {
+                $reportData['latitude'] = $validated['latitude'];
+                $reportData['longitude'] = $validated['longitude'];
+                
+                // Save geometry
+                $point = "POINT({$validated['longitude']} {$validated['latitude']})";
+                $reportData['coordinates'] = DB::raw("ST_GeomFromText('$point')");
+            }
+
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('reports', 'public');
+                $reportData['images'] = json_encode([asset('storage/' . $path)]);
+            }
+
+            $report = Report::create($reportData);
+
+            return response()->json([
+                'message' => 'تم استلام البلاغ بنجاح',
+                'id' => $report->id
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Report submission error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'حدث خطأ أثناء حفظ البلاغ',
+                'error' => $e->getMessage() // Dev only, remove in prod
+            ], 500);
         }
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('reports', 'public');
-            $reportData['images'] = json_encode([asset('storage/' . $path)]);
-        }
-
-        $report = Report::create($reportData);
-
-        return response()->json([
-            'message' => 'تم استلام البلاغ بنجاح',
-            'id' => $report->id
-        ], 201);
     }
 
     private function mapTypeToCategory($type)

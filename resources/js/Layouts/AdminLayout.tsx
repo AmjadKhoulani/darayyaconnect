@@ -56,6 +56,13 @@ export default function AdminLayout({
                         البلاغات
                     </SidebarLink>
                     <SidebarLink
+                        href={route('admin.moderation.index')}
+                        active={route().current('admin.moderation.*')}
+                        icon="🛡️"
+                    >
+                        الرقابة والموافقة
+                    </SidebarLink>
+                    <SidebarLink
                         href={route('admin.volunteers.index')}
                         active={route().current('admin.volunteers.*')}
                         icon="🤝"
@@ -206,11 +213,10 @@ function SidebarLink({
     return (
         <Link
             href={href}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition-all ${
-                active
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition-all ${active
                     ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+                }`}
         >
             <span className="text-lg">{icon}</span>
             <span>{children}</span>

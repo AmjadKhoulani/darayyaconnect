@@ -18,6 +18,7 @@ class Book extends Model
         'status',
         'cover_image',
         'contact_info',
+        'moderation_status',
     ];
 
     public function user()

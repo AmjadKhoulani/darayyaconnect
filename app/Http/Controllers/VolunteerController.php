@@ -12,7 +12,10 @@ class VolunteerController extends Controller
 {
     public function index()
     {
-        $opportunities = VolunteerOpportunity::where('status', 'open')->latest()->get();
+        $opportunities = VolunteerOpportunity::where('status', 'open')
+            ->where('moderation_status', 'approved')
+            ->latest()
+            ->get();
         
         // Check if user has applied to any
         $userApplications = [];

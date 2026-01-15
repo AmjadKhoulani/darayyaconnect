@@ -10,7 +10,8 @@ class InitiativeController extends Controller
 {
     public function index()
     {
-        $initiatives = Initiative::with('user:id,name')
+        $initiatives = Initiative::where('moderation_status', 'approved')
+            ->with('user:id,name')
             ->latest()
             ->get()
             ->map(function ($initiative) {
@@ -58,6 +59,7 @@ class InitiativeController extends Controller
                 'description' => $validated['description'],
                 'image' => $imagePath,
                 'status' => 'قيد المراجعة',
+                'moderation_status' => 'pending',
                 'votes_count' => 0
             ]);
 

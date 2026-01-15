@@ -12,7 +12,6 @@ export default function BottomNav() {
         '/discussions',
         '/notifications',
         '/profile',
-        '/skills',
         '/initiatives',
         '/awareness',
         '/studies'

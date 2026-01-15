@@ -13,6 +13,7 @@ class VolunteeringController extends Controller
     public function index()
     {
         $opportunities = VolunteerOpportunity::where('status', 'open')
+            ->where('moderation_status', 'approved')
             ->orderBy('created_at', 'desc')
             ->get();
             
