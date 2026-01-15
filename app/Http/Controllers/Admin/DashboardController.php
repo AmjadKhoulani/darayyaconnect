@@ -87,25 +87,31 @@ class DashboardController extends Controller
             'active_alerts' => $safeFetch(fn() => ServiceAlert::active()->count(), 0),
         ];
 
-        return Inertia::render('Admin/Dashboard', [
-            'stats' => $stats,
-            'trends' => [
-                'reports' => $reportTrends,
-                'users' => $userTrends,
-                'services' => $serviceTrends,
-            ],
-            'bottlenecks' => [
-                'summary' => [],
-                'list' => []
-            ],
-            'recent_reports' => $safeFetch(fn() => Report::latest()->take(5)->with('user')->get(), []),
-            'active_alerts' => $safeFetch(fn() => ServiceAlert::active()->latest()->get(), []),
-            'active_sos_alerts' => $safeFetch(fn() => \App\Models\SosAlert::where('status', 'active')->with('user')->latest()->get(), []),
-            'infrastructure_points' => $safeFetch(fn() => \App\Models\InfrastructurePoint::orderBy('type')->orderBy('name')->get(), []),
-            'users' => $safeFetch(fn() => User::latest()->take(10)->get(), []),
-            'services' => $safeFetch(fn() => \App\Models\Service::all(), []),
-            'departments' => $safeFetch(fn() => \App\Models\Department::withCount('users')->get(), []),
-        ]);
+        try {
+            return Inertia::render('Admin/Dashboard', [
+                'stats' => $stats,
+                'trends' => [
+                    'reports' => $reportTrends,
+                    'users' => $userTrends,
+                    'services' => $serviceTrends,
+                ],
+                'bottlenecks' => [
+                    'summary' => [],
+                    'list' => []
+                ],
+                'recent_reports' => $safeFetch(fn() => Report::latest()->take(5)->with('user')->get(), []),
+                'active_alerts' => $safeFetch(fn() => ServiceAlert::active()->latest()->get(), []),
+                'active_sos_alerts' => $safeFetch(fn() => \App\Models\SosAlert::where('status', 'active')->with('user')->latest()->get(), []),
+                'infrastructure_points' => $safeFetch(fn() => \App\Models\InfrastructurePoint::orderBy('type')->orderBy('name')->get(), []),
+                'users' => $safeFetch(fn() => User::latest()->take(10)->get(), []),
+                'services' => $safeFetch(fn() => \App\Models\Service::all(), []),
+                'departments' => $safeFetch(fn() => \App\Models\Department::withCount('users')->get(), []),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Inertia Render Error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return response()->make("Fatal Error during Rendering: " . $e->getMessage(), 500);
+        }
     }
 
     public function sendAlert(Request $request)
