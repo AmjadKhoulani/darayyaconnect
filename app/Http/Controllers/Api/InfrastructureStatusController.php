@@ -18,11 +18,11 @@ class InfrastructureStatusController extends Controller
     public function getHeatmapData(Request $request)
     {
         $serviceType = $request->query('type', 'electricity'); // 'electricity' or 'water'
-        $today = Carbon::today();
+        $date = $request->query('date') ? Carbon::parse($request->query('date')) : Carbon::today();
 
         // 1. Aggregate Reports by Neighborhood
         $stats = ServiceLog::where('service_type', $serviceType)
-            ->whereDate('log_date', $today)
+            ->whereDate('log_date', $date)
             ->select('neighborhood', DB::raw('count(*) as total'), DB::raw('sum(case when status = "available" then 1 else 0 end) as available_count'))
             ->groupBy('neighborhood')
             ->having('total', '>=', 1) // Show even with 1 report for now, threshold can be increased

@@ -51,14 +51,20 @@ class ReportController extends Controller
      */
     public function heatmap(Request $request)
     {
+        $date = $request->query('date') ? \Carbon\Carbon::parse($request->query('date')) : null;
+
         // Return reports suitable for a heatmap
         // Weighted by severity
-        $reports = Report::select('latitude', 'longitude', 'severity', 'category')
+        $query = Report::select('latitude', 'longitude', 'severity', 'category')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->where('status', '!=', 'resolved') // Only show active issues
-            ->limit(1000)
-            ->get();
+            ->where('status', '!=', 'resolved'); // Only show active issues
+
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
+
+        $reports = $query->limit(1000)->get();
 
         $formated = $reports->map(function ($report) {
             return [

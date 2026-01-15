@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Crosshair, Layers, X } from 'lucide-react';
+import { ArrowRight, Crosshair, Layers, X, Clock } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { GeolocationService } from '../services/GeolocationService';
@@ -108,6 +108,21 @@ export default function Map() {
     });
 
     const [filteredServices, setFilteredServices] = useState(serviceLocations);
+    const [timeOffset, setTimeOffset] = useState(0);
+
+    const selectedDate = useMemo(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + timeOffset);
+        return d.toISOString().split('T')[0];
+    }, [timeOffset]);
+
+    const selectedDateLabel = useMemo(() => {
+        if (timeOffset === 0) return 'اليوم';
+        if (timeOffset === -1) return 'أمس';
+        const d = new Date();
+        d.setDate(d.getDate() + timeOffset);
+        return d.toLocaleDateString('ar-SA', { weekday: 'long', day: 'numeric', month: 'short' });
+    }, [timeOffset]);
 
     // Initial Map Setup
     useEffect(() => {
@@ -147,11 +162,12 @@ export default function Map() {
             console.log("Mobile Map Loaded");
 
             // 1. Add Population Source
+            // 1. Initial Population Source (Empty, will be filled by useEffect)
             map.current.addSource('population', {
                 type: 'geojson',
                 data: {
                     type: 'FeatureCollection',
-                    features: populationPoints as any
+                    features: []
                 }
             });
 
@@ -183,15 +199,12 @@ export default function Map() {
             fetch('/api/infrastructure')
                 .then(res => res.json())
                 .then(data => {
-                    // Capture map instance to ensure type safety in closure and fix lint errors
                     const mapInstance = map.current;
                     if (!mapInstance) return;
 
-                    // Separate lines by type
                     ['water', 'electricity', 'sewage', 'phone'].forEach(type => {
                         const lines = data.lines.filter((l: any) => l.type === type);
                         const points = data.nodes.filter((n: any) => {
-                            // Map Point Types to Network Types logic
                             if (type === 'sewage' && n.type === 'manhole') return true;
                             if (type === 'electricity' && (n.type === 'transformer' || n.type === 'pole')) return true;
                             if (type === 'water' && n.type === 'pump') return true;
@@ -207,13 +220,11 @@ export default function Map() {
                             }))
                         };
 
-                        // Add Line Source
                         mapInstance.addSource(`infra-${type}-source`, {
                             type: 'geojson',
                             data: geoJson
                         });
 
-                        // Add Line Layer
                         const util = (INFRA_COLORS as any)[type];
                         mapInstance.addLayer({
                             id: `infra-${type}`,
@@ -222,7 +233,7 @@ export default function Map() {
                             layout: {
                                 'line-join': 'round',
                                 'line-cap': 'round',
-                                'visibility': 'none' // Controlled by state
+                                'visibility': 'none'
                             },
                             paint: {
                                 'line-color': util.color,
@@ -231,9 +242,7 @@ export default function Map() {
                             }
                         });
 
-                        // Add Points (Nodes) if any
                         if (points.length > 0) {
-
                             const nodesGeoJson: GeoJSON.FeatureCollection = {
                                 type: 'FeatureCollection',
                                 features: points.map((p: any) => ({
@@ -257,103 +266,110 @@ export default function Map() {
                                 layout: { 'visibility': 'none' }
                             });
                         }
-
                     });
-
                 })
                 .catch(err => console.error("Failed to fetch infra", err));
 
-            // Crowdsourced Status Layers
+            // Crowdsourced Status Layers (Initial Placeholder)
             ['electricity', 'water'].forEach(type => {
-                console.log(`🗺️ Fetching crowd ${type} data from API...`);
+                if (!map.current) return;
+                map.current.addSource(`crowd-${type}-source`, {
+                    type: 'geojson',
+                    data: { type: 'FeatureCollection', features: [] }
+                });
 
-                api.get(`/infrastructure/status-heatmap?type=${type}`)
-                    .then(response => {
-                        const geoJson = response.data;
-                        console.log(`✅ Crowd ${type} GeoJSON received:`, geoJson);
-                        console.log(`   - Features count: ${geoJson.features?.length || 0}`);
+                map.current.addLayer({
+                    id: `crowd-${type}-fill`,
+                    type: 'fill',
+                    source: `crowd-${type}-source`,
+                    layout: { visibility: 'visible' },
+                    paint: {
+                        'fill-color': [
+                            'match',
+                            ['get', 'status'],
+                            'available', '#10b981',
+                            'unstable', '#f59e0b',
+                            'cutoff', '#ef4444',
+                            '#94a3b8'
+                        ],
+                        'fill-opacity': 0.4
+                    }
+                });
 
-                        if (!map.current) return;
+                map.current.addLayer({
+                    id: `crowd-${type}-circle`,
+                    type: 'circle',
+                    source: `crowd-${type}-source`,
+                    layout: { visibility: 'visible' },
+                    paint: {
+                        'circle-radius': 14,
+                        'circle-color': [
+                            'match',
+                            ['get', 'status'],
+                            'available', '#10b981',
+                            'unstable', '#f59e0b',
+                            'cutoff', '#ef4444',
+                            '#94a3b8'
+                        ],
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#fff'
+                    }
+                });
 
-                        // Add source
-                        console.log(`📍 Adding map source: crowd-${type}-source`);
-                        map.current.addSource(`crowd-${type}-source`, {
-                            type: 'geojson',
-                            data: geoJson
-                        });
-
-                        // Add fill layer (polygon)
-                        console.log(`🎨 Creating fill layer: crowd-${type}-fill`);
-                        map.current.addLayer({
-                            id: `crowd-${type}-fill`,
-                            type: 'fill',
-                            source: `crowd-${type}-source`,
-                            layout: { visibility: 'visible' },
-                            paint: {
-                                'fill-color': [
-                                    'match',
-                                    ['get', 'status'],
-                                    'available', '#10b981',  // Green
-                                    'unstable', '#f59e0b',   // Amber
-                                    'cutoff', '#ef4444',     // Red
-                                    '#94a3b8'                // Gray fallback
-                                ],
-                                'fill-opacity': 0.4
-                            }
-                        });
-
-                        // Add circle layer (center point)
-                        console.log(`🎨 Creating circle layer: crowd-${type}-circle`);
-                        map.current.addLayer({
-                            id: `crowd-${type}-circle`,
-                            type: 'circle',
-                            source: `crowd-${type}-source`,
-                            layout: { visibility: 'visible' },
-                            paint: {
-                                'circle-radius': 14,
-                                'circle-color': [
-                                    'match',
-                                    ['get', 'status'],
-                                    'available', '#10b981',
-                                    'unstable', '#f59e0b',
-                                    'cutoff', '#ef4444',
-                                    '#94a3b8'
-                                ],
-                                'circle-stroke-width': 2,
-                                'circle-stroke-color': '#fff'
-                            }
-                        });
-
-                        // Add symbol layer (percentage text)
-                        console.log(`🎨 Creating symbol layer: crowd-${type}-symbol`);
-                        map.current.addLayer({
-                            id: `crowd-${type}-symbol`,
-                            type: 'symbol',
-                            source: `crowd-${type}-source`,
-                            layout: {
-                                visibility: 'visible',
-                                'text-field': '{score}%',
-                                'text-size': 12
-                            },
-                            paint: {
-                                'text-color': '#fff',
-                                'text-halo-color': '#000',
-                                'text-halo-width': 1
-                            }
-                        });
-
-                        console.log(`✅ Crowd ${type} layers added successfully!`);
-                    })
-                    .catch(err => {
-                        console.error(`❌ Failed to fetch ${type} crowd data:`, err);
-                        console.error(`   - Error details:`, err.response?.data || err.message);
-                    });
+                map.current.addLayer({
+                    id: `crowd-${type}-symbol`,
+                    type: 'symbol',
+                    source: `crowd-${type}-source`,
+                    layout: {
+                        visibility: 'visible',
+                        'text-field': ['concat', ['get', 'score'], '%'],
+                        'text-size': 10
+                    },
+                    paint: {
+                        'text-color': '#fff',
+                        'text-halo-color': '#000',
+                        'text-halo-width': 1
+                    }
+                });
             });
         });
 
         // Removed default NavigationControl as per user request (buttons behind bar) and mobile preference (pinch zoom).
         // map.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
     }, []);
+
+    // Handle Time Machine Data Updates
+    useEffect(() => {
+        if (!map.current) return;
+        const currentMap = map.current;
+
+        // 1. Update Heatmap Data
+        api.get(`/reports/heatmap?date=${selectedDate}`)
+            .then(res => {
+                const source = currentMap.getSource('population');
+                if (source) {
+                    (source as any).setData({
+                        type: 'FeatureCollection',
+                        features: res.data.map((r: any) => ({
+                            type: 'Feature',
+                            geometry: { type: 'Point', coordinates: [r[1], r[0]] },
+                            properties: { intensity: r[2] }
+                        }))
+                    });
+                }
+            });
+
+        // 2. Update Crowd Status Layers
+        ['electricity', 'water'].forEach(type => {
+            api.get(`/infrastructure/status-heatmap?type=${type}&date=${selectedDate}`)
+                .then(res => {
+                    const source = currentMap.getSource(`crowd-${type}-source`);
+                    if (source) {
+                        (source as any).setData(res.data);
+                    }
+                });
+        });
+    }, [selectedDate]);
 
     // Handle Active Layers Changes
     useEffect(() => {
@@ -549,6 +565,34 @@ export default function Map() {
                     >
                         <Crosshair size={24} />
                     </button>
+                </div>
+
+                {/* Time Machine Slider */}
+                <div className="absolute bottom-24 left-6 right-6 z-40">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-xl">
+                        <div className="flex justify-between items-center mb-2 px-1">
+                            <h4 className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                <Clock size={12} className="text-emerald-500" />
+                                آلة الزمن
+                            </h4>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
+                                {selectedDateLabel}
+                            </span>
+                        </div>
+                        <input
+                            type="range"
+                            min="-7"
+                            max="0"
+                            step="1"
+                            value={timeOffset}
+                            onChange={(e) => setTimeOffset(parseInt(e.target.value))}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 mb-1"
+                        />
+                        <div className="flex justify-between px-1">
+                            <span className="text-[9px] text-slate-400 font-bold">قبل أسبوع</span>
+                            <span className="text-[9px] text-slate-400 font-bold">اليوم</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
