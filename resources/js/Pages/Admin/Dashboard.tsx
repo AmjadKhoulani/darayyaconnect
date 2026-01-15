@@ -70,7 +70,7 @@ export default function Dashboard({
 
     return (
         <AdminLayout
-            user={auth.user}
+            user={auth?.user || { name: 'Admin', role: 'admin' }}
             header={
                 <h2 className="text-xl font-bold leading-tight text-slate-800">
                     غرفة العمليات المركزية
