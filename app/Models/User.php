@@ -74,4 +74,40 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Department::class);
     }
+
+    /**
+     * Check if user is an admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is an official
+     */
+    public function isOfficial(): bool
+    {
+        return $this->role === 'official';
+    }
+
+    /**
+     * Check if user is a citizen
+     */
+    public function isCitizen(): bool
+    {
+        return $this->role === 'citizen';
+    }
+
+    /**
+     * Check if user has a specific role or roles
+     */
+    public function hasRole(string|array $roles): bool
+    {
+        if (is_array($roles)) {
+            return in_array($this->role, $roles);
+        }
+
+        return $this->role === $roles;
+    }
 }

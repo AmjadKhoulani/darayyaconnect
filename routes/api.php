@@ -6,8 +6,11 @@ use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\PortalController;
 
-Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
-Route::post('/register', [\App\Http\Controllers\Api\AuthController::class, 'register']);
+// Auth Routes - Limited to 5 attempts per minute
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+    Route::post('/register', [\App\Http\Controllers\Api\AuthController::class, 'register']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -23,16 +26,19 @@ use App\Http\Controllers\Api\InfrastructureController;
 use App\Http\Controllers\Api\AiRecommendationController;
 use App\Http\Controllers\Admin\DashboardController;
 
-// Public Alerts & Polls
-Route::get('/alerts/active', [DashboardController::class, 'activeAlerts']);
-Route::get('/polls/active', [DashboardController::class, 'activePoll']);
-Route::prefix('analytics')->group(function () {
-    Route::get('/heatmap', [\App\Http\Controllers\AnalyticsController::class, 'heatmap']);
-    Route::get('/pulse', [\App\Http\Controllers\AnalyticsController::class, 'pulse']);
+// Public Routes - Limited to 60 requests per minute
+Route::middleware('throttle:60,1')->group(function () {
+    // Public Alerts & Polls
+    Route::get('/alerts/active', [DashboardController::class, 'activeAlerts']);
+    Route::get('/polls/active', [DashboardController::class, 'activePoll']);
+    Route::prefix('analytics')->group(function () {
+        Route::get('/heatmap', [\App\Http\Controllers\AnalyticsController::class, 'heatmap']);
+        Route::get('/pulse', [\App\Http\Controllers\AnalyticsController::class, 'pulse']);
+    });
+    // Locations
+    Route::get('/locations', [LocationController::class, 'index']);
+    Route::post('/locations', [LocationController::class, 'store']);
 });
-// Locations
-Route::get('/locations', [LocationController::class, 'index']);
-Route::post('/locations', [LocationController::class, 'store']);
 
 // Infrastructure & Reporting (Urban Platform)
 Route::get('/infrastructure/vector-layers', [\App\Http\Controllers\Api\VectorLayerController::class, 'index']); // RESTORED

@@ -34,7 +34,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // Admin Panel
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')
+        ->middleware(['auth', 'verified', 'role:admin'])
+        ->name('admin.')
+        ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         
         // AI Studies Management
@@ -106,13 +109,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/onboarding/location', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.location');
     Route::post('/onboarding/location', [\App\Http\Controllers\OnboardingController::class, 'store']);
 
-    // Official Routes
-    Route::get('/official/dashboard', [\App\Http\Controllers\OfficialDashboardController::class, 'index'])->name('official.dashboard');
-    Route::post('/official/reports/{report}/update', [\App\Http\Controllers\OfficialDashboardController::class, 'updateReportStatus'])->name('official.report.update');
-    Route::post('/official/services/update', [\App\Http\Controllers\OfficialDashboardController::class, 'updateServiceStatus'])->name('official.service.update');
+    // Official Routes (Protected by official role)
+    Route::middleware('role:official')->prefix('official')->name('official.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\OfficialDashboardController::class, 'index'])->name('dashboard');
+        Route::post('/reports/{report}/update', [\App\Http\Controllers\OfficialDashboardController::class, 'updateReportStatus'])->name('report.update');
+        Route::post('/services/update', [\App\Http\Controllers\OfficialDashboardController::class, 'updateServiceStatus'])->name('service.update');
+        Route::post('/polls', [\App\Http\Controllers\OfficialPollController::class, 'store'])->name('polls.store');
+    });
 
     // Poll Routes
-    Route::post('/official/polls', [\App\Http\Controllers\OfficialPollController::class, 'store'])->name('official.polls.store');
     Route::post('/polls/{poll}/vote', [\App\Http\Controllers\PollController::class, 'vote'])->name('polls.vote');
 
     // Event Routes

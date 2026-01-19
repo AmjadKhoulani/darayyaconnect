@@ -12,6 +12,7 @@ interface Props {
         transformers: number;
         parks: number;
     };
+    liveIndicators: any[];
     feed: any[];
     featuredStudy?: any;
     latestDiscussions?: any[];
@@ -30,6 +31,7 @@ export default function Welcome({
     auth,
     dutyPharmacies,
     cityStats,
+    liveIndicators,
     feed,
     featuredStudy,
     latestDiscussions,
@@ -42,139 +44,176 @@ export default function Welcome({
         >
             <Head title="بوابة المدينة الذكية" />
 
-            {/* Top Navigation - Official Portal Style (Light) */}
-            <nav className="fixed top-0 z-50 h-16 w-full border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur-md">
-                <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 text-xl font-black text-white shadow-lg shadow-emerald-900/10">
+            {/* Top Navigation - Transparent/Glassmorphism */}
+            <nav className="fixed top-0 z-50 h-20 w-full bg-white/70 backdrop-blur-xl border-b border-slate-200/50">
+                <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
+                    <div className="flex items-center gap-5">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-2xl font-black text-white shadow-xl shadow-emerald-500/20 ring-4 ring-emerald-500/10">
                             D
                         </div>
                         <div className="hidden md:block">
-                            <h1 className="text-lg font-bold leading-tight text-slate-900">
-                                داريا{' '}
-                                <span className="text-emerald-600">
-                                    الرقمية
-                                </span>
+                            <h1 className="text-xl font-black tracking-tight text-slate-900">
+                                داريا <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">الرقمية</span>
                             </h1>
-                            <p className="text-[10px] uppercase tracking-wider text-slate-500">
-                                منصة إدارة المدينة الموحدة
+                            <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">
+                                Smart City Ecosystem
                             </p>
                         </div>
                     </div>
 
-                    <div className="hidden items-center gap-6 md:flex">
-                        <NavLink
-                            href={route('infrastructure.index')}
-                            label="الخريطة"
-                        />
-                        <NavLink
-                            href={route('initiatives.public')}
-                            label="المبادرات"
-                        />
+                    <div className="hidden items-center gap-8 lg:flex">
+                        <NavLink href={route('infrastructure.index')} label="الخريطة" active={route().current('infrastructure.*')} />
+                        <NavLink href={route('initiatives.public')} label="المبادرات" />
                         <NavLink href={route('ai-studies')} label="الدراسات" />
-                        <NavLink
-                            href={route('community.index')}
-                            label="المجتمع"
-                        />
-                        <NavLink
-                            href={route('volunteer.index')}
-                            label="التطوع"
-                        />
+                        <NavLink href={route('community.index')} label="المجتمع" />
+                        <NavLink href={route('volunteer.index')} label="التطوع" />
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         {auth?.user ? (
                             <Link
                                 href={route('dashboard')}
-                                className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-1.5 transition hover:bg-slate-100"
+                                className="group flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/50 px-5 py-2 transition-all hover:bg-emerald-100/80 active:scale-95"
                             >
-                                <span className="text-sm font-bold text-emerald-700 group-hover:text-emerald-800">
-                                    لوحة التحكم
-                                </span>
+                                <span className="text-sm font-black text-emerald-700">لوحة التحكم</span>
                             </Link>
                         ) : (
                             <Link
                                 href={route('login')}
-                                className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-900/10 transition hover:bg-emerald-700"
+                                className="rounded-xl bg-slate-900 px-6 py-2.5 text-xs font-black text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 hover:-translate-y-0.5 active:scale-95"
                             >
-                                دخول الموظفين
+                                نظام الموظفين
                             </Link>
                         )}
                     </div>
                 </div>
             </nav>
 
-            <div className="mx-auto max-w-7xl px-4 pb-12 pt-24">
-                {/* 1. Quick Services Grid (Mobile Style) - Moved to TOP as requested */}
-                <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Main Content Container */}
+            <div className="mx-auto max-w-7xl px-6 pb-20 pt-28">
+
+                {/* 1. Stunning Hero Section */}
+                <div className="relative mb-16 overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 md:p-16 lg:p-20 shadow-2xl shadow-slate-900/30">
+                    <div className="absolute inset-0 opacity-20">
+                        <div className="absolute top-0 -left-4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+                        <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+                        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+                    </div>
+
+                    <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-right">
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
+                            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Darayya Digital Portal 2026</span>
+                        </div>
+                        <h1 className="mb-6 max-w-3xl text-4xl font-black leading-[1.1] text-white md:text-5xl lg:text-7xl">
+                            مستقبل <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">داريا</span> يصنعه مجتمعها الرقمي
+                        </h1>
+                        <p className="mb-10 max-w-2xl text-lg font-medium leading-relaxed text-slate-400 md:text-xl">
+                            المنصة الموحدة لإدارة خدمات المدينة، المبادرات المجتمعية، والدراسات الرقمية المتقدمة لتعزيز جودة الحياة.
+                        </p>
+
+                        <div className="flex flex-col gap-4 sm:flex-row">
+                            <Link
+                                href={route('infrastructure.index')}
+                                className="flex items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-sm font-black text-slate-900 shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-400 hover:-translate-y-1 active:scale-95"
+                            >
+                                <span className="text-lg">🗺️</span> استكشف خريطة المدينة
+                            </Link>
+                            <Link
+                                href={route('community.index')}
+                                className="flex items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-8 py-4 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-slate-800 hover:-translate-y-1 active:scale-95"
+                            >
+                                <span className="text-lg">💬</span> انضم لمجلس المجتمع
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Floating Cards (Decorative for Desktop) */}
+                    <div className="absolute left-20 top-1/2 hidden -translate-y-1/2 lg:block">
+                        <div className="grid grid-cols-2 gap-4">
+                            {[
+                                { label: 'مدارس', val: cityStats.schools, icon: '🏫', color: 'blue' },
+                                { label: 'صحة', val: cityStats.clinics, icon: '🏥', color: 'rose' },
+                                { label: 'طاقة', val: cityStats.transformers, icon: '⚡', color: 'amber' },
+                                { label: 'آبار', val: cityStats.wells, icon: '💧', color: 'emerald' },
+                            ].map((s, i) => (
+                                <div key={i} className="group relative w-32 rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-2xl transition-all hover:bg-white/10">
+                                    <div className={`mb-2 text-2xl`}>{s.icon}</div>
+                                    <div className="text-xl font-black text-white">{s.val}</div>
+                                    <div className="text-[10px] font-bold text-slate-500 uppercase">{s.label}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Quick Services Grid (Modern App Style) */}
+                <div className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                     <Link
                         href="/directory"
-                        className="group relative flex h-32 items-center gap-4 rounded-3xl border border-slate-200 bg-white p-6 text-inherit no-underline shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-8 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10"
                     >
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 transition-transform group-hover:scale-110">
+                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-amber-50 text-amber-500 transition-transform group-hover:scale-110 group-hover:rotate-6">
                             <span className="text-3xl">📞</span>
                         </div>
                         <div>
-                            <h4 className="mb-1 text-lg font-bold text-slate-800">
-                                دليل الطوارئ
-                            </h4>
-                            <p className="text-xs text-slate-500">
-                                أرقام الخدمات السريعة
-                            </p>
+                            <h4 className="mb-2 text-xl font-black text-slate-800">دليل الخدمات</h4>
+                            <p className="text-sm font-medium text-slate-400">أرقام الطوارئ والمؤسسات الخدمية في متناول يدك</p>
+                        </div>
+                        <div className="mt-6 flex items-center gap-2 font-black text-emerald-600">
+                            <span className="text-xs uppercase tracking-widest">تصفح الآن</span>
+                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
                         </div>
                     </Link>
 
                     <Link
                         href="/lost-found"
-                        className="group relative flex h-32 items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white no-underline shadow-lg shadow-indigo-500/10 transition-all hover:shadow-indigo-500/20 active:scale-[0.98]"
+                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-600/30"
                     >
-                        <div className="absolute right-0 top-0 -mr-12 -mt-12 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
-                        <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110">
+                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110 group-hover:rotate-6">
                             <span className="text-3xl">🔍</span>
                         </div>
-                        <div className="relative z-10">
-                            <h4 className="mb-1 text-lg font-bold text-white">
-                                المفقودات
-                            </h4>
-                            <p className="text-xs font-medium text-indigo-100/80">
-                                ساعد في الإعادة
-                            </p>
+                        <div>
+                            <h4 className="mb-2 text-xl font-black">مركز المفقودات</h4>
+                            <p className="text-sm font-medium text-indigo-100/70">ساهم في إعادة الممتلكات لأصحابها أو أبلغ عن مفقود</p>
+                        </div>
+                        <div className="mt-6 flex items-center gap-2 font-black">
+                            <span className="text-xs uppercase tracking-widest">المزيد</span>
+                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
                         </div>
                     </Link>
 
                     <Link
                         href="/books"
-                        className="group relative flex h-32 items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-teal-500 to-emerald-600 p-6 text-white no-underline shadow-lg shadow-emerald-500/10 transition-all hover:shadow-emerald-500/20 active:scale-[0.98]"
+                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-emerald-600 p-8 text-white shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/30"
                     >
-                        <div className="absolute right-0 top-0 -mr-12 -mt-12 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
-                        <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110">
+                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110 group-hover:rotate-6">
                             <span className="text-3xl">📚</span>
                         </div>
-                        <div className="relative z-10">
-                            <h4 className="mb-1 text-lg font-bold text-white">
-                                مكتبة الكتب
-                            </h4>
-                            <p className="text-xs font-medium text-emerald-50/80">
-                                تبادل المعرفة
-                            </p>
+                        <div>
+                            <h4 className="mb-2 text-xl font-black">مكتبة المجتمع</h4>
+                            <p className="text-sm font-medium text-emerald-50/70">منصة تبادل الكتب الورقية لتشجيع القراءة في المدينة</p>
+                        </div>
+                        <div className="mt-6 flex items-center gap-2 font-black">
+                            <span className="text-xs uppercase tracking-widest">تصفح الكتب</span>
+                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
                         </div>
                     </Link>
 
                     <Link
                         href="/ai-studies"
-                        className="group relative flex h-32 items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 p-6 text-white no-underline shadow-lg shadow-blue-500/10 transition-all hover:shadow-blue-500/20 active:scale-[0.98]"
+                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50 p-8 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-200/50"
                     >
-                        <div className="absolute right-0 top-0 -mr-12 -mt-12 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
-                        <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110">
+                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-900 text-white transition-transform group-hover:scale-110 group-hover:rotate-6">
                             <span className="text-3xl">💡</span>
                         </div>
-                        <div className="relative z-10">
-                            <h4 className="mb-1 text-lg font-bold text-white">
-                                التوعية المجتمعية
-                            </h4>
-                            <p className="text-xs font-medium text-blue-50/80">
-                                مقالات ودراسات
-                            </p>
+                        <div>
+                            <h4 className="mb-2 text-xl font-black text-slate-800">مركز المعرفة</h4>
+                            <p className="text-sm font-medium text-slate-400">تحليل البيانات والمبادرات الرقمية لتطوير داريا</p>
+                        </div>
+                        <div className="mt-6 flex items-center gap-2 font-black text-slate-800">
+                            <span className="text-xs uppercase tracking-widest">الدراسات</span>
+                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
                         </div>
                     </Link>
                 </div>
@@ -279,144 +318,147 @@ export default function Welcome({
                     </div>
                 </HomeSection>
 
-                <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12">
-                    {/* Right Column: Key Indicators & Quick Services (3 Cols) */}
-                    <aside className="space-y-6 lg:col-span-3">
-                        {/* Live Status Card */}
-                        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
-                                <h3 className="text-sm font-bold text-slate-700">
-                                    📊 المؤشرات الحيوية
+                <div className="mt-20 grid grid-cols-1 gap-12 lg:grid-cols-12">
+                    {/* Right Column: Live Ecosystem (3 Cols) */}
+                    <aside className="space-y-8 lg:col-span-4">
+                        {/* Live Status Card - New Premium Design */}
+                        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40">
+                            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-8 py-5">
+                                <h3 className="flex items-center gap-3 text-sm font-black text-slate-900 uppercase tracking-widest">
+                                    <span className="text-xl">📊</span> المؤشرات الحيوية
                                 </h3>
-                                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
+                                <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1">
+                                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
+                                    <span className="text-[10px] font-black text-emerald-600">LIVE</span>
+                                </div>
                             </div>
-                            <div className="space-y-4 p-4">
-                                <StatusRow
-                                    label="الكهرباء (المدينة)"
-                                    value="متوفرة (2س)"
-                                    status="good"
-                                    icon="⚡"
-                                />
-                                <StatusRow
-                                    label="المياه (الضخ)"
-                                    value="المنطقة أ، ب"
-                                    status="good"
-                                    icon="💧"
-                                />
-                                <StatusRow
-                                    label="الإنترنت (الأرضي)"
-                                    value="مستقر"
-                                    status="good"
-                                    icon="🌐"
-                                />
-                                <StatusRow
-                                    label="حالة الطرق"
-                                    value="ازدحام متوسط"
-                                    status="warning"
-                                    icon="🚦"
-                                />
+                            <div className="space-y-6 p-8">
+                                {liveIndicators && liveIndicators.map((item, i) => (
+                                    <StatusRow
+                                        key={i}
+                                        label={item.label}
+                                        value={item.value}
+                                        status={item.status}
+                                        icon={item.icon}
+                                        percentage={item.percentage}
+                                    />
+                                ))}
                             </div>
                         </div>
 
-                        {/* Quick Access Grid */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <QuickBtn
-                                icon="🔌"
-                                label="المولدات"
-                                color="amber"
-                                href={route('admin.generators.index')}
-                            />
-                            <QuickBtn
-                                icon="🔍"
-                                label="المفقودات"
-                                color="rose"
-                                href={route('admin.lost-found.index')}
-                            />
-                            <QuickBtn
-                                icon="🏗️"
-                                label="المشاريع"
-                                color="blue"
-                                href={route('infrastructure.index')}
-                            />
-                        </div>
-
-                        {/* Duty Pharmacy Mini */}
-                        <div className="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900 to-slate-800 p-4 text-white shadow-lg">
-                            <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase text-slate-300">
-                                <span>💊</span> الصيدليات المناوبة
+                        {/* Duty Pharmacy Mini - Dark Mode Premium */}
+                        <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-2xl shadow-slate-900/30">
+                            <div className="absolute top-0 right-0 -mr-8 -mt-8 h-24 w-24 rounded-full bg-emerald-500/20 blur-2xl"></div>
+                            <h3 className="relative z-10 mb-6 flex items-center gap-3 text-xs font-black uppercase tracking-widest text-slate-400">
+                                <span className="text-xl">💊</span> الصيدليات المناوبة
                             </h3>
-                            <div className="space-y-2">
+                            <div className="relative z-10 space-y-3">
                                 {dutyPharmacies && dutyPharmacies.length > 0 ? (
-                                    dutyPharmacies.slice(0, 2).map((p, i) => (
+                                    dutyPharmacies.slice(0, 3).map((p, i) => (
                                         <div
                                             key={i}
-                                            className="rounded border border-white/5 bg-white p-2 text-sm font-bold text-slate-900 shadow-sm"
+                                            className="group flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 p-4 transition-all hover:bg-white/10"
                                         >
-                                            {p.name}
+                                            <span className="text-sm font-black">{p.name}</span>
+                                            <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
                                         </div>
                                     ))
                                 ) : (
-                                    <span className="text-xs text-slate-400">
-                                        جاري التحديث...
-                                    </span>
+                                    <div className="rounded-2xl border border-dashed border-slate-700 p-4 text-center">
+                                        <span className="text-xs font-bold text-slate-500">جاري تحديث البيانات...</span>
+                                    </div>
+                                )}
+                            </div>
+                            <Link href="/directory" className="relative z-10 mt-6 block text-center text-[10px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300">
+                                عرض الدليل الكامل
+                            </Link>
+                        </div>
+                        {/* Community Discussions Widget */}
+                        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40 mt-8">
+                            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-8 py-5">
+                                <h3 className="flex items-center gap-3 text-sm font-black text-slate-900 uppercase tracking-widest">
+                                    <span>💬</span> نقاشات المجتمع
+                                </h3>
+                                <Link
+                                    href={route('community.index')}
+                                    className="text-[10px] font-black text-emerald-600 hover:underline"
+                                >
+                                    الكل
+                                </Link>
+                            </div>
+                            <div className="divide-y divide-slate-100">
+                                {latestDiscussions && latestDiscussions.length > 0 ? (
+                                    latestDiscussions.map((d: any) => (
+                                        <Link
+                                            key={d.id}
+                                            href={route('community.show', d.id)}
+                                            className="group block p-6 transition hover:bg-slate-50"
+                                        >
+                                            <h4 className="mb-2 line-clamp-1 text-sm font-black text-slate-700 group-hover:text-emerald-600">
+                                                {d?.title}
+                                            </h4>
+                                            <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                                <span className="font-bold">{d?.user}</span>
+                                                <div className="flex items-center gap-3">
+                                                    <span>{d?.time}</span>
+                                                    <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5">
+                                                        <span>↩️</span> {d?.replies_count}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))
+                                ) : (
+                                    <div className="p-10 text-center text-xs text-slate-400">
+                                        لا توجد نقاشات حالياً
+                                    </div>
                                 )}
                             </div>
                         </div>
                     </aside>
 
-                    <main className="space-y-6 lg:col-span-6">
-                        {/* Featured Study (Hero) */}
+                    <main className="space-y-10 lg:col-span-8">
+                        {/* Featured Study (Hero) - Enhanced */}
                         {featuredStudy ? (
-                            <div className="group relative aspect-video overflow-hidden rounded-2xl border border-emerald-100 shadow-xl shadow-emerald-900/10 md:aspect-[2/1]">
-                                <div
-                                    className={`absolute inset-0 bg-gradient-to-br ${featuredStudy?.gradient || 'from-emerald-500 to-teal-600'} opacity-90`}
-                                ></div>
+                            <div className="group relative min-h-[400px] overflow-hidden rounded-[2.5rem] border border-emerald-100 shadow-2xl shadow-emerald-500/10">
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent z-10"></div>
                                 <img
-                                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070&auto=format&fit=crop"
-                                    className="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-overlay"
+                                    src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=2069&auto=format&fit=crop"
+                                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    alt="Featured Study"
                                 />
-                                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-                                    <div className="mb-2 flex items-center gap-2">
-                                        <span className="rounded bg-white/20 px-2 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur">
-                                            {featuredStudy?.icon || '📄'} دراسة
-                                            مميزة
+                                <div className="absolute inset-0 z-20 flex flex-col justify-end p-10 md:p-14">
+                                    <div className="mb-4 flex items-center gap-2">
+                                        <span className="rounded-full bg-emerald-500/20 px-4 py-1.5 text-[10px] font-black text-emerald-400 backdrop-blur-md border border-emerald-500/30">
+                                            {featuredStudy?.icon || '📄'} دراسة مميزة
                                         </span>
-                                        <span className="rounded bg-white/20 px-2 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur">
+                                        <span className="rounded-full bg-white/10 px-4 py-1.5 text-[10px] font-black text-white backdrop-blur-md">
                                             {featuredStudy?.category || 'عام'}
                                         </span>
                                     </div>
-                                    <h2 className="mb-2 text-2xl font-black leading-tight text-white drop-shadow-sm md:text-3xl">
+                                    <h2 className="mb-4 text-3xl font-black leading-tight text-white md:text-5xl">
                                         {featuredStudy?.title}
                                     </h2>
-                                    <p className="mb-4 line-clamp-2 text-sm font-medium text-white/90 drop-shadow-sm md:text-base">
-                                        {featuredStudy?.summary ||
-                                            'استكشف تفاصيل هذه الدراسة المستقبلية التي تهدف لتحسين واقع المدينة...'}
+                                    <p className="mb-8 max-w-2xl text-base font-medium text-slate-300 drop-shadow-sm line-clamp-2">
+                                        {featuredStudy?.summary || 'رؤية مستقبلية لتطوير البنية التحتية والخدمات الذكية في مدينة داريا.'}
                                     </p>
                                     <Link
                                         href={route('ai-studies')}
-                                        className="flex w-fit items-center gap-2 rounded-lg bg-white px-5 py-2 text-sm font-bold text-emerald-900 shadow-lg transition hover:bg-emerald-50"
+                                        className="flex w-fit items-center gap-3 rounded-2xl bg-white px-8 py-4 text-sm font-black text-slate-900 shadow-xl transition-all hover:bg-emerald-50 hover:-translate-y-1"
                                     >
-                                        قراءة الدراسة الكاملة <span>←</span>
+                                        قراءة الدراسة <span>←</span>
                                     </Link>
                                 </div>
                             </div>
-                        ) : (
-                            // Fallback Placeholder
-                            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-100 p-8 text-center">
-                                <div className="mb-2 text-4xl">🚧</div>
-                                <h3 className="font-bold text-slate-500">
-                                    جاري إعداد الدراسات...
-                                </h3>
-                            </div>
-                        )}
+                        ) : null}
 
                         {/* Feed Header */}
-                        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                            <h2 className="flex items-center gap-2 text-xl font-bold text-slate-800">
-                                <span className="h-6 w-2 rounded-full bg-emerald-500"></span>
+                        <div className="flex flex-col gap-6 border-b border-slate-100 pb-8 sm:flex-row sm:items-center sm:justify-between">
+                            <h2 className="flex items-center gap-4 text-3xl font-black text-slate-900">
+                                <span className="h-8 w-2 rounded-full bg-emerald-500"></span>
                                 نبض المدينة
                             </h2>
-                            <div className="flex gap-2">
+                            <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
                                 <FilterBtn label="الكل" active />
                                 <FilterBtn label="رسمي" />
                                 <FilterBtn label="خدمي" />
@@ -425,8 +467,7 @@ export default function Welcome({
                         </div>
 
                         {/* Timeline Posts */}
-                        <div className="space-y-6">
-                            {/* Dynamic Feed */}
+                        <div className="space-y-8">
                             {feed && feed.length > 0 ? (
                                 feed.map((post: any) => (
                                     <UpdateCard
@@ -441,100 +482,14 @@ export default function Welcome({
                                     />
                                 ))
                             ) : (
-                                <UpdateCard
-                                    author="المنظومة الذكية"
-                                    role="مرحباً"
-                                    time="الآن"
-                                    title="أهلاً بك في داريا الرقمية"
-                                    color="emerald"
-                                    content="لم يتم نشر أي تحديثات جديدة بعد. كن أول من يشارك عبر تقديم مبادرة أو الإبلاغ عن مفقودات!"
-                                />
+                                <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+                                    <div className="mb-4 text-5xl">📡</div>
+                                    <h3 className="text-xl font-black text-slate-800">لا توجد تحديثات حالياً</h3>
+                                    <p className="text-sm font-medium text-slate-400">كن أول من يشارك عبر تقديم مبادرة أو الإبلاغ عن مفقودات!</p>
+                                </div>
                             )}
                         </div>
                     </main>
-
-                    {/* Left Column: Data & Analytics (3 Cols) */}
-                    <aside className="space-y-6 lg:col-span-3">
-                        {/* Stats Widget */}
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                            <h3 className="mb-4 text-sm font-bold text-slate-800">
-                                أرقام ونسب
-                            </h3>
-                            <div className="space-y-4">
-                                <StatBar
-                                    label="إنجاز مشاريع الطاقة"
-                                    current={75}
-                                    total={100}
-                                    color="emerald"
-                                />
-                                <StatBar
-                                    label="استجابة الشكاوى"
-                                    current={92}
-                                    total={100}
-                                    color="blue"
-                                />
-                                <StatBar
-                                    label="جاهزية المدارس"
-                                    current={60}
-                                    total={100}
-                                    color="amber"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Community Discussions Widget (New) */}
-                        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-4">
-                                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                                    <span>💬</span> نقاشات المجتمع
-                                </h3>
-                                <Link
-                                    href={route('community.index')}
-                                    className="text-[10px] font-bold text-emerald-600 hover:underline"
-                                >
-                                    الكل
-                                </Link>
-                            </div>
-                            <div className="divide-y divide-slate-100">
-                                {latestDiscussions &&
-                                latestDiscussions.length > 0 ? (
-                                    latestDiscussions.map((d: any) => (
-                                        <Link
-                                            key={d.id}
-                                            href={route('community.show', d.id)}
-                                            className="group block p-3 transition hover:bg-slate-50"
-                                        >
-                                            <h4 className="mb-1 line-clamp-1 text-xs font-bold text-slate-700 group-hover:text-emerald-600">
-                                                {d?.title}
-                                            </h4>
-                                            <div className="flex items-center justify-between text-[10px] text-slate-400">
-                                                <span>{d?.user}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span>{d?.time}</span>
-                                                    <span className="flex items-center gap-1 rounded-full bg-slate-100 px-1.5">
-                                                        <span>↩️</span>{' '}
-                                                        {d?.replies_count}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    ))
-                                ) : (
-                                    <div className="p-4 text-center text-xs text-slate-400">
-                                        لا توجد نقاشات حالياً
-                                    </div>
-                                )}
-                            </div>
-                            <div className="border-t border-slate-100 bg-slate-50 p-3 text-center">
-                                <Link
-                                    href={route('community.index')}
-                                    className="block w-full text-xs font-bold text-emerald-600 hover:text-emerald-700"
-                                >
-                                    + فتح نقاش جديد
-                                </Link>
-                            </div>
-                        </div>
-                    </aside>
                 </div>
 
                 {/* Secondary Horizontal Sections */}
@@ -556,6 +511,7 @@ export default function Welcome({
                                         <img
                                             src={`/storage/${item.image}`}
                                             className="h-full w-full object-cover"
+                                            alt={item.title}
                                         />
                                     ) : (
                                         <div className="flex h-full w-full items-center justify-center font-serif text-3xl italic text-slate-300">
@@ -663,20 +619,30 @@ function NavLink({ href, label, active }: any) {
     );
 }
 
-function StatusRow({ label, value, status, icon }: any) {
+function StatusRow({ label, value, status, icon, percentage }: any) {
     const colors =
         {
-            good: 'text-emerald-600',
-            warning: 'text-amber-600',
-            bad: 'text-rose-600',
-        }[status as string] || 'text-slate-500';
+            good: 'emerald',
+            warning: 'amber',
+            bad: 'rose',
+        }[status as string] || 'slate';
 
     return (
-        <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2 text-slate-500">
-                <span>{icon}</span> {label}
-            </span>
-            <span className={`font-bold ${colors}`}>{value}</span>
+        <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-2 font-black text-slate-500 uppercase tracking-tighter">
+                    <span className="text-base">{icon}</span> {label}
+                </span>
+                <span className={`font-black text-${colors}-600`}>{value}</span>
+            </div>
+            {percentage !== undefined && (
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                        className={`h-full rounded-full bg-${colors}-500 transition-all duration-1000`}
+                        style={{ width: `${percentage}%` }}
+                    ></div>
+                </div>
+            )}
         </div>
     );
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\BookRequest;
+use App\Notifications\BookRequestNotification;
+use App\Notifications\BookRequestStatusNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -144,7 +146,8 @@ class BookController extends Controller
             'status' => 'pending',
         ]);
 
-        // TODO: Send notification to owner
+        // Send notification to owner
+        $book->user->notify(new BookRequestNotification($bookRequest, $book, Auth::user()));
 
         return response()->json([
             'message' => 'تم إرسال الطلب',
@@ -202,7 +205,8 @@ class BookController extends Controller
         // Update book status
         $bookRequest->book->update(['status' => 'borrowed']);
 
-        // TODO: Send notification to requester
+        // Send notification to requester
+        $bookRequest->requester->notify(new BookRequestStatusNotification($bookRequest, $bookRequest->book, 'approved'));
 
         return response()->json([
             'message' => 'تمت الموافقة على الطلب',
@@ -220,6 +224,9 @@ class BookController extends Controller
         }
 
         $bookRequest->update(['status' => 'rejected']);
+
+        // Send notification to requester
+        $bookRequest->requester->notify(new BookRequestStatusNotification($bookRequest, $bookRequest->book, 'rejected'));
 
         return response()->json(['message' => 'تم رفض الطلب']);
     }
@@ -240,6 +247,9 @@ class BookController extends Controller
 
         // Update book status
         $bookRequest->book->update(['status' => 'available']);
+
+        // Send notification to requester
+        $bookRequest->requester->notify(new BookRequestStatusNotification($bookRequest, $bookRequest->book, 'returned'));
 
         return response()->json(['message' => 'تم تسجيل الإرجاع']);
     }

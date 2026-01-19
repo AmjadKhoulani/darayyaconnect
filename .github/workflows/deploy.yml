@@ -21,4 +21,5 @@ jobs:
             cd /home/darayya/domains/darayyaconnect.com/public_html
             git reset --hard HEAD
             git clean -fd
+            git pull origin main
             bash deploy.sh

@@ -14,13 +14,17 @@ class WelcomeController extends Controller
     public function index()
     {
         // 1. Fetch Duty Pharmacies (Existing Logic)
-        $dutyPharmacies = DB::table('directory_contacts')
-            ->where('category', 'health')
-            ->where('name', 'like', '%صيدلية%')
-            ->where('status', 'open')
-            ->get();
+        try {
+            $dutyPharmacies = DB::table('directory_contacts')
+                ->where('category', 'health')
+                ->where('name', 'like', '%صيدلية%')
+                ->where('status', 'open')
+                ->get();
+        } catch (\Throwable $e) {
+            $dutyPharmacies = collect([]);
+        }
 
-        // 2. Fetch City Statistics (New Logic)
+        // 2. Fetch City Statistics (Core Infrastructure)
         $stats = [
             'schools' => InfrastructurePoint::where('type', 'school')->count(),
             'clinics' => InfrastructurePoint::where('type', 'health_center')->count(),
@@ -29,7 +33,40 @@ class WelcomeController extends Controller
             'parks' => InfrastructurePoint::where('type', 'park')->count(),
         ];
 
-        // 3. Fetch Dynamic Content (Feed)
+        // 3. Live Indicators (Electricity, Water, internet, Roads)
+        // These could eventually pull from a "Settings" or "LiveStatus" table
+        $liveIndicators = [
+            [
+                'label' => 'الكهرباء (المدينة)',
+                'value' => 'متوفرة (2س)',
+                'status' => 'good', // good, warning, bad
+                'icon' => '⚡',
+                'percentage' => 75
+            ],
+            [
+                'label' => 'المياه (الضخ)',
+                'value' => 'المنطقة أ، ب',
+                'status' => 'good',
+                'icon' => '💧',
+                'percentage' => 90
+            ],
+            [
+                'label' => 'الإنترنت (الأرضي)',
+                'value' => 'مستقر',
+                'status' => 'good',
+                'icon' => '🌐',
+                'percentage' => 100
+            ],
+            [
+                'label' => 'حالة الطرق',
+                'value' => 'ازدحام متوسط',
+                'status' => 'warning',
+                'icon' => '🚦',
+                'percentage' => 60
+            ],
+        ];
+
+        // 4. Fetch Dynamic Content (Feed)
         $initiatives_feed = \App\Models\Initiative::where('status', 'active')
             ->latest()
             ->take(3)
@@ -86,42 +123,22 @@ class WelcomeController extends Controller
 
         $feed = collect([...$alerts_feed, ...$initiatives_feed, ...$books_feed]); 
 
-        // 4. Fetch Detailed Section Data
-        $studies = \App\Models\AiStudy::where('category', '!=', 'awareness')
-            ->where('category', '!=', 'global')
-            ->latest()
-            ->take(4)
-            ->get();
+        // 5. Fetch Detailed Section Data
+        $sections = [
+            'studies' => \App\Models\AiStudy::whereNotIn('category', ['awareness', 'global', 'education'])
+                ->latest()->take(4)->get(),
+            'awareness' => \App\Models\AiStudy::whereIn('category', ['awareness', 'education'])
+                ->latest()->take(4)->get(),
+            'global' => \App\Models\AiStudy::where('category', 'global')
+                ->latest()->take(4)->get(),
+            'opportunities' => \App\Models\VolunteerOpportunity::where('status', 'active')
+                ->latest()->take(4)->get(),
+            'initiatives' => \App\Models\Initiative::latest()->take(4)->get(),
+            'lostFound' => \App\Models\LostFoundItem::active()->latest()->take(4)->get(),
+            'books' => \App\Models\Book::where('status', 'available')->latest()->take(4)->get(),
+        ];
 
-        $awareness = \App\Models\AiStudy::where('category', 'awareness')
-            ->orWhere('category', 'education')
-            ->latest()
-            ->take(4)
-            ->get();
-
-        $globalExperiences = \App\Models\AiStudy::where('category', 'global')
-            ->latest()
-            ->take(4)
-            ->get();
-
-        $volunteerOpportunities = \App\Models\VolunteerOpportunity::where('status', 'active')
-            ->latest()
-            ->take(4)
-            ->get();
-
-        $allInitiatives = \App\Models\Initiative::latest()->take(4)->get();
-
-        $lostFoundItems = \App\Models\LostFoundItem::active()
-            ->latest()
-            ->take(4)
-            ->get();
-
-        $latestBooks = \App\Models\Book::where('status', 'available')
-            ->latest()
-            ->take(4)
-            ->get();
-
-        // 5. Fetch Featured Content
+        // 6. Fetch Featured Content
         $featuredStudy = \App\Models\AiStudy::latest()->first();
         
         $latestDiscussions = \App\Models\Discussion::with('user')
@@ -139,7 +156,7 @@ class WelcomeController extends Controller
                 ];
             });
 
-        // 6. Render Welcome Page
+        // 7. Render Welcome Page
         return Inertia::render('Welcome', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
@@ -147,18 +164,11 @@ class WelcomeController extends Controller
             'phpVersion' => PHP_VERSION,
             'dutyPharmacies' => $dutyPharmacies,
             'cityStats' => $stats,
+            'liveIndicators' => $liveIndicators,
             'feed' => $feed,
             'featuredStudy' => $featuredStudy,
             'latestDiscussions' => $latestDiscussions,
-            'sections' => [
-                'studies' => $studies,
-                'awareness' => $awareness,
-                'global' => $globalExperiences,
-                'opportunities' => $volunteerOpportunities,
-                'initiatives' => $allInitiatives,
-                'lostFound' => $lostFoundItems,
-                'books' => $latestBooks,
-            ]
+            'sections' => $sections
         ]);
     }
 }

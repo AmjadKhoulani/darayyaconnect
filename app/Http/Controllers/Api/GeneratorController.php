@@ -7,6 +7,8 @@ use App\Models\Generator;
 use App\Models\GeneratorRating;
 use App\Models\GeneratorPriceHistory;
 use App\Models\GeneratorSubscription;
+use App\Notifications\GeneratorPriceUpdateNotification;
+use App\Notifications\GeneratorIssueNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -146,8 +148,8 @@ class GeneratorController extends Controller
             'changed_at' => now()
         ]);
 
-        // TODO: Send notifications to subscribers
-        // $this->notifyPriceChange($generator, $oldPrice, $newPrice);
+        // Send notifications to subscribers
+        $this->notifyPriceChange($generator, $oldPrice, $newPrice);
 
         return response()->json([
             'message' => 'تم تحديث السعر بنجاح',
@@ -268,8 +270,8 @@ class GeneratorController extends Controller
             $generator->update(['status' => 'down']);
         }
 
-        // TODO: Send notifications to subscribers
-        // $this->notifyIssue($generator, $request->issue_type);
+        // Send notifications to subscribers
+        $this->notifyIssue($generator, $request->description ?? $request->issue_type);
 
         return response()->json(['message' => 'تم الإبلاغ عن المشكلة']);
     }
@@ -281,5 +283,35 @@ class GeneratorController extends Controller
         $generator->delete();
 
         return response()->json(['message' => 'تم حذف المولدة']);
+    }
+
+    /**
+     * Notify subscribers about price change
+     */
+    private function notifyPriceChange(Generator $generator, float $oldPrice, float $newPrice)
+    {
+        $subscribers = GeneratorSubscription::where('generator_id', $generator->id)
+            ->where('notify_price_change', true)
+            ->with('user')
+            ->get();
+
+        foreach ($subscribers as $subscription) {
+            $subscription->user->notify(new GeneratorPriceUpdateNotification($generator, $oldPrice, $newPrice));
+        }
+    }
+
+    /**
+     * Notify subscribers about generator issue
+     */
+    private function notifyIssue(Generator $generator, string $issue)
+    {
+        $subscribers = GeneratorSubscription::where('generator_id', $generator->id)
+            ->where('notify_issues', true)
+            ->with('user')
+            ->get();
+
+        foreach ($subscribers as $subscription) {
+            $subscription->user->notify(new GeneratorIssueNotification($generator, Auth::user(), $issue));
+        }
     }
 }

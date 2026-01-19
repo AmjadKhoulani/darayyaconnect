@@ -316,8 +316,9 @@ export default function Dashboard({
                             <div className="h-[250px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={Object.entries(trends?.services || {}).map(([type, logs]: [string, any]) => {
-                                        const avg = logs.length > 0
-                                            ? logs.reduce((acc: number, curr: any) => acc + (curr.available / curr.total), 0) / logs.length
+                                        const safeLogs = Array.isArray(logs) ? logs : [];
+                                        const avg = safeLogs.length > 0
+                                            ? safeLogs.reduce((acc: number, curr: any) => acc + (curr.available / curr.total), 0) / safeLogs.length
                                             : 0;
                                         return {
                                             name: type === 'electricity' ? 'كهرباء' : 'مياه',

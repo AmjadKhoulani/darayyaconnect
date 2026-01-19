@@ -87,8 +87,25 @@ class DashboardController extends Controller
             'active_alerts' => $safeFetch(fn() => ServiceAlert::active()->count(), 0),
         ];
 
+        // Helper to sanitize UTF-8 recursively
+        $sanitizeRecursive = function ($data) use (&$sanitizeRecursive) {
+            if (is_string($data)) {
+                return mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+            }
+            if (is_array($data)) {
+                return array_map($sanitizeRecursive, $data);
+            }
+            if ($data instanceof \Illuminate\Database\Eloquent\Model) {
+                return $sanitizeRecursive($data->toArray());
+            }
+            if ($data instanceof \Illuminate\Support\Collection) {
+                return $data->map($sanitizeRecursive)->toArray();
+            }
+            return $data;
+        };
+
         try {
-            return Inertia::render('Admin/Dashboard', [
+            $data = [
                 'stats' => $stats,
                 'trends' => [
                     'reports' => $reportTrends,
@@ -106,7 +123,9 @@ class DashboardController extends Controller
                 'users' => $safeFetch(fn() => User::latest()->take(10)->get(), []),
                 'services' => $safeFetch(fn() => \App\Models\Service::all(), []),
                 'departments' => $safeFetch(fn() => \App\Models\Department::withCount('users')->get(), []),
-            ]);
+            ];
+
+            return Inertia::render('Admin/Dashboard', $sanitizeRecursive($data));
         } catch (\Throwable $e) {
             \Log::error('Inertia Render Error: ' . $e->getMessage());
             \Log::error($e->getTraceAsString());
