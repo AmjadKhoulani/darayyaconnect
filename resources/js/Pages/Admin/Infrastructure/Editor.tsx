@@ -410,7 +410,7 @@ export default function InfrastructureEditor({ auth }: Props) {
         }
     };
 
-    const startDraw = (mode: 'draw_line_string' | 'draw_point') => {
+    const startDraw = (mode: 'draw_line_string' | 'draw_point' | 'simple_select') => {
         if (draw.current) {
             draw.current.changeMode(mode);
         }
