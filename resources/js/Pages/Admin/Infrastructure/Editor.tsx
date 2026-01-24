@@ -308,7 +308,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
 
         try {
             if (feature.geometry.type === 'Point') {
-                await axios.post('/api/infrastructure/nodes', {
+                await axios.post('/admin/api/infrastructure/nodes', {
                     type: currentType,
                     latitude: feature.geometry.coordinates[1],
                     longitude: feature.geometry.coordinates[0],
@@ -319,7 +319,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     draw.current?.delete(feature.id);
                     return;
                 }
-                await axios.post('/api/infrastructure/lines', {
+                await axios.post('/admin/api/infrastructure/lines', {
                     type: currentType,
                     coordinates: feature.geometry.coordinates,
                     status: 'active',
@@ -347,7 +347,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
 
             const newMeta = { ...currentMeta, served_neighborhood: assignedNeighborhood };
 
-            await axios.put(`/api/infrastructure/${endpoint}/${inspectorData.id}`, {
+            await axios.put(`/admin/api/infrastructure/${endpoint}/${inspectorData.id}`, {
                 meta: newMeta
             });
 
@@ -366,7 +366,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         try {
             setLoading(true);
             const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
-            await axios.delete(`/api/infrastructure/${endpoint}/${inspectorData.id}`);
+            await axios.delete(`/admin/api/infrastructure/${endpoint}/${inspectorData.id}`);
             setInspectorData(null);
             fetchData();
         } catch (e) {

@@ -112,6 +112,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/moderation/forbidden-words/{id}', [\App\Http\Controllers\Admin\ModerationController::class, 'deleteForbiddenWord'])->name('moderation.forbidden-words.destroy');
 
         Route::put('/volunteering/applications/{id}', [\App\Http\Controllers\Admin\VolunteeringController::class, 'updateApplicationStatus'])->name('volunteering.application.update');
+
+        // Infrastructure API (Accessible via Session Auth)
+        Route::prefix('api/infrastructure')->group(function () {
+            Route::post('/lines', [App\Http\Controllers\Api\InfrastructureController::class, 'storeLine']);
+            Route::post('/nodes', [App\Http\Controllers\Api\InfrastructureController::class, 'storeNode']);
+            Route::put('/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'updateLine']);
+            Route::put('/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'updateNode']);
+            Route::delete('/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyLine']);
+            Route::delete('/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyNode']);
+        });
     });
 
     // Voting
