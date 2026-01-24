@@ -74,6 +74,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // General route for dynamic access if needed
         Route::get('/infrastructure/{sector}/editor', [InfrastructureManagerController::class, 'editor'])->name('infrastructure.sector.editor');
 
+        // Restore old route as redirect to prevent 404
+        Route::get('/infrastructure/editor', function() {
+            return to_route('admin.infrastructure.water.editor');
+        })->name('infrastructure.editor');
+
         // New Resources
         Route::resource('generators', \App\Http\Controllers\Admin\GeneratorController::class);
         Route::resource('initiatives', \App\Http\Controllers\Admin\InitiativeController::class);
