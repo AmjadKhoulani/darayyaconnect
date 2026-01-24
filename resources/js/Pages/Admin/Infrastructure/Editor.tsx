@@ -1,4 +1,3 @@
-// Final fix for build
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
 import maplibregl from 'maplibre-gl';
@@ -49,7 +48,7 @@ const SECTOR_CONFIG: Record<string, {
         color: '#3b82f6',
         icon: Droplets,
         nodeTypes: [
-            { type: 'water_tank', label: 'خزان مياه', icon: '🏯', canFeedNeighborhood: true },
+            { type: 'water_tank', label: 'خزان مياه', icon: '🏰', canFeedNeighborhood: true },
             { type: 'pump', label: 'مضخة مياه', icon: '⚙️', canFeedNeighborhood: true },
             { type: 'valve', label: 'صمام (سكر)', icon: '🔧' },
         ],
@@ -112,6 +111,13 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     const [loading, setLoading] = useState(false);
     const [inspectorData, setInspectorData] = useState<any | null>(null);
     const [assignedNeighborhood, setAssignedNeighborhood] = useState('');
+
+    // Refs for event listeners to avoid closure issues
+    const subTypeRef = useRef<string>(selectedSubType);
+    const toolRef = useRef<'select' | 'line' | 'point'>(activeTool);
+
+    useEffect(() => { subTypeRef.current = selectedSubType; }, [selectedSubType]);
+    useEffect(() => { toolRef.current = activeTool; }, [activeTool]);
 
     const config = SECTOR_CONFIG[sector] || SECTOR_CONFIG['water'];
 
@@ -186,7 +192,11 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
 
         // Event Listeners
         map.current.on('load', () => fetchData());
-        map.current.on('draw.create', (e) => saveDraw(e.features[0]));
+
+        // Use a wrapper to always call the LATEST saveDraw or access CURRENT ref values
+        map.current.on('draw.create', (e) => {
+            handleSaveEvent(e.features[0]);
+        });
 
         map.current.on('click', (e) => {
             const features = map.current?.queryRenderedFeatures(e.point);
@@ -287,17 +297,19 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         }
     };
 
-    const saveDraw = async (feature: any) => {
+    const handleSaveEvent = async (feature: any) => {
+        const currentType = subTypeRef.current;
+
+        if (!currentType) {
+            alert('الرجاء اختيار نوع العنصر أولاً من القائمة الجانبية');
+            draw.current?.delete(feature.id);
+            return;
+        }
+
         try {
             if (feature.geometry.type === 'Point') {
-                if (!selectedSubType) {
-                    alert('الرجاء اختيار نوع العنصر أولاً');
-                    // Clean up invalid feature from map
-                    draw.current?.delete(feature.id);
-                    return;
-                }
                 await axios.post('/api/infrastructure/nodes', {
-                    type: selectedSubType,
+                    type: currentType,
                     latitude: feature.geometry.coordinates[1],
                     longitude: feature.geometry.coordinates[0],
                     status: 'active',
@@ -308,7 +320,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     return;
                 }
                 await axios.post('/api/infrastructure/lines', {
-                    type: selectedSubType,
+                    type: currentType,
                     coordinates: feature.geometry.coordinates,
                     status: 'active',
                 });
@@ -364,7 +376,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         }
     };
 
-    // Check if the current inspector asset can feed a neighborhood
     const canServe = useMemo(() => {
         if (!inspectorData) return false;
         const assetType = inspectorData.properties.type;
@@ -380,7 +391,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
 
             <div className="relative flex h-[calc(100vh-64px)] w-full overflow-hidden bg-slate-100" dir="rtl">
 
-                {/* Sector Switcher (Top Left) */}
                 <div className="absolute top-4 left-4 z-20 flex gap-2">
                     {Object.entries(SECTOR_CONFIG).map(([key, val]) => {
                         const Icon = val.icon;
@@ -401,7 +411,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     })}
                 </div>
 
-                {/* Right Toolbar */}
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
                     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-3 flex flex-col gap-3 w-64">
                         <div className="p-3 border-b border-slate-100 mb-1 flex items-center justify-between">
@@ -414,7 +423,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                             </button>
                         </div>
 
-                        {/* Add Points */}
                         <div>
                             <label className="text-[10px] font-bold text-slate-400 mb-3 block px-1 uppercase tracking-wider">نقاط الشبكة (Nodes)</label>
                             <div className="grid grid-cols-1 gap-2">
@@ -435,7 +443,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                             </div>
                         </div>
 
-                        {/* Add Lines */}
                         <div className="mt-2">
                             <label className="text-[10px] font-bold text-slate-400 mb-3 block px-1 uppercase tracking-wider">تمديدات وخطوط (Lines)</label>
                             <div className="grid grid-cols-1 gap-2">
@@ -457,7 +464,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                         </div>
                     </div>
 
-                    {/* Completion Button while drawing */}
                     {activeTool !== 'select' && (
                         <button
                             onClick={finishDrawing}
@@ -469,10 +475,8 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     )}
                 </div>
 
-                {/* Map Area */}
                 <div ref={mapContainer} className="relative h-full flex-1" />
 
-                {/* Left Inspector */}
                 {inspectorData && (
                     <div className="animate-in slide-in-from-left-4 absolute left-4 bottom-4 z-10 w-80 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md p-5 shadow-2xl">
                         <div className="mb-5 flex items-center justify-between">
@@ -489,7 +493,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                                 <div className="font-bold text-slate-800">{inspectorData.properties.type}</div>
                             </div>
 
-                            {/* Neighborhood Assignment (Conditional) */}
                             {canServe && (
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
