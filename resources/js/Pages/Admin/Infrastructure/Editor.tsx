@@ -2,7 +2,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 // @ts-ignore
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
@@ -386,10 +386,11 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                         return (
                             <Link
                                 key={key}
+                                // @ts-ignore
                                 href={route('admin.infrastructure.sector.editor', { sector: key })}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl border shadow-sm transition-all ${sector === key
-                                        ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
-                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                    ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
+                                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                     }`}
                             >
                                 <Icon size={16} />
@@ -421,8 +422,8 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                                         key={t.type}
                                         onClick={() => startTool('point', t.type)}
                                         className={`flex items-center gap-3 p-3 rounded-xl text-right transition-all border ${activeTool === 'point' && selectedSubType === t.type
-                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'
-                                                : 'bg-white border-transparent hover:border-slate-200 text-slate-600'
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'
+                                            : 'bg-white border-transparent hover:border-slate-200 text-slate-600'
                                             }`}
                                     >
                                         <span className="text-2xl filter drop-shadow-sm">{t.icon}</span>
@@ -442,8 +443,8 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                                         key={t.type}
                                         onClick={() => startTool('line', t.type)}
                                         className={`flex items-center gap-3 p-3 rounded-xl text-right transition-all border ${activeTool === 'line' && selectedSubType === t.type
-                                                ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
-                                                : 'bg-white border-transparent hover:border-slate-200 text-slate-600'
+                                            ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
+                                            : 'bg-white border-transparent hover:border-slate-200 text-slate-600'
                                             }`}
                                     >
                                         <span className="text-2xl filter drop-shadow-sm">{t.icon}</span>
