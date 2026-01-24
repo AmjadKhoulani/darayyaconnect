@@ -72,7 +72,7 @@ class UserDashboardController extends Controller
                 ->exists();
         }
 
-        // Upcomming Events
+        // Upcoming Events
         $upcomingEvents = \App\Models\Event::where('start_time', '>', now())
             ->withCount('attendees')
             ->orderBy('start_time', 'asc')
@@ -81,6 +81,26 @@ class UserDashboardController extends Controller
             ->each(function ($event) {
                 $event->append('is_attending');
             });
+
+        // [SYNC] Fetch Additional Data for Mobile Parity
+        $population = \App\Models\User::count(); // Use simple count for now or filter by role if needed
+        
+        $recentNews = \App\Models\News::with('user:id,name')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'excerpt' => $item->excerpt ?? substr($item->content, 0, 100) . '...',
+                    'author' => $item->user->name ?? 'مجلس المدينة',
+                    'created_at' => $item->created_at->diffForHumans(),
+                    'category' => $item->category ?? 'news'
+                ];
+            });
+
+        $serviceStates = \App\Models\ServiceState::where('is_active', true)->get();
 
         return Inertia::render('Dashboard', [
             'userLogs' => $userLogs, // ['electricity', 'water'] if logged
@@ -91,6 +111,10 @@ class UserDashboardController extends Controller
             ],
             'active_poll' => $activePoll,
             'upcoming_events' => $upcomingEvents,
+            // [SYNC] New Props
+            'population' => $population,
+            'news' => $recentNews,
+            'serviceStates' => $serviceStates,
             'pharmacy_status' => $user->profession === 'pharmacist' 
                 ? DB::table('directory_contacts')->where('user_id', $user->id)->value('status') 
                 : null
