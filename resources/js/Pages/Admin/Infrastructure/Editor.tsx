@@ -19,11 +19,11 @@ import {
     Settings,
     Trash2,
     Zap,
+    Home,
 } from 'lucide-react';
 
 // Define Types
-type NetworkType = 'water' | 'electricity' | 'sewage' | 'phone';
-type NodeType = 'manhole' | 'pump' | 'transformer' | 'pole';
+type SectorType = 'water' | 'electricity' | 'sewage' | 'phone';
 
 interface Props {
     auth: {
@@ -39,42 +39,108 @@ interface Props {
             };
         };
     };
+    sector: SectorType;
 }
 
-export default function InfrastructureEditor({ auth }: Props) {
+const SECTOR_CONFIG: Record<string, {
+    label: string;
+    color: string;
+    nodeTypes: { type: string; label: string; icon: string }[];
+    lineTypes: { type: string; label: string }[];
+}> = {
+    water: {
+        label: 'شبكة الكياه',
+        color: '#3b82f6',
+        nodeTypes: [
+            { type: 'water_tank', label: 'خزان رئيسي', icon: '🚰' },
+            { type: 'pump', label: 'مضخة', icon: '⚙️' },
+            { type: 'valve', label: 'صمام (سكر)', icon: '🔧' },
+        ],
+        lineTypes: [
+            { type: 'water_pipe_main', label: 'انبوب رئيسي' },
+            { type: 'water_pipe_distribution', label: 'انبوب فرعي' },
+        ]
+    },
+    electricity: {
+        label: 'شبكة الكهرباء',
+        color: '#eab308',
+        nodeTypes: [
+            { type: 'transformer', label: 'محولة كهرباء', icon: '⚡' },
+            { type: 'pole', label: 'عامود إنارة', icon: '💡' },
+            { type: 'generator', label: 'مولدة', icon: '🔋' },
+        ],
+        lineTypes: [
+            { type: 'power_cable_underground', label: 'كبل أرضي' },
+            { type: 'power_line_overhead', label: 'كبل هوائي' },
+        ]
+    },
+    sewage: {
+        label: 'الصرف الصحي',
+        color: '#78350f',
+        nodeTypes: [
+            { type: 'manhole', label: 'ريكار (Manhole)', icon: '🕳️' },
+        ],
+        lineTypes: [
+            { type: 'sewage_pipe', label: 'قسطل صرف' },
+        ]
+    },
+    phone: {
+        label: 'الاتصالات',
+        color: '#10b981',
+        nodeTypes: [
+            { type: 'exchange', label: 'مقسم', icon: '🏢' },
+            { type: 'cabinet', label: 'علبة توزيع', icon: '📦' },
+        ],
+        lineTypes: [
+            { type: 'telecom_cable', label: 'كبل هاتف' },
+        ]
+    }
+};
+
+const NEIGHBORHOODS = [
+    "الشرقي", "الغربي", "القبلية", "الكورنيش", "الثورة", "المركز", "الشاميات", "الخليج"
+];
+
+export default function InfrastructureEditor({ auth, sector }: Props) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
     const draw = useRef<MapboxDraw | null>(null);
 
     // State
-    const [selectedType, setSelectedType] = useState<string>('');
+    const actionState = useState<'select' | 'line' | 'point'>('select');
+    const [activeTool, setActiveTool] = actionState;
+    const [selectedSubType, setSelectedSubType] = useState<string>(''); // For specific asset types (e.g. transformer)
     const [lines, setLines] = useState<any[]>([]);
     const [nodes, setNodes] = useState<any[]>([]);
-    const [activeLayer, setActiveLayer] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [inspectorData, setInspectorData] = useState<any | null>(null);
-    const [drawMode, setDrawMode] = useState<'simple_select' | 'draw_line_string' | 'draw_point'>('simple_select');
+    const [assignedNeighborhood, setAssignedNeighborhood] = useState('');
 
-    // Permissions Logic
-    const allowedTypes = useMemo(() => {
-        const role = auth.user.role;
-        const deptSlug = auth.user.department?.slug;
+    const config = SECTOR_CONFIG[sector] || SECTOR_CONFIG['water'];
 
-        if (role === 'admin')
-            return ['water', 'electricity', 'sewage', 'phone'];
-        if (deptSlug === 'water') return ['water'];
-        if (deptSlug === 'electricity') return ['electricity'];
-        if (deptSlug === 'municipality') return ['sewage'];
-        if (deptSlug === 'telecom') return ['phone'];
-        return [];
-    }, [auth.user]);
-
-    // Initial Selection
+    // Default selection
     useEffect(() => {
-        if (allowedTypes.length > 0 && !selectedType) {
-            setSelectedType(allowedTypes[0]);
+        if (config && !selectedSubType) {
+            // Default to first node type
+            setSelectedSubType(config.nodeTypes[0].type);
         }
-    }, [allowedTypes]);
+    }, [sector]);
+
+    // Inspector Data Effect
+    useEffect(() => {
+        if (inspectorData?.properties?.meta) {
+            try {
+                const meta = typeof inspectorData.properties.meta === 'string'
+                    ? JSON.parse(inspectorData.properties.meta)
+                    : inspectorData.properties.meta;
+                setAssignedNeighborhood(meta.served_neighborhood || '');
+            } catch (e) {
+                setAssignedNeighborhood('');
+            }
+        } else {
+            setAssignedNeighborhood('');
+        }
+    }, [inspectorData]);
 
     useEffect(() => {
         if (map.current) return;
@@ -88,9 +154,7 @@ export default function InfrastructureEditor({ auth }: Props) {
                 sources: {
                     osm: {
                         type: 'raster',
-                        tiles: [
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        ],
+                        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
                         tileSize: 256,
                         attribution: '&copy; OpenStreetMap',
                     },
@@ -103,127 +167,67 @@ export default function InfrastructureEditor({ auth }: Props) {
 
         // Initialize Draw Tools
         draw.current = new MapboxDraw({
-            displayControlsDefault: false, // We use custom buttons
+            displayControlsDefault: false,
+            // defaultMode: 'simple_select',
             styles: [
-                // ACTIVE (being drawn)
-                // line stroke
+                // Style definitions... (Keep existing clean styles)
                 {
                     id: 'gl-draw-line',
                     type: 'line',
-                    filter: [
-                        'all',
-                        ['==', '$type', 'LineString'],
-                        ['!=', 'mode', 'static'],
-                    ],
-                    layout: {
-                        'line-cap': 'round',
-                        'line-join': 'round',
-                    },
-                    paint: {
-                        'line-color': '#2563eb',
-                        'line-dasharray': [0.2, 2],
-                        'line-width': 4,
-                    },
-                },
-                // vertex point halos
-                {
-                    id: 'gl-draw-polygon-and-line-vertex-halo-active',
-                    type: 'circle',
-                    filter: [
-                        'all',
-                        ['==', 'meta', 'vertex'],
-                        ['==', '$type', 'Point'],
-                        ['!=', 'mode', 'static'],
-                    ],
-                    paint: {
-                        'circle-radius': 7,
-                        'circle-color': '#FFF',
-                    },
-                },
-                // vertex points
-                {
-                    id: 'gl-draw-polygon-and-line-vertex-active',
-                    type: 'circle',
-                    filter: [
-                        'all',
-                        ['==', 'meta', 'vertex'],
-                        ['==', '$type', 'Point'],
-                        ['!=', 'mode', 'static'],
-                    ],
-                    paint: {
-                        'circle-radius': 5,
-                        'circle-color': '#2563eb',
-                    },
-                },
-                // point
-                {
-                    id: 'gl-draw-point-point-stroke-active',
-                    type: 'circle',
-                    filter: [
-                        'all',
-                        ['==', '$type', 'Point'],
-                        ['==', 'meta', 'feature'],
-                        ['!=', 'mode', 'static'],
-                    ],
-                    paint: {
-                        'circle-radius': 8,
-                        'circle-opacity': 1,
-                        'circle-color': '#fff',
-                    },
+                    filter: ['all', ['==', '$type', 'LineString'], ['!=', 'mode', 'static']],
+                    layout: { 'line-cap': 'round', 'line-join': 'round' },
+                    paint: { 'line-color': config?.color || '#333', 'line-dasharray': [0.2, 2], 'line-width': 4 },
                 },
                 {
-                    id: 'gl-draw-point-active',
+                    id: 'gl-draw-point',
                     type: 'circle',
-                    filter: [
-                        'all',
-                        ['==', '$type', 'Point'],
-                        ['==', 'meta', 'feature'],
-                        ['!=', 'mode', 'static'],
-                    ],
-                    paint: {
-                        'circle-radius': 6,
-                        'circle-color': '#facc15',
-                    },
+                    filter: ['all', ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
+                    paint: { 'circle-radius': 8, 'circle-color': config?.color || '#333', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
                 },
             ],
         });
 
         map.current.addControl(draw.current, 'top-left');
-        map.current.addControl(
-            new maplibregl.NavigationControl(),
-            'bottom-right',
-        );
+        map.current.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 
         // Event Listeners
         map.current.on('load', () => fetchData());
-
         map.current.on('draw.create', (e) => saveDraw(e.features[0]));
-        map.current.on('draw.update', (e) => updateDraw(e.features[0]));
-        map.current.on('draw.delete', (e) => deleteDraw(e.features[0]));
-        map.current.on('draw.modechange', (e) => setDrawMode(e.mode));
 
         map.current.on('click', (e) => {
-            // Check if clicked on existing feature
             const features = map.current?.queryRenderedFeatures(e.point);
             if (features && features.length > 0 && features[0].properties?.id) {
+                // Clicked on an existing asset
+                const props = features[0].properties;
                 setInspectorData({
-                    id: features[0].properties.id,
-                    type: features[0].properties.type,
+                    id: props.id,
+                    type: props.type,
                     layer: features[0].layer.id,
+                    properties: props
                 });
             } else {
-                setInspectorData(null);
+                // If not clicking a feature, and tool is select, clear inspector
+                // if (activeTool === 'select') setInspectorData(null);
             }
         });
-    }, []);
+    }, [sector]);
 
     const fetchData = async () => {
         try {
             setLoading(true);
             const { data } = await axios.get('/api/infrastructure');
-            setLines(data.lines);
-            setNodes(data.nodes);
-            renderData(data.lines, data.nodes);
+
+            // Filter client side as backend returns all
+            const sectorNodes = data.nodes.filter((n: any) =>
+                config.nodeTypes.some(t => t.type === n.type)
+            );
+            const sectorLines = data.lines.filter((l: any) =>
+                config.lineTypes.some(t => t.type === l.type)
+            );
+
+            setNodes(sectorNodes);
+            setLines(sectorLines);
+            renderData(sectorLines, sectorNodes);
         } catch (e) {
             console.error('Failed to fetch data', e);
         } finally {
@@ -234,150 +238,86 @@ export default function InfrastructureEditor({ auth }: Props) {
     const renderData = (linesData: any[], nodesData: any[]) => {
         if (!map.current) return;
 
-        // Helper to add layer if not exists
-        const addLayer = (
-            id: string,
-            color: string,
-            type: 'line' | 'circle',
-            data: any[],
-        ) => {
-            if (map.current?.getSource(id)) {
-                (map.current.getSource(id) as maplibregl.GeoJSONSource).setData(
-                    {
-                        type: 'FeatureCollection',
-                        features: data,
-                    },
-                );
-                return;
-            }
+        // Clear existing layers if any (simplified)
+        const sourceId = `net-${sector}`;
+        const geojson = {
+            type: 'FeatureCollection',
+            features: [
+                ...linesData.map(l => ({
+                    type: 'Feature',
+                    geometry: { type: 'LineString', coordinates: l.coordinates },
+                    properties: { id: l.id, type: l.type, meta: l.meta }
+                })),
+                ...nodesData.map(n => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [parseFloat(n.longitude), parseFloat(n.latitude)] },
+                    properties: { id: n.id, type: n.type, meta: n.meta }
+                }))
+            ]
+        };
 
-            map.current?.addSource(id, {
-                type: 'geojson',
-                data: { type: 'FeatureCollection', features: data },
+        if (map.current.getSource(sourceId)) {
+            (map.current.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojson as any);
+        } else {
+            map.current.addSource(sourceId, { type: 'geojson', data: geojson as any });
+
+            // Lines Layer
+            map.current.addLayer({
+                id: `${sourceId}-lines`,
+                type: 'line',
+                source: sourceId,
+                filter: ['==', '$type', 'LineString'],
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: { 'line-color': config?.color || '#333', 'line-width': 4, 'line-opacity': 0.8 }
             });
 
-            if (type === 'line') {
-                const lineWidth = id.includes('active') ? 6 : 4;
-                map.current?.addLayer({
-                    id: id,
-                    type: 'line',
-                    source: id,
-                    layout: { 'line-join': 'round', 'line-cap': 'round' },
-                    paint: {
-                        'line-color': color,
-                        'line-width': lineWidth,
-                        'line-opacity': 0.8,
-                    },
-                });
-            } else {
-                map.current?.addLayer({
-                    id: id,
-                    type: 'circle',
-                    source: id,
-                    paint: {
-                        'circle-radius': 6,
-                        'circle-color': color,
-                        'circle-stroke-width': 2,
-                        'circle-stroke-color': '#fff',
-                    },
-                });
+            // Nodes Layer
+            map.current.addLayer({
+                id: `${sourceId}-nodes`,
+                type: 'circle',
+                source: sourceId,
+                filter: ['==', '$type', 'Point'],
+                paint: { 'circle-radius': 6, 'circle-color': config?.color || '#333', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' }
+            });
+        }
+    };
+
+    const startTool = (mode: 'select' | 'line' | 'point', subType?: string) => {
+        setActiveTool(mode);
+        if (subType) setSelectedSubType(subType);
+
+        if (draw.current) {
+            if (mode === 'select') {
+                draw.current.changeMode('simple_select');
+            } else if (mode === 'line') {
+                draw.current.changeMode('draw_line_string');
+            } else if (mode === 'point') {
+                draw.current.changeMode('draw_point');
             }
-        };
-
-        // Group by type
-        const networks = {
-            water: { color: '#3b82f6', lines: [] as any[], nodes: [] as any[] },
-            electricity: {
-                color: '#eab308',
-                lines: [] as any[],
-                nodes: [] as any[],
-            },
-            sewage: {
-                color: '#78350f',
-                lines: [] as any[],
-                nodes: [] as any[],
-            },
-            phone: { color: '#10b981', lines: [] as any[], nodes: [] as any[] },
-        };
-
-        linesData.forEach((l) => {
-            const type = l.type as keyof typeof networks;
-            if (networks[type]) {
-                networks[type].lines.push({
-                    type: 'Feature',
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: l.coordinates,
-                    },
-                    properties: { id: l.id, type: l.type },
-                });
-            }
-        });
-
-        nodesData.forEach((n) => {
-            // Map Node to Network
-            let net: string = '';
-            if (['manhole'].includes(n.type)) net = 'sewage';
-            else if (['pump'].includes(n.type)) net = 'water';
-            else if (['transformer', 'pole'].includes(n.type))
-                net = 'electricity';
-
-            if (net && networks[net as keyof typeof networks]) {
-                //@ts-ignore
-                networks[net as keyof typeof networks].nodes.push({
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Point',
-                        coordinates: [
-                            parseFloat(n.longitude),
-                            parseFloat(n.latitude),
-                        ],
-                    },
-                    properties: { id: n.id, type: n.type },
-                });
-            }
-        });
-
-        // Render Layers
-        Object.entries(networks).forEach(([key, val]) => {
-            addLayer(`net-${key}-lines`, val.color, 'line', val.lines);
-            addLayer(`net-${key}-nodes`, val.color, 'circle', val.nodes);
-        });
+        }
     };
 
     const saveDraw = async (feature: any) => {
-        if (!selectedType) return alert('الرجاء اختيار نوع الشبكة أولاً');
-        if (!allowedTypes.includes(selectedType))
-            return alert('ليس لديك صلاحية لهذا الإجراء');
-
         try {
             if (feature.geometry.type === 'Point') {
-                // Determine node type based on network selection
-                let nodeType = 'pole'; // Default
-                if (selectedType === 'water') nodeType = 'pump';
-                if (selectedType === 'sewage') nodeType = 'manhole';
-                if (selectedType === 'electricity') nodeType = 'transformer';
-
                 await axios.post('/api/infrastructure/nodes', {
-                    type: nodeType, // Simplified
+                    type: selectedSubType,
                     latitude: feature.geometry.coordinates[1],
                     longitude: feature.geometry.coordinates[0],
                     status: 'active',
                 });
             } else {
+                if (feature.geometry.coordinates.length < 2) return; // Ignore invalid lines
                 await axios.post('/api/infrastructure/lines', {
-                    type: selectedType,
+                    type: selectedSubType,
                     coordinates: feature.geometry.coordinates,
                     status: 'active',
                 });
             }
 
-            // Clear Draw and Refresh
             draw.current?.deleteAll();
-            // Reset mode to simple select
-            setTimeout(() => {
-                draw.current?.changeMode('simple_select');
-            }, 100);
+            // Reset to select mode after drawing
+            startTool('select');
             fetchData();
         } catch (e) {
             alert('فشل الحفظ');
@@ -385,17 +325,32 @@ export default function InfrastructureEditor({ auth }: Props) {
         }
     };
 
-    const updateDraw = (feature: any) => {
-        console.log('Update not implemented yet', feature);
-    };
+    const updateAssignedNeighborhood = async () => {
+        if (!inspectorData) return;
+        try {
+            const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
+            // Update meta
+            const currentMeta = typeof inspectorData.properties.meta === 'string'
+                ? JSON.parse(inspectorData.properties.meta || '{}')
+                : (inspectorData.properties.meta || {});
 
-    const deleteDraw = (feature: any) => {
-        console.log('Delete not implemented yet', feature);
+            const newMeta = { ...currentMeta, served_neighborhood: assignedNeighborhood };
+
+            await axios.put(`/api/infrastructure/${endpoint}/${inspectorData.id}`, {
+                meta: newMeta
+            });
+
+            alert('تم تعيين الحارة بنجاح');
+            setInspectorData(null);
+            fetchData();
+        } catch (e) {
+            alert('فشل التحديث');
+            console.error(e);
+        }
     };
 
     const deleteAsset = async () => {
         if (!inspectorData || !confirm('هل أنت متأكد من الحذف؟')) return;
-
         try {
             setLoading(true);
             const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
@@ -404,106 +359,77 @@ export default function InfrastructureEditor({ auth }: Props) {
             fetchData();
         } catch (e) {
             alert('فشل الحذف');
-            console.error(e);
         } finally {
             setLoading(false);
         }
     };
 
-    const startDraw = (mode: 'draw_line_string' | 'draw_point' | 'simple_select') => {
-        if (draw.current) {
-            draw.current.changeMode(mode);
-        }
-    };
+    if (!config) return <div>Invalid Sector: {sector}</div>;
 
-    const networkConfig: Record<string, { label: string; color: string; icon: any }> = {
-        water: { label: 'شبكة المياه', color: 'bg-blue-500', icon: CheckCircle2 },
-        electricity: { label: 'شبكة الكهرباء', color: 'bg-amber-500', icon: Zap },
-        sewage: { label: 'الصرف الصحي', color: 'bg-amber-900', icon: Trash2 },
-        phone: { label: 'الاتصالات', color: 'bg-emerald-500', icon: CheckCircle2 },
-    };
-
-    // UI Components
     return (
-        <AdminLayout
-            user={auth.user}
-            header={
-                <h2 className="hidden text-xl font-bold text-slate-800">
-                    Infrastructure
-                </h2>
-            }
-        >
-            <Head title="محرر البنية التحتية" />
+        <AdminLayout user={auth.user}>
+            <Head title={`محرر ${config.label}`} />
 
             <div className="relative flex h-[calc(100vh-64px)] w-full overflow-hidden bg-slate-100" dir="rtl">
 
-                {/* 1. Top Bar Controls */}
+                {/* Right Toolbar */}
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
-                    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-2 flex flex-col gap-2 w-14 items-center">
-                        <div className="p-2 bg-slate-100 rounded-lg text-slate-600 mb-1" title="Editor">
-                            <MapIcon size={20} />
+                    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-2 flex flex-col gap-2 w-64">
+                        <div className="p-3 border-b border-slate-100 mb-2 flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: config.color }}></div>
+                            <h3 className="font-bold text-slate-800">{config.label}</h3>
                         </div>
 
-                        {/* Selection Tool */}
-                        <button
-                            onClick={() => startDraw('simple_select')}
-                            className={`p-2 rounded-lg transition-colors ${drawMode === 'simple_select' ? 'bg-sky-50 text-sky-600' : 'hover:bg-slate-50 text-slate-500'}`}
-                            title="تحريك / تحديد"
-                        >
-                            <MousePointer2 size={20} />
-                        </button>
+                        {/* Add Points */}
+                        <div className="mb-2">
+                            <label className="text-xs font-bold text-slate-400 mb-2 block px-1">نقاط (Nodes)</label>
+                            <div className="grid grid-cols-1 gap-2">
+                                {config.nodeTypes.map(t => (
+                                    <button
+                                        key={t.type}
+                                        onClick={() => startTool('point', t.type)}
+                                        className={`flex items-center gap-2 p-2 rounded-lg text-right transition-colors ${activeTool === 'point' && selectedSubType === t.type ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'hover:bg-slate-50 text-slate-600'}`}
+                                    >
+                                        <span className="text-xl">{t.icon}</span>
+                                        <span className="text-sm font-bold">{t.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                        {/* Draw Line */}
-                        <button
-                            onClick={() => startDraw('draw_line_string')}
-                            disabled={allowedTypes.length === 0}
-                            className={`p-2 rounded-lg transition-colors ${drawMode === 'draw_line_string' ? 'bg-sky-50 text-sky-600' : 'hover:bg-slate-50 text-slate-500'} ${allowedTypes.length === 0 ? 'opacity-50' : ''}`}
-                            title="رسم خط"
-                        >
-                            <PenTool size={20} />
-                        </button>
+                        {/* Add Lines */}
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 mb-2 block px-1">تمديدات (Lines)</label>
+                            <div className="grid grid-cols-1 gap-2">
+                                {config.lineTypes.map(t => (
+                                    <button
+                                        key={t.type}
+                                        onClick={() => startTool('line', t.type)}
+                                        className={`flex items-center gap-2 p-2 rounded-lg text-right transition-colors ${activeTool === 'line' && selectedSubType === t.type ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'hover:bg-slate-50 text-slate-600'}`}
+                                    >
+                                        <PenTool size={16} />
+                                        <span className="text-sm font-bold">{t.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                        {/* Add Point */}
-                        <button
-                            onClick={() => startDraw('draw_point')}
-                            disabled={allowedTypes.length === 0}
-                            className={`p-2 rounded-lg transition-colors ${drawMode === 'draw_point' ? 'bg-sky-50 text-sky-600' : 'hover:bg-slate-50 text-slate-500'} ${allowedTypes.length === 0 ? 'opacity-50' : ''}`}
-                            title="إضافة نقطة"
-                        >
-                            <AlertTriangle size={20} />
-                        </button>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-2 flex flex-col gap-2 w-14 items-center">
-                        {/* Layer Control Placeholder */}
-                        <button className="p-2 rounded-lg hover:bg-slate-50 text-slate-500" title="الطبقات">
-                            <Layers size={20} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Network Selector (Floating Top Right Center) */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
-                    <div className="bg-white rounded-full shadow-lg border border-slate-200 p-1.5 flex items-center gap-2">
-                        {allowedTypes.map(t => (
+                        <div className="border-t border-slate-100 mt-2 pt-2">
                             <button
-                                key={t}
-                                onClick={() => setSelectedType(t)}
-                                className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${selectedType === t
-                                    ? 'bg-slate-900 text-white shadow-md'
-                                    : 'text-slate-500 hover:bg-slate-50'}`}
+                                onClick={() => startTool('select')}
+                                className={`w-full flex items-center justify-center gap-2 p-2 rounded-lg transition-colors ${activeTool === 'select' ? 'bg-slate-100 text-slate-800 font-bold' : 'text-slate-500 hover:bg-slate-50'}`}
                             >
-                                <span className={`w-2 h-2 rounded-full ${t === 'water' ? 'bg-blue-500' : t === 'electricity' ? 'bg-amber-400' : 'bg-slate-400'}`}></span>
-                                {t === 'water' ? 'مياه' : t === 'electricity' ? 'كهرباء' : t === 'sewage' ? 'صرف' : 'هاتف'}
+                                <MousePointer2 size={16} />
+                                وضع التحديد
                             </button>
-                        ))}
+                        </div>
                     </div>
                 </div>
 
-                {/* 2. Map Area */}
+                {/* Map Area */}
                 <div ref={mapContainer} className="relative h-full flex-1" />
 
-                {/* 3. Left Inspector Panel (Conditional) */}
+                {/* Left Inspector */}
                 {inspectorData && (
                     <div className="animate-in slide-in-from-left-4 absolute left-4 top-4 z-10 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl">
                         <div className="mb-4 flex items-center justify-between">
@@ -511,53 +437,53 @@ export default function InfrastructureEditor({ auth }: Props) {
                                 <Info size={16} className="text-blue-500" />{' '}
                                 تفاصيل العنصر
                             </h3>
-                            <button
-                                onClick={() => setInspectorData(null)}
-                                className="text-slate-400 hover:text-slate-600"
-                            >
-                                ✕
-                            </button>
+                            <button onClick={() => setInspectorData(null)} className="text-slate-400 hover:text-slate-600">✕</button>
                         </div>
 
-                        <div className="space-y-3">
-                            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-                                <div className="mb-1 text-xs font-bold uppercase text-slate-400">
-                                    معرف العنصر
-                                </div>
-                                <div className="font-mono text-sm max-w-[200px] truncate">
-                                    {inspectorData.id}
-                                </div>
+                        <div className="space-y-4">
+                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <div className="text-xs text-slate-500 mb-1">النوع</div>
+                                <div className="font-bold text-slate-800">{inspectorData.type}</div>
                             </div>
 
-                            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-                                <div className="mb-1 text-xs font-bold uppercase text-slate-400">
-                                    النوع
+                            {/* Neighborhood Assignment */}
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                                    <Home size={12} />
+                                    الحارة المستفيدة (Connect To)
+                                </label>
+                                <div className="flex gap-2">
+                                    <select
+                                        value={assignedNeighborhood}
+                                        onChange={(e) => setAssignedNeighborhood(e.target.value)}
+                                        className="flex-1 rounded-lg border-slate-200 text-sm py-2"
+                                    >
+                                        <option value="">اختر الحارة...</option>
+                                        {NEIGHBORHOODS.map(n => (
+                                            <option key={n} value={n}>{n}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={updateAssignedNeighborhood}
+                                        className="bg-slate-900 text-white p-2 rounded-lg hover:bg-slate-800"
+                                        title="حفظ"
+                                    >
+                                        <CheckCircle2 size={16} />
+                                    </button>
                                 </div>
-                                <div className="font-bold capitalize text-slate-700">
-                                    {inspectorData.type}
-                                </div>
+                                <p className="text-[10px] text-slate-400 mt-1">حدد الحارة التي تتغذى من هذا العنصر</p>
                             </div>
 
-                            <div className="mt-4 flex gap-2">
-                                <button
-                                    onClick={deleteAsset}
-                                    className="flex-1 rounded-lg bg-rose-50 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 flex items-center justify-center gap-2"
-                                >
-                                    <Trash2 size={14} />
-                                    حذف
-                                </button>
-                                <button className="flex-1 rounded-lg bg-slate-800 py-2 text-xs font-bold text-white hover:bg-slate-700">
-                                    تعديل
-                                </button>
-                            </div>
+                            <button onClick={deleteAsset} className="w-full py-2 bg-rose-50 text-rose-600 font-bold rounded-lg hover:bg-rose-100 flex items-center justify-center gap-2">
+                                <Trash2 size={16} /> حذف العنصر
+                            </button>
                         </div>
                     </div>
                 )}
 
-                {/* Loading State */}
                 {loading && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
-                        <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-800"></div>
                     </div>
                 )}
             </div>
