@@ -69,7 +69,7 @@ class LostFoundController extends Controller
 
         $validated['user_id'] = Auth::id();
         $validated['status'] = 'active';
-        $validated['moderation_status'] = 'pending';
+        $validated['moderation_status'] = 'approved';
 
         $item = LostFoundItem::create($validated);
 
