@@ -31,6 +31,17 @@ interface Props {
     };
 }
 
+const categoryLabels: Record<string, string> = {
+    documents: 'وثائق ومستندات',
+    phone: 'هاتف',
+    keys: 'مفاتيح',
+    bag: 'حقيبة',
+    wallet: 'محفظة',
+    jewelry: 'مجوهرات',
+    pet: 'حيوان أليف',
+    other: 'أخرى',
+};
+
 export default function LostFoundIndex({ auth, items, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,11 +150,10 @@ export default function LostFoundIndex({ auth, items, filters }: Props) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`rounded px-2 py-1 text-xs font-bold ${
-                                                item.type === 'found'
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : 'bg-amber-100 text-amber-700'
-                                            }`}
+                                            className={`rounded px-2 py-1 text-xs font-bold ${item.type === 'found'
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : 'bg-amber-100 text-amber-700'
+                                                }`}
                                         >
                                             {item.type === 'found'
                                                 ? 'موجود (لقطة) ✅'
@@ -151,7 +161,7 @@ export default function LostFoundIndex({ auth, items, filters }: Props) {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-slate-600">
-                                        {item.category}
+                                        {categoryLabels[item.category] || item.category}
                                     </td>
                                     <td className="px-6 py-4 font-bold text-slate-600">
                                         {item.location}
@@ -296,11 +306,14 @@ function LostFoundModal({
                                 className="mt-1 w-full rounded-lg border-slate-300"
                             >
                                 <option value="">اختر التصنيف...</option>
-                                <option value="وثائق">وثائق ومستندات</option>
-                                <option value="إلكترونيات">إلكترونيات</option>
-                                <option value="مفاتيح">مفاتيح</option>
-                                <option value="مال">مال</option>
-                                <option value="أخرى">أخرى</option>
+                                <option value="documents">وثائق ومستندات</option>
+                                <option value="phone">هاتف / جوال</option>
+                                <option value="keys">مفاتيح</option>
+                                <option value="bag">حقيبة / شتنة</option>
+                                <option value="wallet">محفظة / جزدان</option>
+                                <option value="jewelry">مجوهرات / ذهب</option>
+                                <option value="pet">حيوان أليف</option>
+                                <option value="other">أخرى</option>
                             </select>
                             {errors.category && (
                                 <p className="mt-1 text-xs text-red-500">
