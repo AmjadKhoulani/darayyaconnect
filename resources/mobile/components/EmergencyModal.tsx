@@ -1,13 +1,25 @@
-import { useState } from 'react';
-import { AlertCircle, Shield, X, MapPin, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Shield, X, MapPin, Loader2 } from 'lucide-react';
 import { Geolocation } from '@capacitor/geolocation';
 import api from '../services/api';
 import { HapticService } from '../services/HapticService';
 
-export default function SOSButton() {
-    const [isOpen, setIsOpen] = useState(false);
+interface Props {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export default function EmergencyModal({ isOpen, onClose }: Props) {
     const [status, setStatus] = useState<'idle' | 'locating' | 'sending' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
+
+    useEffect(() => {
+        if (!isOpen) {
+            // Reset status when closed
+            setTimeout(() => setStatus('idle'), 300);
+        }
+    }, [isOpen]);
 
     const handleSOS = async (type: string) => {
         try {
@@ -35,9 +47,8 @@ export default function SOSButton() {
 
             // Auto close after 3 seconds
             setTimeout(() => {
-                setIsOpen(false);
-                setStatus('idle');
-            }, 5000);
+                onClose();
+            }, 3000);
 
         } catch (error: any) {
             console.error('SOS Failed:', error);
@@ -47,30 +58,14 @@ export default function SOSButton() {
         }
     };
 
-    if (!isOpen) {
-        return (
-            <button
-                onClick={() => {
-                    setIsOpen(true);
-                    HapticService.mediumImpact();
-                }}
-                className="fixed bottom-24 left-6 z-[110] w-14 h-14 bg-rose-600 dark:bg-rose-500 rounded-full flex items-center justify-center text-white shadow-[0_10px_25px_-5px_rgba(225,29,72,0.4)] active:scale-90 transition-all border-4 border-white dark:border-slate-800 animate-pulse"
-            >
-                <AlertCircle size={28} />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-500"></span>
-                </span>
-            </button>
-        );
-    }
+    if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
             <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[40px] p-8 shadow-2xl relative border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-300">
                 <button
-                    onClick={() => setIsOpen(false)}
-                    className="absolute top-6 right-6 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400"
+                    onClick={onClose}
+                    className="absolute top-6 right-6 p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 z-10"
                 >
                     <X size={20} />
                 </button>
@@ -126,7 +121,7 @@ export default function SOSButton() {
                                 <h4 className="text-xl font-black text-emerald-600 dark:text-emerald-400 mb-2">تم الإرسال بنجاح!</h4>
                                 <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">تم تحديد موقعك بدقة، الفرق المختصة في طريقها إليك.</p>
                                 <button
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={onClose}
                                     className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold"
                                 >
                                     فهمت
@@ -151,6 +146,7 @@ export default function SOSButton() {
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

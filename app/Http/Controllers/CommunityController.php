@@ -34,6 +34,7 @@ class CommunityController extends Controller
             'body' => $request->body,
             'category' => $request->category,
             'image_path' => $imagePath,
+            'moderation_status' => 'pending',
         ]);
 
         return redirect()->back();

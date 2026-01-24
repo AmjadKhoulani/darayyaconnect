@@ -9,14 +9,7 @@ use App\Http\Controllers\Admin\InfrastructureManagerController;
 use App\Http\Controllers\Admin\AiStudyController;
 use App\Models\AiStudy;
 
-Route::any('/', function(Illuminate\Http\Request $request) { 
-    return response()->json([
-        'uri' => $request->getRequestUri(),
-        'method' => $request->getMethod(),
-        'path' => $request->getPathInfo(),
-        'all_methods_for_this_path' => 'Check route:list',
-    ]);
-})->name('welcome');
+Route::get('/', [\App\Http\Controllers\WelcomeController::class, 'index'])->name('welcome');
 
 Route::get('/privacy-policy', function () {
     return Inertia::render('PrivacyPolicy');

@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import React, { PropsWithChildren } from 'react';
+import EmergencyModal from '@/Components/EmergencyModal';
 
 interface Props {
     auth?: any;
@@ -12,11 +13,18 @@ export default function PortalLayout({
     children,
     header,
 }: PropsWithChildren<Props>) {
+    const [emergencyModalOpen, setEmergencyModalOpen] = React.useState(false);
+
     return (
         <div
             className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-500 selection:text-white"
             dir="rtl"
         >
+            <EmergencyModal
+                open={emergencyModalOpen}
+                setOpen={setEmergencyModalOpen}
+            />
+
             {/* Top Navigation - Official Portal Style (Light) */}
             <nav className="fixed top-0 z-50 h-16 w-full border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur-md">
                 <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4">
@@ -68,6 +76,17 @@ export default function PortalLayout({
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setEmergencyModalOpen(true)}
+                            className="group relative flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 text-red-500 transition-all hover:bg-red-500 hover:text-white"
+                            title="أرقام الطوارئ"
+                        >
+                            <span className="animate-pulse absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white group-hover:bg-red-400"></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                        </button>
+
                         {auth?.user ? (
                             <Link
                                 href={route('dashboard')}

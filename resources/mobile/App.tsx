@@ -48,7 +48,6 @@ import ArticleView from './pages/ArticleView';
 import Settings from './pages/Settings';
 import EditProfile from './pages/EditProfile';
 import About from './pages/About';
-import SOSButton from './components/SOSButton';
 import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
 import OfflineIndicator from './components/OfflineIndicator';
@@ -182,7 +181,6 @@ function AppContent() {
                 <Route path="/about" element={<About />} />
             </Routes>
 
-            {showFab && <SOSButton />}
             {showBottomNav && <BottomNav />}
             <Toast />
             <OfflineIndicator />

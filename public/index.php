@@ -1,4 +1,5 @@
 <?php
+die("Reached public/index.php");
 
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;

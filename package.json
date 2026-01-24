@@ -6,6 +6,7 @@
         "build": "tsc && vite build && vite build -c vite.mobile.config.js",
         "build:mobile": "vite build -c vite.mobile.config.js",
         "dev": "vite",
+        "dev:mobile": "vite -c vite.mobile.config.js --host",
         "lint": "eslint resources/js --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore --fix"
     },
     "devDependencies": {

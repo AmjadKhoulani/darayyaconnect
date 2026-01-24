@@ -59,7 +59,7 @@ export default function Home() {
     }, [fetchDashboardData]);
 
     return (
-        <div className="min-h-screen bg-white dark:bg-slate-900 pb-20 relative transition-colors duration-300 overflow-x-hidden touch-pan-y" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-white dark:bg-slate-900 pb-20 relative transition-colors duration-300 overflow-x-hidden" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
                 <OfflineIndicator />
 

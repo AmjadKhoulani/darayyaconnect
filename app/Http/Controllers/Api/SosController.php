@@ -18,20 +18,28 @@ class SosController extends Controller
             'message' => 'nullable|string'
         ]);
 
-        $alert = SosAlert::create([
-            'user_id' => Auth::id(),
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'emergency_type' => $request->emergency_type ?? 'general',
-            'message' => $request->message,
-            'status' => 'active'
-        ]);
+        try {
+            $alert = SosAlert::create([
+                'user_id' => Auth::id(),
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'emergency_type' => $request->emergency_type ?? 'general',
+                'message' => $request->message,
+                'status' => 'active'
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Emergency signal received. Help is on the way.',
-            'alert' => $alert
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Emergency signal received. Help is on the way.',
+                'alert' => $alert
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('SOS Trigger Failed: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['message' => 'Server Error: ' . $e->getMessage()], 500);
+        }
     }
 
     public function status(SosAlert $alert)
