@@ -34,3 +34,9 @@ Thumbs.db
 /node_modules
 /capacitor-cordova-android-plugins
 /capacitor-cordova-ios-plugins
+
+# Keystore
+*.jks
+*.keystore
+/android/keystore.properties
+/android/app/release-key.jks

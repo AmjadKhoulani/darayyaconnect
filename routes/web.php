@@ -9,7 +9,18 @@ use App\Http\Controllers\Admin\InfrastructureManagerController;
 use App\Http\Controllers\Admin\AiStudyController;
 use App\Models\AiStudy;
 
-Route::get('/', [\App\Http\Controllers\WelcomeController::class, 'index'])->name('welcome');
+Route::any('/', function(Illuminate\Http\Request $request) { 
+    return response()->json([
+        'uri' => $request->getRequestUri(),
+        'method' => $request->getMethod(),
+        'path' => $request->getPathInfo(),
+        'all_methods_for_this_path' => 'Check route:list',
+    ]);
+})->name('welcome');
+
+Route::get('/privacy-policy', function () {
+    return Inertia::render('PrivacyPolicy');
+})->name('privacy-policy');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])->name('dashboard');
