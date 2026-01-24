@@ -21,5 +21,17 @@ class AdminUserSeeder extends Seeder
                 'is_verified_official' => true,
             ]);
         }
+
+        // New requested admin
+        if (!User::where('email', 'admin@darayyaconnect.com')->exists()) {
+            User::create([
+                'name' => 'Super Admin',
+                'email' => 'admin@darayyaconnect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'profession' => 'System Owner',
+                'is_verified_official' => true,
+            ]);
+        }
     }
 }
