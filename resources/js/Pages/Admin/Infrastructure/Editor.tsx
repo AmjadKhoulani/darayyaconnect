@@ -1,3 +1,4 @@
+// Final fix for build
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
 import maplibregl from 'maplibre-gl';
