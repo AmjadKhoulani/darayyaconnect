@@ -95,7 +95,7 @@ export default function Dashboard({
                     {/* Hero Section: Community Stats */}
                     <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                         {/* Population Status - NEW */}
-                        <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-emerald-100 dark:bg-slate-800 lg:col-span-2">
+                        <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-md border border-emerald-100 dark:bg-slate-800 lg:col-span-2">
                             <div className="relative z-10 flex items-center justify-between h-full">
                                 <div>
                                     <h3 className="mb-1 flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-300">
@@ -120,7 +120,7 @@ export default function Dashboard({
                         </div>
 
                         {/* Electricity Status */}
-                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-50 p-6 shadow-sm dark:from-amber-900/40 dark:to-slate-800">
+                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-50 p-6 shadow-md dark:from-amber-900/40 dark:to-slate-800">
                             <div className="relative z-10">
                                 <h3 className="mb-1 flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300">
                                     <span className="text-2xl">⚡</span> الكهرباء
@@ -142,7 +142,7 @@ export default function Dashboard({
                         </div>
 
                         {/* Water Status */}
-                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-50 p-6 shadow-sm dark:from-cyan-900/40 dark:to-slate-800">
+                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-50 p-6 shadow-md dark:from-cyan-900/40 dark:to-slate-800">
                             <div className="relative z-10">
                                 <h3 className="mb-1 flex items-center gap-2 font-bold text-cyan-800 dark:text-cyan-300">
                                     <span className="text-2xl">💧</span> المياه
@@ -166,7 +166,7 @@ export default function Dashboard({
                     {/* Additional Service States Grid (Internet, Pharmacy) */}
                     <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
                         {/* Internet */}
-                        <div className="rounded-2xl bg-white p-4 shadow-sm border border-slate-100">
+                        <div className="rounded-2xl bg-white p-4 shadow-md border border-slate-100">
                             <h4 className="flex items-center gap-2 text-sm font-bold text-slate-500 mb-2">
                                 <span>🌐</span> الإنترنت
                             </h4>
@@ -183,7 +183,7 @@ export default function Dashboard({
                         </div>
 
                         {/* Pharmacy */}
-                        <div className="rounded-2xl bg-white p-4 shadow-sm border border-slate-100">
+                        <div className="rounded-2xl bg-white p-4 shadow-md border border-slate-100">
                             <h4 className="flex items-center gap-2 text-sm font-bold text-slate-500 mb-2">
                                 <span>💊</span> الصيدليات
                             </h4>
@@ -216,7 +216,7 @@ export default function Dashboard({
                             {notifications.map((note) => (
                                 <div
                                     key={note.id}
-                                    className="rounded-r border-l-4 border-red-500 bg-red-50 p-4 shadow-sm"
+                                    className="rounded-r border-l-4 border-red-500 bg-red-50 p-4 shadow-md"
                                 >
                                     <div className="flex">
                                         <div className="flex-shrink-0">
@@ -247,7 +247,7 @@ export default function Dashboard({
                             {/* Active Poll */}
                             {active_poll && <PollWidget poll={active_poll} />}
 
-                            <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
+                            <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
                                 <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
                                     <span className="rounded-lg bg-slate-100 p-2">
                                         📢

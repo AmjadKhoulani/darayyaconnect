@@ -83,7 +83,7 @@ class UserDashboardController extends Controller
             });
 
         // [SYNC] Fetch Additional Data for Mobile Parity
-        $population = \App\Models\User::count(); // Use simple count for now or filter by role if needed
+        $population = \App\Models\User::residents()->count(); // Use real resident count
         
         $recentNews = \App\Models\News::with('user:id,name')
             ->latest()

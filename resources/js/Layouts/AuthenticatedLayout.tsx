@@ -15,7 +15,7 @@ export default function Authenticated({
 
     return (
         <div
-            className="min-h-screen bg-slate-50 text-right font-sans text-slate-800"
+            className="min-h-screen bg-slate-100 text-right font-sans text-slate-800"
             dir="rtl"
         >
             <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white">

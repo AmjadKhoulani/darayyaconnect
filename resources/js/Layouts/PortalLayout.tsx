@@ -17,7 +17,7 @@ export default function PortalLayout({
 
     return (
         <div
-            className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-500 selection:text-white"
+            className="min-h-screen bg-slate-100 font-sans text-slate-900 selection:bg-emerald-500 selection:text-white"
             dir="rtl"
         >
             <EmergencyModal
