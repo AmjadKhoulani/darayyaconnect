@@ -65,9 +65,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
         // Infrastructure Editor
-        Route::get('/infrastructure/editor', function () {
-            return Inertia::render('Admin/Infrastructure/Editor');
-        })->name('infrastructure.editor');
+        // Infrastructure Editors (Per Sector)
+        Route::get('/infrastructure/water/editor', [InfrastructureManagerController::class, 'editor'])->defaults('sector', 'water')->name('infrastructure.water.editor');
+        Route::get('/infrastructure/electricity/editor', [InfrastructureManagerController::class, 'editor'])->defaults('sector', 'electricity')->name('infrastructure.electricity.editor');
+        Route::get('/infrastructure/sewage/editor', [InfrastructureManagerController::class, 'editor'])->defaults('sector', 'sewage')->name('infrastructure.sewage.editor');
+        Route::get('/infrastructure/phone/editor', [InfrastructureManagerController::class, 'editor'])->defaults('sector', 'phone')->name('infrastructure.phone.editor');
+        
+        // General route for dynamic access if needed
+        Route::get('/infrastructure/{sector}/editor', [InfrastructureManagerController::class, 'editor'])->name('infrastructure.sector.editor');
 
         // New Resources
         Route::resource('generators', \App\Http\Controllers\Admin\GeneratorController::class);

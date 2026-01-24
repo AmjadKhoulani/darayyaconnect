@@ -38,4 +38,14 @@ class InfrastructureManagerController extends Controller
             'zones' => InfrastructurePoint::where('type', 'water_zone')->orderBy('name')->get()
         ]);
     }
+    public function editor($sector)
+    {
+        if (!in_array($sector, ['water', 'electricity', 'sewage', 'phone'])) {
+            abort(404);
+        }
+
+        return Inertia::render('Admin/Infrastructure/Editor', [
+            'sector' => $sector
+        ]);
+    }
 }
