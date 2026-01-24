@@ -15,6 +15,14 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef, useState } from 'react';
 
+const networks = ['water', 'electricity', 'sewage', 'phone'];
+const colors: Record<string, string> = {
+    water: '#3b82f6',
+    electricity: '#f59e0b',
+    sewage: '#78350f',
+    phone: '#10b981',
+};
+
 interface Point {
     id: number;
     name: string;
@@ -56,78 +64,160 @@ export default function InfrastructureIndex({ auth, points }: any) {
         map.current.on('load', () => {
             if (!map.current) return;
 
-            // 1. Add Infrastructure Networks (Lines)
-            const networks = ['water', 'electricity', 'sewage', 'phone'];
-            const colors: Record<string, string> = {
-                water: '#3b82f6',
-                electricity: '#f59e0b',
-                sewage: '#78350f',
-                phone: '#10b981',
-            };
-
+            // 2. Add Infrastructure Data (Lines & Nodes)
             fetch('/api/infrastructure')
                 .then((res) => res.json())
                 .then((data) => {
                     if (!map.current) return;
 
-                    networks.forEach((type) => {
-                        const lines = data.lines.filter(
-                            (l: any) => l.type === type,
-                        );
-                        const pointsData = data.nodes.filter((n: any) => {
-                            if (type === 'sewage' && n.type === 'manhole')
-                                return true;
-                            if (
-                                type === 'electricity' &&
-                                (n.type === 'transformer' || n.type === 'pole')
-                            )
-                                return true;
-                            if (type === 'water' && n.type === 'pump')
-                                return true;
-                            return false;
-                        });
+                    const allFeatures: GeoJSON.Feature[] = [];
 
-                        const lineGeoJson: GeoJSON.FeatureCollection = {
-                            type: 'FeatureCollection',
-                            features: lines.map((l: any) => ({
-                                type: 'Feature',
-                                geometry: {
-                                    type: 'LineString',
-                                    coordinates: l.coordinates,
-                                },
-                                properties: {
-                                    id: l.id,
-                                    type: l.type,
-                                    category: 'network',
-                                },
-                            })),
-                        };
-
-                        map.current!.addSource(`infra-${type}-source`, {
-                            type: 'geojson',
-                            data: lineGeoJson,
+                    // Process Lines
+                    data.lines.forEach((l: any) => {
+                        const sector = getSectorFromType(l.type);
+                        allFeatures.push({
+                            type: 'Feature',
+                            geometry: { type: 'LineString', coordinates: l.coordinates },
+                            properties: {
+                                id: l.id,
+                                type: l.type,
+                                sector,
+                                label: getLabelForType(l.type),
+                                status: l.status,
+                                meta: l.meta
+                            }
                         });
+                    });
+
+                    // Process Nodes
+                    data.nodes.forEach((n: any) => {
+                        const sector = getSectorFromType(n.type);
+                        allFeatures.push({
+                            type: 'Feature',
+                            geometry: { type: 'Point', coordinates: [parseFloat(n.longitude), parseFloat(n.latitude)] },
+                            properties: {
+                                id: n.id,
+                                type: n.type,
+                                sector,
+                                label: getLabelForType(n.type),
+                                icon: getEmojiForType(n.type),
+                                status: n.status,
+                                meta: n.meta
+                            }
+                        });
+                    });
+
+                    map.current.addSource('infra-source', {
+                        type: 'geojson',
+                        data: { type: 'FeatureCollection', features: allFeatures }
+                    });
+
+                    // Add Sector Layers (Lines)
+                    networks.forEach(sector => {
                         map.current!.addLayer({
-                            id: `infra-${type}-layer`,
+                            id: `infra-${sector}-lines`,
                             type: 'line',
-                            source: `infra-${type}-source`,
+                            source: 'infra-source',
+                            filter: ['all', ['==', '$type', 'LineString'], ['==', 'sector', sector]],
                             layout: {
                                 'line-join': 'round',
                                 'line-cap': 'round',
-                                visibility: activeLayers.includes(type)
-                                    ? 'visible'
-                                    : 'none',
+                                visibility: activeLayers.includes(sector) ? 'visible' : 'none',
                             },
                             paint: {
-                                'line-color': colors[type],
-                                'line-width': 3,
-                                'line-opacity': 0.7,
+                                'line-color': colors[sector],
+                                'line-width': 4,
+                                'line-opacity': 0.8,
                             },
+                        });
+                    });
+
+                    // Add Sector Layers (Nodes/Icons)
+                    networks.forEach(sector => {
+                        map.current!.addLayer({
+                            id: `infra-${sector}-nodes-bg`,
+                            type: 'circle',
+                            source: 'infra-source',
+                            filter: ['all', ['==', '$type', 'Point'], ['==', 'sector', sector]],
+                            layout: {
+                                visibility: activeLayers.includes(sector) ? 'visible' : 'none',
+                            },
+                            paint: {
+                                'circle-radius': 12,
+                                'circle-color': '#fff',
+                                'circle-stroke-width': 2,
+                                'circle-stroke-color': colors[sector],
+                            }
+                        });
+
+                        map.current!.addLayer({
+                            id: `infra-${sector}-nodes-icon`,
+                            type: 'symbol',
+                            source: 'infra-source',
+                            filter: ['all', ['==', '$type', 'Point'], ['==', 'sector', sector]],
+                            layout: {
+                                'text-field': ['get', 'icon'],
+                                'text-size': 14,
+                                'text-allow-overlap': true,
+                                visibility: activeLayers.includes(sector) ? 'visible' : 'none',
+                            }
+                        });
+                    });
+
+                    // Setup Hover Popups
+                    const popup = new maplibregl.Popup({
+                        closeButton: false,
+                        closeOnClick: false,
+                        className: 'infra-popup'
+                    });
+
+                    const layersToHandle = [
+                        ...networks.map(s => `infra-${s}-lines`),
+                        ...networks.map(s => `infra-${s}-nodes-bg`)
+                    ];
+
+                    layersToHandle.forEach(layerId => {
+                        map.current!.on('mouseenter', layerId, (e) => {
+                            map.current!.getCanvas().style.cursor = 'pointer';
+                            const feature = e.features![0];
+                            const props = feature.properties as any;
+                            const coordinates = feature.geometry.type === 'Point'
+                                ? (feature.geometry as any).coordinates.slice()
+                                : e.lngLat;
+
+                            let metaHtml = '';
+                            if (props.meta) {
+                                try {
+                                    const meta = typeof props.meta === 'string' ? JSON.parse(props.meta) : props.meta;
+                                    if (meta.served_neighborhood) {
+                                        metaHtml = `<div class="text-[10px] font-bold text-emerald-600 mt-1">🏠 يخدم حارة: ${meta.served_neighborhood}</div>`;
+                                    }
+                                } catch (e) { }
+                            }
+
+                            const html = `
+                                <div class="p-2 text-right" dir="rtl">
+                                    <div class="font-black text-slate-800 text-sm">${props.label}</div>
+                                    <div class="text-[10px] text-slate-400 uppercase tracking-tighter">${props.type}</div>
+                                    <div class="mt-2 flex items-center gap-1">
+                                        <div class="w-2 h-2 rounded-full ${props.status === 'active' ? 'bg-emerald-500' : 'bg-rose-500'}"></div>
+                                        <span class="text-[10px] font-bold">${props.status === 'active' ? 'يعمل' : 'تحت الصيانة'}</span>
+                                    </div>
+                                    ${metaHtml}
+                                </div>
+                            `;
+
+                            popup.setLngLat(coordinates).setHTML(html).addTo(map.current!);
+                        });
+
+                        map.current!.on('mouseleave', layerId, () => {
+                            map.current!.getCanvas().style.cursor = '';
+                            popup.remove();
                         });
                     });
                 });
 
-            // 2. Crowdsourced Status Layer (Heatmap/Zones)
+            // 3. Crowdsourced Status Layer (Heatmap/Zones)
             fetch('/api/infrastructure/status-heatmap?type=electricity')
                 .then((res) => res.json())
                 .then((geoJson) => {
@@ -187,12 +277,15 @@ export default function InfrastructureIndex({ auth, points }: any) {
         if (!map.current) return;
 
         ['water', 'electricity', 'sewage', 'phone'].forEach((layer) => {
-            if (map.current!.getLayer(`infra-${layer}-layer`)) {
-                map.current!.setLayoutProperty(
-                    `infra-${layer}-layer`,
-                    'visibility',
-                    activeLayers.includes(layer) ? 'visible' : 'none',
-                );
+            const visibility = activeLayers.includes(layer) ? 'visible' : 'none';
+            if (map.current!.getLayer(`infra-${layer}-lines`)) {
+                map.current!.setLayoutProperty(`infra-${layer}-lines`, 'visibility', visibility);
+            }
+            if (map.current!.getLayer(`infra-${layer}-nodes-bg`)) {
+                map.current!.setLayoutProperty(`infra-${layer}-nodes-bg`, 'visibility', visibility);
+            }
+            if (map.current!.getLayer(`infra-${layer}-nodes-icon`)) {
+                map.current!.setLayoutProperty(`infra-${layer}-nodes-icon`, 'visibility', visibility);
             }
         });
 
@@ -214,15 +307,58 @@ export default function InfrastructureIndex({ auth, points }: any) {
     };
 
     const getEmojiForType = (type: string) => {
-        const map: Record<string, string> = {
-            water_well: '💧',
-            transformer: '⚡',
-            school: '🎓',
-            health_center: '🏥',
-            park: '🌳',
-            government: '🏛️',
+        const emojis: Record<string, string> = {
+            // Water
+            'water_tank': '🏯',
+            'pump': '⚙️',
+            'valve': '🔧',
+            'water_well': '💧',
+            // Electricity
+            'transformer': '⚡',
+            'pole': '💡',
+            'generator': '🔋',
+            // Sewage
+            'manhole': '🕳️',
+            // Phone
+            'exchange': '🏢',
+            'cabinet': '📦',
+            // Public
+            'school': '🎓',
+            'health_center': '🏥',
+            'park': '🌳',
+            'government': '🏛️',
         };
-        return map[type] || '📍';
+        return emojis[type] || '📍';
+    };
+
+    const getSectorFromType = (type: string) => {
+        if (type.startsWith('water') || ['pump', 'valve', 'water_well'].includes(type)) return 'water';
+        if (type.startsWith('power') || ['transformer', 'pole', 'generator'].includes(type)) return 'electricity';
+        if (type.startsWith('sewage') || ['manhole'].includes(type)) return 'sewage';
+        if (type.startsWith('telecom') || ['exchange', 'cabinet'].includes(type)) return 'phone';
+        return 'other';
+    };
+
+    const getLabelForType = (type: string) => {
+        const labels: Record<string, string> = {
+            'water_tank': 'خزان مياه',
+            'pump': 'مضخة مياه',
+            'valve': 'صمام أغلاق',
+            'water_well': 'بئر مياه',
+            'water_pipe_main': 'أنبوب رئيسي',
+            'water_pipe_distribution': 'أنبوب فرعي',
+            'transformer': 'محولة كهرباء',
+            'pole': 'عامود إنارة',
+            'generator': 'مولدة كهرباء',
+            'power_cable_underground': 'كبل أرضي',
+            'power_line_overhead': 'كبل هوائي',
+            'manhole': 'ريكار (Manhole)',
+            'sewage_pipe': 'قسطل صرف',
+            'exchange': 'مقسم هاتف',
+            'cabinet': 'كابينة توزيع',
+            'telecom_cable': 'كبل هاتف',
+        };
+        return labels[type] || type;
     };
 
     return (
@@ -285,7 +421,7 @@ export default function InfrastructureIndex({ auth, points }: any) {
                                                 className={`text-xs font-bold ${selectedAsset.status === 'active' ? 'text-emerald-600' : 'text-rose-600'}`}
                                             >
                                                 {selectedAsset.status ===
-                                                'active'
+                                                    'active'
                                                     ? '● يعمل بكفاءة'
                                                     : '● متوقف للصيانة'}
                                             </span>

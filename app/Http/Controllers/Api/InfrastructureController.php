@@ -72,11 +72,21 @@ class InfrastructureController extends Controller
         return $map[$type] ?? 'safety';
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $queryLines = InfrastructureLine::query();
+        $queryNodes = InfrastructureNode::query();
+
+        // If not admin, only show published items
+        // Since this is used by both Admin Editor and Portal Map, we check for auth or a flag
+        if (!$request->user() || $request->user()->role !== 'admin') {
+            $queryLines->where('is_published', true);
+            $queryNodes->where('is_published', true);
+        }
+
         return response()->json([
-            'lines' => InfrastructureLine::all(),
-            'nodes' => InfrastructureNode::all()
+            'lines' => $queryLines->get(),
+            'nodes' => $queryNodes->get()
         ]);
     }
 
@@ -89,6 +99,8 @@ class InfrastructureController extends Controller
             'meta' => 'nullable|array'
         ]);
 
+        $validated['is_published'] = false; // New items are drafts
+        
         $line = InfrastructureLine::create($validated);
         return response()->json($line, 201);
     }
@@ -103,21 +115,37 @@ class InfrastructureController extends Controller
             'meta' => 'nullable|array'
         ]);
 
+        $validated['is_published'] = false; // New items are drafts
+
         $node = InfrastructureNode::create($validated);
         return response()->json($node, 201);
+    }
+
+    public function publishLine($id)
+    {
+        $line = InfrastructureLine::findOrFail($id);
+        $line->update(['is_published' => true]);
+        return response()->json($line);
+    }
+
+    public function publishNode($id)
+    {
+        $node = InfrastructureNode::findOrFail($id);
+        $node->update(['is_published' => true]);
+        return response()->json($node);
     }
 
     public function updateLine(Request $request, $id)
     {
         $line = InfrastructureLine::findOrFail($id);
-        $line->update($request->only(['type', 'status', 'meta', 'coordinates']));
+        $line->update($request->only(['type', 'status', 'meta', 'coordinates', 'is_published']));
         return response()->json($line);
     }
 
     public function updateNode(Request $request, $id)
     {
         $node = InfrastructureNode::findOrFail($id);
-        $node->update($request->only(['type', 'latitude', 'longitude', 'status', 'meta']));
+        $node->update($request->only(['type', 'latitude', 'longitude', 'status', 'meta', 'is_published']));
         return response()->json($node);
     }
 

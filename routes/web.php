@@ -115,10 +115,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Infrastructure API (Accessible via Session Auth)
         Route::prefix('api/infrastructure')->group(function () {
+            Route::get('/', [App\Http\Controllers\Api\InfrastructureController::class, 'index']); // GET ALL as admin
             Route::post('/lines', [App\Http\Controllers\Api\InfrastructureController::class, 'storeLine']);
             Route::post('/nodes', [App\Http\Controllers\Api\InfrastructureController::class, 'storeNode']);
             Route::put('/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'updateLine']);
             Route::put('/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'updateNode']);
+            Route::post('/lines/{id}/publish', [App\Http\Controllers\Api\InfrastructureController::class, 'publishLine']);
+            Route::post('/nodes/{id}/publish', [App\Http\Controllers\Api\InfrastructureController::class, 'publishNode']);
             Route::delete('/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyLine']);
             Route::delete('/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyNode']);
         });

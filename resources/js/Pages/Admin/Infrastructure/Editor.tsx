@@ -176,13 +176,23 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     type: 'line',
                     filter: ['all', ['==', '$type', 'LineString'], ['!=', 'mode', 'static']],
                     layout: { 'line-cap': 'round', 'line-join': 'round' },
-                    paint: { 'line-color': config?.color || '#333', 'line-dasharray': [0.2, 2], 'line-width': 4 },
+                    paint: {
+                        'line-color': config?.color || '#333',
+                        'line-dasharray': ['case', ['!', ['get', 'is_published']], ['literal', [2, 2]], ['literal', [1, 0]]],
+                        'line-width': 4
+                    },
                 },
                 {
                     id: 'gl-draw-point',
                     type: 'circle',
                     filter: ['all', ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
-                    paint: { 'circle-radius': 8, 'circle-color': config?.color || '#333', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
+                    paint: {
+                        'circle-radius': 8,
+                        'circle-color': config?.color || '#333',
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#fff',
+                        'circle-opacity': 0.7
+                    },
                 },
             ],
         });
@@ -215,7 +225,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get('/api/infrastructure');
+            const { data } = await axios.get('/admin/api/infrastructure');
 
             const sectorNodes = data.nodes.filter((n: any) =>
                 config.nodeTypes.some(t => t.type === n.type)
@@ -263,7 +273,12 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                 source: sourceId,
                 filter: ['==', '$type', 'LineString'],
                 layout: { 'line-join': 'round', 'line-cap': 'round' },
-                paint: { 'line-color': config?.color || '#333', 'line-width': 4, 'line-opacity': 0.8 }
+                paint: {
+                    'line-color': config?.color || '#333',
+                    'line-width': 4,
+                    'line-opacity': 0.8,
+                    'line-dasharray': ['case', ['!', ['get', 'is_published']], ['literal', [2, 2]], ['literal', [1, 0]]]
+                }
             });
 
             map.current.addLayer({
@@ -271,7 +286,13 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                 type: 'circle',
                 source: sourceId,
                 filter: ['==', '$type', 'Point'],
-                paint: { 'circle-radius': 6, 'circle-color': config?.color || '#333', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' }
+                paint: {
+                    'circle-radius': 6,
+                    'circle-color': config?.color || '#333',
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#fff',
+                    'circle-opacity': ['case', ['!', ['get', 'is_published']], 0.5, 1]
+                }
             });
         }
     };
@@ -522,9 +543,27 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                                 </div>
                             )}
 
-                            <button onClick={deleteAsset} className="w-full py-3 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 flex items-center justify-center gap-2 transition-colors border border-rose-100 mt-2">
-                                <Trash2 size={18} /> حذف هذا العنصر
-                            </button>
+                            {/* Publish Option */}
+                            <div className="pt-2 flex flex-col gap-2">
+                                {!inspectorData.properties.is_published && (
+                                    <button
+                                        onClick={publishAsset}
+                                        className="w-full py-4 bg-emerald-600 text-white font-black rounded-xl hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-lg shadow-emerald-200"
+                                    >
+                                        <Check size={20} /> اعتماد ونشر (Live)
+                                    </button>
+                                )}
+
+                                {inspectorData.properties.is_published && (
+                                    <div className="text-center py-2 bg-slate-100 rounded-xl border border-slate-200 text-slate-500 text-[10px] font-bold">
+                                        ✅ هذا العنصر منشور حالياً للجمهور
+                                    </div>
+                                )}
+
+                                <button onClick={deleteAsset} className="w-full py-3 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 flex items-center justify-center gap-2 transition-colors border border-rose-100 mt-2">
+                                    <Trash2 size={18} /> حذف هذا العنصر
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -535,6 +574,6 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     </div>
                 )}
             </div>
-        </AdminLayout>
+        </AdminLayout >
     );
 }
