@@ -107,6 +107,20 @@ class InfrastructureController extends Controller
         return response()->json($node, 201);
     }
 
+    public function updateLine(Request $request, $id)
+    {
+        $line = InfrastructureLine::findOrFail($id);
+        $line->update($request->only(['type', 'status', 'meta', 'coordinates']));
+        return response()->json($line);
+    }
+
+    public function updateNode(Request $request, $id)
+    {
+        $node = InfrastructureNode::findOrFail($id);
+        $node->update($request->only(['type', 'latitude', 'longitude', 'status', 'meta']));
+        return response()->json($node);
+    }
+
     public function destroyLine($id)
     {
         InfrastructureLine::destroy($id);

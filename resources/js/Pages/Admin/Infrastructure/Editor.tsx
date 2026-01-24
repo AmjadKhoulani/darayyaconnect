@@ -18,6 +18,7 @@ import {
     Zap,
     Wind,
     Phone,
+    Check,
 } from 'lucide-react';
 
 // Define Types
@@ -39,16 +40,16 @@ const SECTOR_CONFIG: Record<string, {
     label: string;
     color: string;
     icon: any;
-    nodeTypes: { type: string; label: string; icon: string }[];
-    lineTypes: { type: string; label: string; icon: string }[];
+    nodeTypes: { type: string; label: string; icon: string; canFeedNeighborhood?: boolean }[];
+    lineTypes: { type: string; label: string; icon: string; canFeedNeighborhood?: boolean }[];
 }> = {
     water: {
         label: 'شبكة المياه',
         color: '#3b82f6',
         icon: Droplets,
         nodeTypes: [
-            { type: 'water_tank', label: 'خزان مياه', icon: '🏯' },
-            { type: 'pump', label: 'مضخة مياه', icon: '⚙️' },
+            { type: 'water_tank', label: 'خزان مياه', icon: '🏯', canFeedNeighborhood: true },
+            { type: 'pump', label: 'مضخة مياه', icon: '⚙️', canFeedNeighborhood: true },
             { type: 'valve', label: 'صمام (سكر)', icon: '🔧' },
         ],
         lineTypes: [
@@ -61,9 +62,9 @@ const SECTOR_CONFIG: Record<string, {
         color: '#eab308',
         icon: Zap,
         nodeTypes: [
-            { type: 'transformer', label: 'محولة كهرباء', icon: '⚡' },
+            { type: 'transformer', label: 'محولة كهرباء', icon: '⚡', canFeedNeighborhood: true },
             { type: 'pole', label: 'عامود إنارة', icon: '💡' },
-            { type: 'generator', label: 'مولدة', icon: '🔋' },
+            { type: 'generator', label: 'مولدة', icon: '🔋', canFeedNeighborhood: true },
         ],
         lineTypes: [
             { type: 'power_cable_underground', label: 'كبل أرضي', icon: '🔌' },
@@ -279,11 +280,19 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         }
     };
 
+    const finishDrawing = () => {
+        if (draw.current) {
+            draw.current.changeMode('simple_select');
+        }
+    };
+
     const saveDraw = async (feature: any) => {
         try {
             if (feature.geometry.type === 'Point') {
                 if (!selectedSubType) {
                     alert('الرجاء اختيار نوع العنصر أولاً');
+                    // Clean up invalid feature from map
+                    draw.current?.delete(feature.id);
                     return;
                 }
                 await axios.post('/api/infrastructure/nodes', {
@@ -293,7 +302,10 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     status: 'active',
                 });
             } else {
-                if (feature.geometry.coordinates.length < 2) return;
+                if (feature.geometry.coordinates.length < 2) {
+                    draw.current?.delete(feature.id);
+                    return;
+                }
                 await axios.post('/api/infrastructure/lines', {
                     type: selectedSubType,
                     coordinates: feature.geometry.coordinates,
@@ -308,6 +320,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             const errorMsg = e.response?.data?.message || e.message || 'خطأ غير معروف';
             alert(`فشل الحفظ: ${errorMsg}`);
             console.error(e);
+            draw.current?.delete(feature.id);
         }
     };
 
@@ -328,8 +341,9 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             alert('تم تعيين الحارة بنجاح');
             setInspectorData(null);
             fetchData();
-        } catch (e) {
-            alert('فشل التحديث');
+        } catch (e: any) {
+            const errorMsg = e.response?.data?.message || e.message || 'خطأ غير معروف';
+            alert(`فشل التحديث: ${errorMsg}`);
             console.error(e);
         }
     };
@@ -348,6 +362,16 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             setLoading(false);
         }
     };
+
+    // Check if the current inspector asset can feed a neighborhood
+    const canServe = useMemo(() => {
+        if (!inspectorData) return false;
+        const assetType = inspectorData.properties.type;
+        const isNode = inspectorData.layer.includes('nodes');
+
+        const list = isNode ? config.nodeTypes : config.lineTypes;
+        return list.find(t => t.type === assetType)?.canFeedNeighborhood || false;
+    }, [inspectorData, config]);
 
     return (
         <AdminLayout user={auth.user}>
@@ -430,6 +454,17 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                             </div>
                         </div>
                     </div>
+
+                    {/* Completion Button while drawing */}
+                    {activeTool !== 'select' && (
+                        <button
+                            onClick={finishDrawing}
+                            className="bg-emerald-600 text-white rounded-xl shadow-lg border border-emerald-500 p-4 font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 animate-in slide-in-from-bottom-5"
+                        >
+                            <Check size={20} />
+                            إنهاء وحفظ الرسم
+                        </button>
+                    )}
                 </div>
 
                 {/* Map Area */}
@@ -452,33 +487,35 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                                 <div className="font-bold text-slate-800">{inspectorData.properties.type}</div>
                             </div>
 
-                            {/* Neighborhood Assignment */}
-                            <div>
-                                <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
-                                    <Home size={14} className="text-slate-400" />
-                                    الحارة المستفيدة (خدمة المنطقة)
-                                </label>
-                                <div className="flex gap-2">
-                                    <select
-                                        value={assignedNeighborhood}
-                                        onChange={(e) => setAssignedNeighborhood(e.target.value)}
-                                        className="flex-1 rounded-xl border-slate-200 text-sm py-2.5 focus:ring-slate-900 focus:border-slate-900 shadow-sm bg-white"
-                                    >
-                                        <option value="">اختر الحارة...</option>
-                                        {NEIGHBORHOODS.map(n => (
-                                            <option key={n} value={n}>{n}</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={updateAssignedNeighborhood}
-                                        className="bg-slate-900 text-white px-3 rounded-xl hover:bg-slate-800 shadow-md flex items-center justify-center"
-                                        title="حفظ"
-                                    >
-                                        <CheckCircle2 size={18} />
-                                    </button>
+                            {/* Neighborhood Assignment (Conditional) */}
+                            {canServe && (
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
+                                        <Home size={14} className="text-slate-400" />
+                                        الحارة المستفيدة (خدمة المنطقة)
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={assignedNeighborhood}
+                                            onChange={(e) => setAssignedNeighborhood(e.target.value)}
+                                            className="flex-1 rounded-xl border-slate-200 text-sm py-2.5 focus:ring-slate-900 focus:border-slate-900 shadow-sm bg-white"
+                                        >
+                                            <option value="">اختر الحارة...</option>
+                                            {NEIGHBORHOODS.map(n => (
+                                                <option key={n} value={n}>{n}</option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            onClick={updateAssignedNeighborhood}
+                                            className="bg-slate-900 text-white px-3 rounded-xl hover:bg-slate-800 shadow-md flex items-center justify-center"
+                                            title="حفظ"
+                                        >
+                                            <CheckCircle2 size={18} />
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-2 px-1">حدد الحارة التي يتم تغذيتها من هذا العنصر لربط الشبكة بالسكان.</p>
                                 </div>
-                                <p className="text-[10px] text-slate-400 mt-2 px-1">حدد الحارة التي يتم تغذيتها من هذا العنصر لربط الشبكة بالسكان.</p>
-                            </div>
+                            )}
 
                             <button onClick={deleteAsset} className="w-full py-3 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 flex items-center justify-center gap-2 transition-colors border border-rose-100 mt-2">
                                 <Trash2 size={18} /> حذف هذا العنصر

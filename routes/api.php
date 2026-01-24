@@ -87,6 +87,8 @@ Route::get('/infrastructure', [App\Http\Controllers\Api\InfrastructureController
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/infrastructure/lines', [App\Http\Controllers\Api\InfrastructureController::class, 'storeLine']);
     Route::post('/infrastructure/nodes', [App\Http\Controllers\Api\InfrastructureController::class, 'storeNode']);
+    Route::put('/infrastructure/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'updateLine']);
+    Route::put('/infrastructure/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'updateNode']);
     Route::delete('/infrastructure/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyLine']);
     Route::delete('/infrastructure/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyLine']);
     Route::delete('/infrastructure/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyNode']);
