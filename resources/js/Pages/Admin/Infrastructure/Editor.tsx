@@ -1,5 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -7,7 +7,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import axios from 'axios';
-import { Info, Settings } from 'lucide-react';
+import {
+    Activity,
+    AlertTriangle,
+    CheckCircle2,
+    Info,
+    Layers,
+    Map as MapIcon,
+    MousePointer2,
+    PenTool,
+    Settings,
+    Trash2,
+    Zap,
+} from 'lucide-react';
 
 // Define Types
 type NetworkType = 'water' | 'electricity' | 'sewage' | 'phone';
@@ -41,6 +53,7 @@ export default function InfrastructureEditor({ auth }: Props) {
     const [activeLayer, setActiveLayer] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [inspectorData, setInspectorData] = useState<any | null>(null);
+    const [drawMode, setDrawMode] = useState<'simple_select' | 'draw_line_string' | 'draw_point'>('simple_select');
 
     // Permissions Logic
     const allowedTypes = useMemo(() => {
@@ -90,12 +103,7 @@ export default function InfrastructureEditor({ auth }: Props) {
 
         // Initialize Draw Tools
         draw.current = new MapboxDraw({
-            displayControlsDefault: false,
-            controls: {
-                line_string: true,
-                point: true,
-                trash: true,
-            },
+            displayControlsDefault: false, // We use custom buttons
             styles: [
                 // ACTIVE (being drawn)
                 // line stroke
@@ -192,6 +200,7 @@ export default function InfrastructureEditor({ auth }: Props) {
         map.current.on('draw.create', (e) => saveDraw(e.features[0]));
         map.current.on('draw.update', (e) => updateDraw(e.features[0]));
         map.current.on('draw.delete', (e) => deleteDraw(e.features[0]));
+        map.current.on('draw.modechange', (e) => setDrawMode(e.mode));
 
         map.current.on('click', (e) => {
             // Check if clicked on existing feature
@@ -248,6 +257,7 @@ export default function InfrastructureEditor({ auth }: Props) {
             });
 
             if (type === 'line') {
+                const lineWidth = id.includes('active') ? 6 : 4;
                 map.current?.addLayer({
                     id: id,
                     type: 'line',
@@ -255,7 +265,7 @@ export default function InfrastructureEditor({ auth }: Props) {
                     layout: { 'line-join': 'round', 'line-cap': 'round' },
                     paint: {
                         'line-color': color,
-                        'line-width': 4,
+                        'line-width': lineWidth,
                         'line-opacity': 0.8,
                     },
                 });
@@ -336,9 +346,9 @@ export default function InfrastructureEditor({ auth }: Props) {
     };
 
     const saveDraw = async (feature: any) => {
-        if (!selectedType) return alert('Select a type first');
+        if (!selectedType) return alert('الرجاء اختيار نوع الشبكة أولاً');
         if (!allowedTypes.includes(selectedType))
-            return alert('Permission Denied');
+            return alert('ليس لديك صلاحية لهذا الإجراء');
 
         try {
             if (feature.geometry.type === 'Point') {
@@ -364,9 +374,13 @@ export default function InfrastructureEditor({ auth }: Props) {
 
             // Clear Draw and Refresh
             draw.current?.deleteAll();
+            // Reset mode to simple select
+            setTimeout(() => {
+                draw.current?.changeMode('simple_select');
+            }, 100);
             fetchData();
         } catch (e) {
-            alert('Failed to save');
+            alert('فشل الحفظ');
             console.error(e);
         }
     };
@@ -379,6 +393,36 @@ export default function InfrastructureEditor({ auth }: Props) {
         console.log('Delete not implemented yet', feature);
     };
 
+    const deleteAsset = async () => {
+        if (!inspectorData || !confirm('هل أنت متأكد من الحذف؟')) return;
+
+        try {
+            setLoading(true);
+            const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
+            await axios.delete(`/api/infrastructure/${endpoint}/${inspectorData.id}`);
+            setInspectorData(null);
+            fetchData();
+        } catch (e) {
+            alert('فشل الحذف');
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const startDraw = (mode: 'draw_line_string' | 'draw_point') => {
+        if (draw.current) {
+            draw.current.changeMode(mode);
+        }
+    };
+
+    const networkConfig: Record<string, { label: string; color: string; icon: any }> = {
+        water: { label: 'شبكة المياه', color: 'bg-blue-500', icon: CheckCircle2 },
+        electricity: { label: 'شبكة الكهرباء', color: 'bg-amber-500', icon: Zap },
+        sewage: { label: 'الصرف الصحي', color: 'bg-amber-900', icon: Trash2 },
+        phone: { label: 'الاتصالات', color: 'bg-emerald-500', icon: CheckCircle2 },
+    };
+
     // UI Components
     return (
         <AdminLayout
@@ -389,92 +433,83 @@ export default function InfrastructureEditor({ auth }: Props) {
                 </h2>
             }
         >
-            <Head title="GIS Editor" />
+            <Head title="محرر البنية التحتية" />
 
-            <div className="relative flex h-[calc(100vh-64px)] w-full overflow-hidden bg-slate-100">
-                {/* 1. Left Floating Toolbox */}
-                <div className="absolute left-14 top-4 z-10 flex flex-col gap-2">
-                    <div className="w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
-                        <div className="mb-3 flex items-center gap-2 border-b border-slate-100 pb-3">
-                            <div className="rounded-lg bg-slate-900 p-1.5 text-white">
-                                <Settings size={16} />
-                            </div>
-                            <span className="text-sm font-bold text-slate-800">
-                                Editor Controls
-                            </span>
+            <div className="relative flex h-[calc(100vh-64px)] w-full overflow-hidden bg-slate-100" dir="rtl">
+
+                {/* 1. Top Bar Controls */}
+                <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
+                    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-2 flex flex-col gap-2 w-14 items-center">
+                        <div className="p-2 bg-slate-100 rounded-lg text-slate-600 mb-1" title="Editor">
+                            <MapIcon size={20} />
                         </div>
 
-                        <div className="space-y-4">
-                            <div>
-                                <label className="mb-1 block text-xs font-bold uppercase text-slate-400">
-                                    Active Network
-                                </label>
-                                <select
-                                    className="w-full rounded-lg border-slate-200 bg-slate-50 text-sm font-bold"
-                                    value={selectedType}
-                                    onChange={(e) =>
-                                        setSelectedType(e.target.value)
-                                    }
-                                >
-                                    {allowedTypes.map((t) => (
-                                        <option key={t} value={t}>
-                                            {t.toUpperCase()}
-                                        </option>
-                                    ))}
-                                    {allowedTypes.length === 0 && (
-                                        <option disabled>No Permissions</option>
-                                    )}
-                                </select>
-                            </div>
+                        {/* Selection Tool */}
+                        <button
+                            onClick={() => startDraw('simple_select')}
+                            className={`p-2 rounded-lg transition-colors ${drawMode === 'simple_select' ? 'bg-sky-50 text-sky-600' : 'hover:bg-slate-50 text-slate-500'}`}
+                            title="تحريك / تحديد"
+                        >
+                            <MousePointer2 size={20} />
+                        </button>
 
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    onClick={() =>
-                                        draw.current?.changeMode(
-                                            'draw_line_string',
-                                        )
-                                    }
-                                    disabled={allowedTypes.length === 0}
-                                    className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 py-2 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
-                                >
-                                    <span>〰️</span> Draw Line
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        draw.current?.changeMode('draw_point')
-                                    }
-                                    disabled={allowedTypes.length === 0}
-                                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-50 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
-                                >
-                                    <span>📍</span> Add Node
-                                </button>
-                            </div>
-                        </div>
+                        {/* Draw Line */}
+                        <button
+                            onClick={() => startDraw('draw_line_string')}
+                            disabled={allowedTypes.length === 0}
+                            className={`p-2 rounded-lg transition-colors ${drawMode === 'draw_line_string' ? 'bg-sky-50 text-sky-600' : 'hover:bg-slate-50 text-slate-500'} ${allowedTypes.length === 0 ? 'opacity-50' : ''}`}
+                            title="رسم خط"
+                        >
+                            <PenTool size={20} />
+                        </button>
+
+                        {/* Add Point */}
+                        <button
+                            onClick={() => startDraw('draw_point')}
+                            disabled={allowedTypes.length === 0}
+                            className={`p-2 rounded-lg transition-colors ${drawMode === 'draw_point' ? 'bg-sky-50 text-sky-600' : 'hover:bg-slate-50 text-slate-500'} ${allowedTypes.length === 0 ? 'opacity-50' : ''}`}
+                            title="إضافة نقطة"
+                        >
+                            <AlertTriangle size={20} />
+                        </button>
                     </div>
 
-                    {/* Stats / Info */}
-                    <div className="w-64 rounded-xl border border-slate-200 bg-white/90 p-3 text-xs shadow-lg backdrop-blur">
-                        <div className="mb-1 flex items-center justify-between">
-                            <span className="text-slate-500">Total Lines</span>
-                            <span className="font-bold">{lines.length}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-slate-500">Total Assets</span>
-                            <span className="font-bold">{nodes.length}</span>
-                        </div>
+                    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-2 flex flex-col gap-2 w-14 items-center">
+                        {/* Layer Control Placeholder */}
+                        <button className="p-2 rounded-lg hover:bg-slate-50 text-slate-500" title="الطبقات">
+                            <Layers size={20} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Network Selector (Floating Top Right Center) */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+                    <div className="bg-white rounded-full shadow-lg border border-slate-200 p-1.5 flex items-center gap-2">
+                        {allowedTypes.map(t => (
+                            <button
+                                key={t}
+                                onClick={() => setSelectedType(t)}
+                                className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${selectedType === t
+                                    ? 'bg-slate-900 text-white shadow-md'
+                                    : 'text-slate-500 hover:bg-slate-50'}`}
+                            >
+                                <span className={`w-2 h-2 rounded-full ${t === 'water' ? 'bg-blue-500' : t === 'electricity' ? 'bg-amber-400' : 'bg-slate-400'}`}></span>
+                                {t === 'water' ? 'مياه' : t === 'electricity' ? 'كهرباء' : t === 'sewage' ? 'صرف' : 'هاتف'}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
                 {/* 2. Map Area */}
                 <div ref={mapContainer} className="relative h-full flex-1" />
 
-                {/* 3. Right Inspector Panel (Conditional) */}
+                {/* 3. Left Inspector Panel (Conditional) */}
                 {inspectorData && (
-                    <div className="animate-in slide-in-from-right-4 absolute right-4 top-4 z-10 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl">
+                    <div className="animate-in slide-in-from-left-4 absolute left-4 top-4 z-10 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl">
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="flex items-center gap-2 font-bold text-slate-800">
                                 <Info size={16} className="text-blue-500" />{' '}
-                                Asset Details
+                                تفاصيل العنصر
                             </h3>
                             <button
                                 onClick={() => setInspectorData(null)}
@@ -487,16 +522,16 @@ export default function InfrastructureEditor({ auth }: Props) {
                         <div className="space-y-3">
                             <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                                 <div className="mb-1 text-xs font-bold uppercase text-slate-400">
-                                    Asset ID
+                                    معرف العنصر
                                 </div>
-                                <div className="font-mono text-sm">
+                                <div className="font-mono text-sm max-w-[200px] truncate">
                                     {inspectorData.id}
                                 </div>
                             </div>
 
                             <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                                 <div className="mb-1 text-xs font-bold uppercase text-slate-400">
-                                    Type
+                                    النوع
                                 </div>
                                 <div className="font-bold capitalize text-slate-700">
                                     {inspectorData.type}
@@ -504,11 +539,15 @@ export default function InfrastructureEditor({ auth }: Props) {
                             </div>
 
                             <div className="mt-4 flex gap-2">
-                                <button className="flex-1 rounded-lg bg-rose-50 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100">
-                                    Delete Asset
+                                <button
+                                    onClick={deleteAsset}
+                                    className="flex-1 rounded-lg bg-rose-50 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 flex items-center justify-center gap-2"
+                                >
+                                    <Trash2 size={14} />
+                                    حذف
                                 </button>
                                 <button className="flex-1 rounded-lg bg-slate-800 py-2 text-xs font-bold text-white hover:bg-slate-700">
-                                    Edit Data
+                                    تعديل
                                 </button>
                             </div>
                         </div>

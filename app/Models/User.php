@@ -24,8 +24,6 @@ class User extends Authenticatable
         'password',
         'role',
         'department_id',
-        'role',
-        'department_id',
         'neighborhood',
         'age',
         'gender',
@@ -37,6 +35,7 @@ class User extends Authenticatable
         'location_verified_at',
         'country_code',
         'mobile',
+        'last_active_at',
     ];
 
     /**
