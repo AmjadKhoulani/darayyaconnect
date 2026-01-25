@@ -76,7 +76,8 @@ class InfrastructureController extends Controller
             'electricity' => ['category' => 'electricity', 'dept' => 'electricity'],
             'sewage' => ['category' => 'sanitation', 'dept' => 'municipality'],
             'phone' => ['category' => 'communication', 'dept' => 'telecom'],
-            'infrastructure' => ['category' => 'other', 'dept' => 'municipality'],
+            'infrastructure' => ['category' => 'infrastructure', 'dept' => 'municipality'],
+            'other' => ['category' => 'other', 'dept' => 'municipality'],
         ];
         
         $res = $map[$type] ?? ['category' => 'other', 'dept' => 'municipality'];
