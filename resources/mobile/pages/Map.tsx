@@ -8,77 +8,11 @@ import { Geolocation } from '@capacitor/geolocation';
 
 import api from '../services/api';
 
-// Sample Service Locations
-const serviceLocations = [
-    { id: 1, name: 'صيدلية الشفاء', type: 'pharmacy', lat: 33.458, lng: 36.234, emoji: '💊' },
-    { id: 2, name: 'صيدلية داريا المركزية', type: 'pharmacy', lat: 33.455, lng: 36.238, emoji: '💊' },
-    { id: 3, name: 'مركز داريا الصحي', type: 'health', lat: 33.457, lng: 36.237, emoji: '🏥' },
-    { id: 4, name: 'مجلس المدينة', type: 'government', lat: 33.456, lng: 36.236, emoji: '🏛️' },
-    { id: 5, name: 'حديقة الباسل', type: 'park', lat: 33.454, lng: 36.235, emoji: '🌳' },
-    { id: 6, name: 'فرن داريا الآلي', type: 'service', lat: 33.459, lng: 36.239, emoji: '🍞' },
-];
+// Real Service Locations will be fetched from API
 
-// Mock Infrastructure Data Generator
-const generateInfrastructure = (center: [number, number]): GeoJSON.FeatureCollection => {
-    const features: GeoJSON.Feature[] = [];
-    const [centerLng, centerLat] = center;
-    const size = 0.02; // Roughly 2km box
+// Mock Infrastructure Data Generator Removed
 
-    const types = ['water', 'electricity', 'sewage', 'phone'];
-
-    // Horizontal lines
-    for (let i = 0; i < 8; i++) {
-        const lat = centerLat - size / 2 + (size / 8) * i;
-        types.forEach((type, idx) => {
-            const offset = (idx * 0.00015);
-            features.push({
-                type: 'Feature',
-                properties: { type, id: `h-${i}-${type}` },
-                geometry: {
-                    type: 'LineString',
-                    coordinates: [
-                        [centerLng - size / 2, lat + offset],
-                        [centerLng + size / 2, lat + offset]
-                    ]
-                }
-            });
-        });
-    }
-
-    // Vertical lines
-    for (let i = 0; i < 8; i++) {
-        const lng = centerLng - size / 2 + (size / 8) * i;
-        types.forEach((type, idx) => {
-            const offset = (idx * 0.00015);
-            features.push({
-                type: 'Feature',
-                properties: { type, id: `v-${i}-${type}` },
-                geometry: {
-                    type: 'LineString',
-                    coordinates: [
-                        [lng + offset, centerLat - size / 2],
-                        [lng + offset, centerLat + size / 2]
-                    ]
-                }
-            });
-        });
-    }
-
-    return { type: 'FeatureCollection', features };
-};
-
-// Generate Mock Population Data for Heatmap
-const generatePopulationPoints = (count: number) => {
-    const points = [];
-    for (let i = 0; i < count; i++) {
-        const lng = 36.236 + (Math.random() - 0.5) * 0.02;
-        const lat = 33.456 + (Math.random() - 0.5) * 0.02;
-        points.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] }, properties: { intensity: Math.random() } });
-    }
-    return points;
-};
-
-const populationPoints = generatePopulationPoints(500);
+// Population mocks removed
 
 // Colors for Infrastructure
 const INFRA_COLORS = {
@@ -107,7 +41,8 @@ export default function Map() {
         crowdWater: true
     });
 
-    const [filteredServices, setFilteredServices] = useState(serviceLocations);
+    const [filteredServices, setFilteredServices] = useState<any[]>([]);
+    const [allServices, setAllServices] = useState<any[]>([]);
     const [timeOffset, setTimeOffset] = useState(0);
 
     const selectedDate = useMemo(() => {
@@ -345,7 +280,7 @@ export default function Map() {
         const currentMap = map.current;
 
         // 1. Update Heatmap Data
-        api.get(`/reports/heatmap?date=${selectedDate}`)
+        api.get(`/analytics/heatmap?date=${selectedDate}`)
             .then(res => {
                 const source = currentMap.getSource('population');
                 if (source) {
@@ -419,14 +354,46 @@ export default function Map() {
         }
     }, [map.current]);
 
+    // Fetch Real Services from Directory
+    useEffect(() => {
+        api.get('/directory')
+            .then(res => {
+                const services = res.data.map((item: any) => ({
+                    id: item.id,
+                    name: item.name,
+                    type: item.category,
+                    lat: parseFloat(item.latitude),
+                    lng: parseFloat(item.longitude),
+                    emoji: getCategoryEmoji(item.category)
+                }));
+                setAllServices(services);
+                setFilteredServices(services);
+            })
+            .catch(err => console.error("Failed to fetch directory", err));
+    }, []);
+
+    const getCategoryEmoji = (category: string) => {
+        const emojis: Record<string, string> = {
+            'pharmacy': '💊',
+            'health': '🏥',
+            'government': '🏛️',
+            'park': '🌳',
+            'service': '🍞',
+            'food': '🍴',
+            'education': '🎓',
+            'transport': '🚌'
+        };
+        return emojis[category] || '📍';
+    };
+
     // Handle Search
     useEffect(() => {
-        const filtered = serviceLocations.filter(loc =>
+        const filtered = allServices.filter(loc =>
             loc.name.includes(searchQuery) ||
             loc.type.includes(searchQuery)
         );
         setFilteredServices(filtered);
-    }, [searchQuery]);
+    }, [searchQuery, allServices]);
 
 
     // Manage Markers
