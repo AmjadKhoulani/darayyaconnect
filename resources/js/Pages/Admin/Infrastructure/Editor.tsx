@@ -252,12 +252,12 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                 ...linesData.map(l => ({
                     type: 'Feature',
                     geometry: { type: 'LineString', coordinates: l.coordinates },
-                    properties: { id: l.id, type: l.type, meta: l.meta }
+                    properties: { id: l.id, type: l.type, meta: l.meta, is_published: l.is_published }
                 })),
                 ...nodesData.map(n => ({
                     type: 'Feature',
                     geometry: { type: 'Point', coordinates: [parseFloat(n.longitude), parseFloat(n.latitude)] },
-                    properties: { id: n.id, type: n.type, meta: n.meta }
+                    properties: { id: n.id, type: n.type, meta: n.meta, is_published: n.is_published }
                 }))
             ]
         };
@@ -355,6 +355,22 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             alert(`فشل الحفظ: ${errorMsg}`);
             console.error(e);
             draw.current?.delete(feature.id);
+        }
+    };
+
+    const publishAsset = async () => {
+        if (!inspectorData || !confirm('هل أنت متأكد من اعتماد هذا العنصر ونشره للجمهور؟')) return;
+        try {
+            setLoading(true);
+            const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
+            await axios.post(`/admin/api/infrastructure/${endpoint}/${inspectorData.id}/publish`);
+            alert('تم النشر بنجاح');
+            setInspectorData(null);
+            fetchData();
+        } catch (e: any) {
+            alert('فشل النشر');
+        } finally {
+            setLoading(false);
         }
     };
 

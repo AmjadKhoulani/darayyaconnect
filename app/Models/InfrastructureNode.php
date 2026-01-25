@@ -14,7 +14,8 @@ class InfrastructureNode extends Model
         'latitude',
         'longitude',
         'status',
-        'meta'
+        'meta',
+        'is_published'
     ];
 
     protected $casts = [

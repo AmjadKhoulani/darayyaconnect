@@ -13,7 +13,8 @@ class InfrastructureLine extends Model
         'type',
         'coordinates',
         'status',
-        'meta'
+        'meta',
+        'is_published'
     ];
 
     protected $casts = [
