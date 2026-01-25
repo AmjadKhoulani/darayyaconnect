@@ -271,6 +271,31 @@ export default function DirectoryIndex({
                             </div>
                         </div>
 
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <InputLabel htmlFor="latitude" value="خط العرض (Latitude)" />
+                                <TextInput
+                                    id="latitude"
+                                    type="text"
+                                    className="mt-1 block w-full text-left"
+                                    value={data.latitude}
+                                    onChange={(e) => setData('latitude', e.target.value)}
+                                    placeholder="e.g. 33.456"
+                                />
+                            </div>
+                            <div>
+                                <InputLabel htmlFor="longitude" value="خط الطول (Longitude)" />
+                                <TextInput
+                                    id="longitude"
+                                    type="text"
+                                    className="mt-1 block w-full text-left"
+                                    value={data.longitude}
+                                    onChange={(e) => setData('longitude', e.target.value)}
+                                    placeholder="e.g. 36.234"
+                                />
+                            </div>
+                        </div>
+
                         <div className="mt-6 flex justify-end gap-3">
                             <SecondaryButton onClick={closeModal}>
                                 إلغاء
