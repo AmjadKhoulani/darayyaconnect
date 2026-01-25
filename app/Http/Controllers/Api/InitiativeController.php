@@ -46,15 +46,23 @@ class InitiativeController extends Controller
 
             $imagePath = null;
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('initiatives', 'public');
-                $imagePath = asset('storage/' . $path);
+                $file = $request->file('image');
+                $path = $file->store('initiatives', 'public');
+                // Use relative path for storage to avoid issues with APP_URL
+                $imagePath = '/storage/' . $path;
                 \Log::info('Image stored', ['path' => $imagePath]);
             } else if (is_string($request->image)) {
                 $imagePath = $request->image;
             }
 
+            $user = $request->user();
+            if (!$user) {
+                \Log::error('Initiative store failed: User not authenticated');
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+
             $initiative = Initiative::create([
-                'user_id' => $request->user()->id,
+                'user_id' => $user->id,
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'image' => $imagePath,
@@ -63,15 +71,22 @@ class InitiativeController extends Controller
                 'votes_count' => 0
             ]);
 
-            \Log::info('Initiative created', ['id' => $initiative->id]);
+            \Log::info('Initiative created successfully', ['id' => $initiative->id]);
 
             return response()->json($initiative, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('Initiative validation failed', ['errors' => $e->errors()]);
+            return response()->json([
+                'message' => 'بيانات غير صالحة',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             \Log::error('Initiative store failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'حدث خطأ في الخادم أثناء حفظ المبادرة'], 500);
         }
     }
 
