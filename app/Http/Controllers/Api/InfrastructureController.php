@@ -23,9 +23,13 @@ class InfrastructureController extends Controller
         ]);
 
         try {
+            $routing = $this->mapTypeToCategoryAndDept($validated['type']);
+            
             $reportData = [
                 'user_id' => $request->user()?->id,
-                'category' => $this->mapTypeToCategory($validated['type']),
+                'category' => $routing['category'],
+                'department_id' => $routing['dept_id'],
+                'department_assigned' => $routing['dept_id'] ? true : false,
                 'description' => $validated['title'] . "\n\n" . $validated['description'],
                 'status' => 'pending',
                 'severity' => 2,
@@ -61,15 +65,22 @@ class InfrastructureController extends Controller
         }
     }
 
-    private function mapTypeToCategory($type)
+    private function mapTypeToCategoryAndDept($type)
     {
         $map = [
-            'infrastructure' => 'sanitation', // generic mapping
-            'trash' => 'sanitation',
-            'lighting' => 'electricity',
-            'other' => 'safety'
+            'water' => ['category' => 'water', 'dept' => 'water'],
+            'electricity' => ['category' => 'electricity', 'dept' => 'electricity'],
+            'sewage' => ['category' => 'sanitation', 'dept' => 'municipality'],
+            'phone' => ['category' => 'communication', 'dept' => 'telecom'],
+            'infrastructure' => ['category' => 'other', 'dept' => 'municipality'],
         ];
-        return $map[$type] ?? 'safety';
+        
+        $res = $map[$type] ?? ['category' => 'other', 'dept' => 'municipality'];
+        
+        $dept = \App\Models\Department::where('slug', $res['dept'])->first();
+        $res['dept_id'] = $dept ? $dept->id : null;
+        
+        return $res;
     }
 
     public function index(Request $request)
@@ -224,5 +235,55 @@ class InfrastructureController extends Controller
             'lines_count' => $linesUpdated,
             'nodes_count' => $nodesUpdated
         ]);
+    }
+
+    public function getAssetReports(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|string', // 'node' or 'line'
+            'id' => 'required|numeric',
+        ]);
+
+        $asset = $validated['type'] === 'node' 
+            ? InfrastructureNode::findOrFail($validated['id'])
+            : InfrastructureLine::findOrFail($validated['id']);
+
+        $categoryMap = [
+            'water_tank' => 'water',
+            'pump' => 'water',
+            'valve' => 'water',
+            'water_pipe_main' => 'water',
+            'water_pipe_distribution' => 'water',
+            'transformer' => 'electricity',
+            'pole' => 'electricity',
+            'generator' => 'electricity',
+            'power_cable_underground' => 'electricity',
+            'power_line_overhead' => 'electricity',
+            'manhole' => 'sanitation',
+            'sewage_pipe' => 'sanitation',
+            'exchange' => 'communication',
+            'cabinet' => 'communication',
+            'telecom_cable' => 'communication',
+        ];
+
+        $category = $categoryMap[$asset->type] ?? 'other';
+
+        $query = Report::where('category', $category)
+            ->where('status', '!=', 'resolved')
+            ->orderBy('created_at', 'desc');
+
+        // Simple radius check if it's a node
+        if ($validated['type'] === 'node') {
+            $lat = $asset->latitude;
+            $lng = $asset->longitude;
+            
+            // Approx 100m radius using simple box for performance
+            $query->whereBetween('latitude', [$lat - 0.001, $lat + 0.001])
+                  ->whereBetween('longitude', [$lng - 0.001, $lng + 0.001]);
+        }
+
+        $reports = $query->with('user')->get();
+
+        return response()->json($reports);
     }
 }

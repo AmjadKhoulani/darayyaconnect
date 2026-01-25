@@ -123,6 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/lines/{id}/publish', [App\Http\Controllers\Api\InfrastructureController::class, 'publishLine']);
             Route::post('/nodes/{id}/publish', [App\Http\Controllers\Api\InfrastructureController::class, 'publishNode']);
             Route::post('/publish-all', [App\Http\Controllers\Api\InfrastructureController::class, 'publishAll']);
+            Route::get('/asset-reports', [App\Http\Controllers\Api\InfrastructureController::class, 'getAssetReports']);
             Route::delete('/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyLine']);
             Route::delete('/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyNode']);
         });

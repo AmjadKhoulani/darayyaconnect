@@ -23,6 +23,9 @@ import {
     Droplets,
     Zap,
     Wind,
+    MessageSquare,
+    AlertCircle,
+    ClipboardList,
 } from 'lucide-react';
 
 // Define Types
@@ -115,6 +118,8 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     const [loading, setLoading] = useState(false);
     const [inspectorData, setInspectorData] = useState<any | null>(null);
     const [assignedNeighborhood, setAssignedNeighborhood] = useState('');
+    const [assetNotes, setAssetNotes] = useState('');
+    const [associatedReports, setAssociatedReports] = useState<any[]>([]);
     const [history, setHistory] = useState<any[]>([]);
     const [redoStack, setRedoStack] = useState<any[]>([]);
     const [hasUnpublishedChanges, setHasUnpublishedChanges] = useState(false);
@@ -137,19 +142,29 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
 
     // Inspector Data Effect
     useEffect(() => {
-        if (inspectorData?.properties?.meta) {
-            try {
-                const meta = typeof inspectorData.properties.meta === 'string'
-                    ? JSON.parse(inspectorData.properties.meta)
-                    : inspectorData.properties.meta;
-                setAssignedNeighborhood(meta.served_neighborhood || '');
-            } catch (e) {
-                setAssignedNeighborhood('');
-            }
+        if (inspectorData) {
+            setAssignedNeighborhood(inspectorData.properties.meta?.assigned_neighborhood || '');
+            setAssetNotes(inspectorData.properties.meta?.notes || '');
+            fetchAssetReports(inspectorData);
         } else {
-            setAssignedNeighborhood('');
+            setAssetNotes('');
+            setAssociatedReports([]);
         }
     }, [inspectorData]);
+
+    const fetchAssetReports = async (data: any) => {
+        try {
+            const res = await axios.get('/admin/api/infrastructure/asset-reports', {
+                params: {
+                    type: data.layer.includes('nodes') ? 'node' : 'line',
+                    id: data.id
+                }
+            });
+            setAssociatedReports(res.data);
+        } catch (e) {
+            console.error('Failed to fetch reports', e);
+        }
+    };
 
     useEffect(() => {
         if (map.current) return;
@@ -429,48 +444,38 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     };
 
     const saveDraft = () => {
-        // Items are auto-saved as drafts on creation. 
-        // This button confirms the session is saved and clears current local draw state if needed.
         alert('تم حفظ المسودات بنجاح. يمكنك العودة وإكمال العمل لاحقاً.');
     };
 
-    const publishAsset = async () => {
-        if (!inspectorData || !confirm('هل أنت متأكد من اعتماد هذا العنصر ونشره للجمهور؟')) return;
+    const updateAssetMetadata = async () => {
+        if (!inspectorData) return;
         try {
             setLoading(true);
             const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
-            await axios.post(`/admin/api/infrastructure/${endpoint}/${inspectorData.id}/publish`);
-            alert('تم النشر بنجاح');
-            setInspectorData(null);
-            fetchData();
-        } catch (e: any) {
-            alert('فشل النشر');
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    const updateAssignedNeighborhood = async () => {
-        if (!inspectorData) return;
-        try {
-            const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
+            // Handle both string and object meta
             const currentMeta = typeof inspectorData.properties.meta === 'string'
                 ? JSON.parse(inspectorData.properties.meta || '{}')
                 : (inspectorData.properties.meta || {});
 
-            const newMeta = { ...currentMeta, served_neighborhood: assignedNeighborhood };
+            const newMeta = {
+                ...currentMeta,
+                assigned_neighborhood: assignedNeighborhood,
+                notes: assetNotes
+            };
 
             await axios.put(`/admin/api/infrastructure/${endpoint}/${inspectorData.id}`, {
                 meta: newMeta
             });
 
-            alert('تم تعيين الحارة بنجاح');
-            setInspectorData(null);
+            alert('تم حفظ البيانات بنجاح');
             fetchData();
         } catch (e: any) {
             const errorMsg = e.response?.data?.message || e.message || 'خطأ غير معروف';
             alert(`فشل التحديث: ${errorMsg}`);
             console.error(e);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -642,57 +647,76 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                             <button onClick={() => setInspectorData(null)} className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg">✕</button>
                         </div>
 
-                        <div className="space-y-5">
+                        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
                             <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
                                 <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase">نوع العنصر</div>
                                 <div className="font-bold text-slate-800">{inspectorData.properties.type}</div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
+                                    <MessageSquare size={14} className="text-slate-400" />
+                                    ملاحظات الإدارة
+                                </label>
+                                <textarea
+                                    value={assetNotes}
+                                    onChange={(e) => setAssetNotes(e.target.value)}
+                                    placeholder="أضف ملاحظات فنية أو إدارية هنا..."
+                                    className="w-full rounded-xl border-slate-200 text-sm py-2.5 focus:ring-slate-900 focus:border-slate-900 shadow-sm bg-white min-h-[80px]"
+                                />
                             </div>
 
                             {canServe && (
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
                                         <Home size={14} className="text-slate-400" />
-                                        الحارة المستفيدة (خدمة المنطقة)
+                                        الحارة المستفيدة
                                     </label>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={assignedNeighborhood}
-                                            onChange={(e) => setAssignedNeighborhood(e.target.value)}
-                                            className="flex-1 rounded-xl border-slate-200 text-sm py-2.5 focus:ring-slate-900 focus:border-slate-900 shadow-sm bg-white"
-                                        >
-                                            <option value="">اختر الحارة...</option>
-                                            {NEIGHBORHOODS.map(n => (
-                                                <option key={n} value={n}>{n}</option>
-                                            ))}
-                                        </select>
-                                        <button
-                                            onClick={updateAssignedNeighborhood}
-                                            className="bg-slate-900 text-white px-3 rounded-xl hover:bg-slate-800 shadow-md flex items-center justify-center"
-                                            title="حفظ"
-                                        >
-                                            <CheckCircle2 size={18} />
-                                        </button>
-                                    </div>
-                                    <p className="text-[10px] text-slate-400 mt-2 px-1">حدد الحارة التي يتم تغذيتها من هذا العنصر لربط الشبكة بالسكان.</p>
+                                    <select
+                                        value={assignedNeighborhood}
+                                        onChange={(e) => setAssignedNeighborhood(e.target.value)}
+                                        className="w-full rounded-xl border-slate-200 text-sm py-2.5 focus:ring-slate-900 focus:border-slate-900 shadow-sm bg-white"
+                                    >
+                                        <option value="">اختر الحارة...</option>
+                                        {NEIGHBORHOODS.map(n => (
+                                            <option key={n} value={n}>{n}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             )}
 
-                            {/* Publish Option */}
-                            <div className="pt-2 flex flex-col gap-2">
-                                {!inspectorData.properties.is_published && (
-                                    <button
-                                        onClick={publishAsset}
-                                        className="w-full py-4 bg-emerald-600 text-white font-black rounded-xl hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-lg shadow-emerald-200"
-                                    >
-                                        <Check size={20} /> اعتماد ونشر (Live)
-                                    </button>
-                                )}
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-3 flex items-center gap-1">
+                                    <ClipboardList size={14} className="text-slate-400" />
+                                    البلاغات المرتبطة ({associatedReports.length})
+                                </label>
+                                <div className="space-y-2">
+                                    {associatedReports.map(report => (
+                                        <div key={report.id} className="p-3 bg-amber-50 rounded-xl border border-amber-100 flex gap-2 items-start">
+                                            <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
+                                            <div className="flex-1">
+                                                <div className="text-[10px] font-bold text-amber-800 mb-1">
+                                                    {new Date(report.created_at).toLocaleDateString('ar-SY')}
+                                                </div>
+                                                <div className="text-xs text-amber-900 leading-snug">{report.description}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {associatedReports.length === 0 && (
+                                        <div className="text-center py-4 text-slate-400 text-xs italic bg-slate-50 rounded-xl border border-dashed">
+                                            لا توجد بلاغات حالية
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
-                                {inspectorData.properties.is_published && (
-                                    <div className="text-center py-2 bg-slate-100 rounded-xl border border-slate-200 text-slate-500 text-[10px] font-bold">
-                                        ✅ هذا العنصر منشور حالياً للجمهور
-                                    </div>
-                                )}
+                            <div className="pt-2 flex flex-col gap-2">
+                                <button
+                                    onClick={updateAssetMetadata}
+                                    className="w-full py-4 bg-slate-900 text-white font-black rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
+                                >
+                                    <Check size={20} /> حفظ الملاحظات والتعديلات
+                                </button>
 
                                 <button onClick={deleteAsset} className="w-full py-3 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 flex items-center justify-center gap-2 transition-colors border border-rose-100 mt-2">
                                     <Trash2 size={18} /> حذف هذا العنصر
