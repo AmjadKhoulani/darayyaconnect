@@ -190,4 +190,41 @@ class InfrastructureController extends Controller
         InfrastructureNode::destroy($id);
         return response()->json(null, 204);
     }
+
+    public function publishAll(Request $request)
+    {
+        $validated = $request->validate([
+            'sector' => 'required|string'
+        ]);
+
+        $sector = $validated['sector'];
+        
+        // Define types for each sector (should match client-side SECTOR_CONFIG)
+        $sectorTypes = [
+            'water' => ['water_tank', 'pump', 'valve', 'water_pipe_main', 'water_pipe_distribution'],
+            'electricity' => ['transformer', 'pole', 'generator', 'power_cable_underground', 'power_line_overhead'],
+            'sewage' => ['manhole', 'sewage_pipe'],
+            'phone' => ['exchange', 'cabinet', 'telecom_cable']
+        ];
+
+        $types = $sectorTypes[$sector] ?? [];
+
+        if (empty($types)) {
+            return response()->json(['message' => 'Invalid sector'], 400);
+        }
+
+        $linesUpdated = InfrastructureLine::whereIn('type', $types)
+            ->where('is_published', false)
+            ->update(['is_published' => true]);
+
+        $nodesUpdated = InfrastructureNode::whereIn('type', $types)
+            ->where('is_published', false)
+            ->update(['is_published' => true]);
+
+        return response()->json([
+            'message' => 'تم نشر كافة التعديلات بنجاح',
+            'lines_count' => $linesUpdated,
+            'nodes_count' => $nodesUpdated
+        ]);
+    }
 }

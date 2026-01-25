@@ -122,6 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'updateNode']);
             Route::post('/lines/{id}/publish', [App\Http\Controllers\Api\InfrastructureController::class, 'publishLine']);
             Route::post('/nodes/{id}/publish', [App\Http\Controllers\Api\InfrastructureController::class, 'publishNode']);
+            Route::post('/publish-all', [App\Http\Controllers\Api\InfrastructureController::class, 'publishAll']);
             Route::delete('/lines/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyLine']);
             Route::delete('/nodes/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'destroyNode']);
         });

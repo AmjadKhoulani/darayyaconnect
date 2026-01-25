@@ -8,6 +8,10 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import axios from 'axios';
 import {
+    Check,
+    Undo2,
+    Redo2,
+    Globe,
     CheckCircle2,
     Info,
     MousePointer2,
@@ -18,7 +22,6 @@ import {
     Zap,
     Wind,
     Phone,
-    Check,
 } from 'lucide-react';
 
 // Define Types
@@ -111,6 +114,9 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     const [loading, setLoading] = useState(false);
     const [inspectorData, setInspectorData] = useState<any | null>(null);
     const [assignedNeighborhood, setAssignedNeighborhood] = useState('');
+    const [history, setHistory] = useState<any[]>([]);
+    const [redoStack, setRedoStack] = useState<any[]>([]);
+    const [hasUnpublishedChanges, setHasUnpublishedChanges] = useState(false);
 
     // Refs for event listeners to avoid closure issues
     const subTypeRef = useRef<string>(selectedSubType);
@@ -205,7 +211,16 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
 
         // Use a wrapper to always call the LATEST saveDraw or access CURRENT ref values
         map.current.on('draw.create', (e) => {
+            saveHistory();
             handleSaveEvent(e.features[0]);
+        });
+
+        map.current.on('draw.update', () => {
+            saveHistory();
+        });
+
+        map.current.on('draw.delete', () => {
+            saveHistory();
         });
 
         map.current.on('click', (e) => {
@@ -222,6 +237,35 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         });
     }, [sector]);
 
+    const saveHistory = () => {
+        if (!draw.current) return;
+        const currentFeatures = draw.current.getAll();
+        setHistory(prev => [...prev.slice(-19), currentFeatures]); // Keep last 20 steps
+        setRedoStack([]);
+    };
+
+    const undo = () => {
+        if (history.length === 0 || !draw.current) return;
+        const currentFeatures = draw.current.getAll();
+        const previous = history[history.length - 1];
+
+        setRedoStack(prev => [...prev, currentFeatures]);
+        setHistory(prev => prev.slice(0, -1));
+
+        draw.current.set(previous);
+    };
+
+    const redo = () => {
+        if (redoStack.length === 0 || !draw.current) return;
+        const currentFeatures = draw.current.getAll();
+        const next = redoStack[redoStack.length - 1];
+
+        setHistory(prev => [...prev, next]);
+        setRedoStack(prev => prev.slice(0, -1));
+
+        draw.current.set(next);
+    };
+
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -233,6 +277,10 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             const sectorLines = data.lines.filter((l: any) =>
                 config.lineTypes.some(t => t.type === l.type)
             );
+
+            const hasDrafts = data.nodes.some((n: any) => !n.is_published && config.nodeTypes.some(t => t.type === n.type)) ||
+                data.lines.some((l: any) => !l.is_published && config.lineTypes.some(t => t.type === l.type));
+            setHasUnpublishedChanges(hasDrafts);
 
             renderData(sectorLines, sectorNodes);
         } catch (e) {
@@ -358,6 +406,20 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         }
     };
 
+    const publishAll = async () => {
+        if (!confirm('هل أنت متأكد من نشر كافة التعديلات في هذا القطاع للجمهور؟')) return;
+        try {
+            setLoading(true);
+            await axios.post('/admin/api/infrastructure/publish-all', { sector });
+            alert('تم نشر كافة التعديلات بنجاح');
+            fetchData();
+        } catch (e: any) {
+            alert('فشل النشر الجماعي');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const publishAsset = async () => {
         if (!inspectorData || !confirm('هل أنت متأكد من اعتماد هذا العنصر ونشره للجمهور؟')) return;
         try {
@@ -446,6 +508,39 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                             </Link>
                         );
                     })}
+                </div>
+
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
+                    <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 p-2 flex items-center gap-2">
+                        <button
+                            onClick={undo}
+                            disabled={history.length === 0}
+                            className={`p-3 rounded-xl transition-all ${history.length === 0 ? 'text-slate-300' : 'text-slate-700 hover:bg-slate-100'}`}
+                            title="تراجع (Undo)"
+                        >
+                            <Undo2 size={20} />
+                        </button>
+                        <button
+                            onClick={redo}
+                            disabled={redoStack.length === 0}
+                            className={`p-3 rounded-xl transition-all ${redoStack.length === 0 ? 'text-slate-300' : 'text-slate-700 hover:bg-slate-100'}`}
+                            title="إعادة (Redo)"
+                        >
+                            <Redo2 size={20} />
+                        </button>
+                        <div className="w-px h-6 bg-slate-200 mx-1"></div>
+                        <button
+                            onClick={publishAll}
+                            disabled={!hasUnpublishedChanges}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${hasUnpublishedChanges
+                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700'
+                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                }`}
+                        >
+                            <Globe size={18} />
+                            نشر كافة التعديلات (Live)
+                        </button>
+                    </div>
                 </div>
 
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
