@@ -24,6 +24,7 @@ class InitiativeController extends Controller
     public function index(Request $request)
     {
         $initiatives = Initiative::query()
+            ->with('user')
             ->when($request->search, function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
@@ -89,5 +90,26 @@ class InitiativeController extends Controller
     {
         $initiative->delete();
         return redirect()->back()->with('message', 'تم حذف المبادرة');
+    }
+
+    public function approve(Initiative $initiative)
+    {
+        $initiative->update([
+            'moderation_status' => 'approved',
+            'status' => 'active',
+            'rejection_reason' => null
+        ]);
+        return redirect()->back()->with('message', 'تم الموافقة على المبادرة ونشرها');
+    }
+
+    public function reject(Request $request, Initiative $initiative)
+    {
+        $request->validate(['reason' => 'required|string']);
+        $initiative->update([
+            'moderation_status' => 'rejected',
+            'status' => 'inactive',
+            'rejection_reason' => $request->reason
+        ]);
+        return redirect()->back()->with('message', 'تم رفض المبادرة وإبلاغ المعلن');
     }
 }

@@ -16,7 +16,12 @@ interface Initiative {
     icon: string;
     image: string | null;
     votes_count: number;
+    moderation_status: string;
+    rejection_reason: string | null;
     created_at: string;
+    user?: {
+        name: string;
+    };
 }
 
 interface Props {
@@ -37,7 +42,10 @@ export default function InitiativesIndex({
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
     const [editingItem, setEditingItem] = useState<Initiative | null>(null);
+    const [itemToReject, setItemToReject] = useState<Initiative | null>(null);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,6 +60,27 @@ export default function InitiativesIndex({
         if (confirm('هل أنت متأكد من حذف هذه المبادرة؟')) {
             router.delete(route('admin.initiatives.destroy', id));
         }
+    };
+
+    const approveItem = (id: number) => {
+        if (confirm('هل أنت متأكد من الموافقة على هذه المبادرة؟')) {
+            router.post(route('admin.initiatives.approve', id));
+        }
+    };
+
+    const openRejectModal = (item: Initiative) => {
+        setItemToReject(item);
+        setRejectionReason('');
+        setIsRejectModalOpen(true);
+    };
+
+    const submitRejection = () => {
+        if (!rejectionReason.trim()) return;
+        router.post(route('admin.initiatives.reject', itemToReject!.id), {
+            reason: rejectionReason
+        }, {
+            onSuccess: () => setIsRejectModalOpen(false)
+        });
     };
 
     const openModal = (item: Initiative | null = null) => {
@@ -100,10 +129,11 @@ export default function InitiativesIndex({
                     <table className="w-full text-right">
                         <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-500">
                             <tr>
-                                <th className="px-6 py-4">عنوان المبادرة</th>
+                                <th className="px-6 py-4">عنوان المبادرة / المعلن</th>
                                 <th className="px-6 py-4">التصنيف</th>
                                 <th className="px-6 py-4">الأصوات</th>
                                 <th className="px-6 py-4">الحالة</th>
+                                <th className="px-6 py-4">التدقيق</th>
                                 <th className="px-6 py-4">تاريخ الإطلاق</th>
                                 <th className="px-6 py-4">الإجراءات</th>
                             </tr>
@@ -123,12 +153,8 @@ export default function InitiativesIndex({
                                                 <div className="font-bold text-slate-800">
                                                     {item.title}
                                                 </div>
-                                                <div className="text-xs text-slate-500">
-                                                    {item.description.substring(
-                                                        0,
-                                                        30,
-                                                    )}
-                                                    ...
+                                                <div className="text-[10px] text-emerald-600 font-bold">
+                                                    بواسطة: {item.user?.name || 'مستخدم مجهول'}
                                                 </div>
                                             </div>
                                         </div>
@@ -139,42 +165,66 @@ export default function InitiativesIndex({
                                     <td className="px-6 py-4 font-bold text-blue-600">
                                         {item.votes_count} 👍
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 font-medium">
                                         <span
-                                            className={`rounded px-2 py-1 text-xs font-bold ${
-                                                item.status === 'active'
+                                            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${item.moderation_status === 'approved'
                                                     ? 'bg-emerald-100 text-emerald-700'
-                                                    : item.status ===
-                                                        'completed'
-                                                      ? 'bg-blue-100 text-blue-700'
-                                                      : 'bg-slate-100 text-slate-700'
-                                            }`}
+                                                    : item.moderation_status === 'rejected'
+                                                        ? 'bg-rose-100 text-rose-700'
+                                                        : 'bg-amber-100 text-amber-700'
+                                                }`}
                                         >
-                                            {item.status === 'active'
-                                                ? 'جارية'
-                                                : item.status === 'completed'
-                                                  ? 'مكتملة'
-                                                  : item.status}
+                                            {item.moderation_status === 'approved'
+                                                ? 'تمت الموافقة'
+                                                : item.moderation_status === 'rejected'
+                                                    ? 'مرفوضة'
+                                                    : 'قيد المراجعة'}
                                         </span>
+                                        {item.rejection_reason && (
+                                            <div className="mt-1 text-[10px] text-rose-500 max-w-[150px] truncate" title={item.rejection_reason}>
+                                                السبب: {item.rejection_reason}
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-500">
                                         {new Date(
                                             item.created_at,
                                         ).toLocaleDateString()}
                                     </td>
-                                    <td className="flex gap-2 px-6 py-4">
-                                        <button
-                                            onClick={() => openModal(item)}
-                                            className="rounded p-2 text-blue-600 hover:bg-blue-50"
-                                        >
-                                            ✏️
-                                        </button>
-                                        <button
-                                            onClick={() => deleteItem(item.id)}
-                                            className="rounded p-2 text-red-600 hover:bg-red-50"
-                                        >
-                                            🗑️
-                                        </button>
+                                    <td className="px-6 py-4">
+                                        <div className="flex gap-2">
+                                            {item.moderation_status !== 'approved' && (
+                                                <button
+                                                    onClick={() => approveItem(item.id)}
+                                                    className="rounded-lg bg-emerald-50 p-2 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                                                    title="موافقة"
+                                                >
+                                                    ✅
+                                                </button>
+                                            )}
+                                            {item.moderation_status !== 'rejected' && (
+                                                <button
+                                                    onClick={() => openRejectModal(item)}
+                                                    className="rounded-lg bg-rose-50 p-2 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                                                    title="رفض"
+                                                >
+                                                    ❌
+                                                </button>
+                                            )}
+                                            <div className="w-px h-8 bg-slate-100 mx-1"></div>
+                                            <button
+                                                onClick={() => openModal(item)}
+                                                className="rounded-lg bg-blue-50 p-2 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button
+                                                onClick={() => deleteItem(item.id)}
+                                                className="rounded-lg bg-slate-50 p-2 text-slate-600 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -188,6 +238,31 @@ export default function InitiativesIndex({
                 item={editingItem}
                 onClose={() => setIsModalOpen(false)}
             />
+
+            <Modal show={isRejectModalOpen} onClose={() => setIsRejectModalOpen(false)}>
+                <div className="p-6">
+                    <h2 className="text-lg font-bold text-slate-900 mb-4">🚫 رفض المبادرة</h2>
+                    <p className="text-sm text-slate-600 mb-4">يرجى كتابة سبب الرفض لتوضيحه لصاحب المبادرة:</p>
+
+                    <textarea
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                        className="w-full h-32 rounded-xl border-slate-300 focus:ring-rose-500 focus:border-rose-500 text-sm p-4"
+                        placeholder="مثلاً: المحتوى غير لائق، أو المعلومات غير كافية..."
+                    />
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <SecondaryButton onClick={() => setIsRejectModalOpen(false)}>إلغاء</SecondaryButton>
+                        <button
+                            onClick={submitRejection}
+                            disabled={!rejectionReason.trim()}
+                            className="bg-rose-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-rose-700 disabled:opacity-50 transition-all"
+                        >
+                            تأكيد الرفض
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </AdminLayout>
     );
 }

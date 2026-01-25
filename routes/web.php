@@ -82,6 +82,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // New Resources
         Route::resource('generators', \App\Http\Controllers\Admin\GeneratorController::class);
         Route::resource('initiatives', \App\Http\Controllers\Admin\InitiativeController::class);
+        Route::post('/initiatives/{initiative}/approve', [\App\Http\Controllers\Admin\InitiativeController::class, 'approve'])->name('initiatives.approve');
+        Route::post('/initiatives/{initiative}/reject', [\App\Http\Controllers\Admin\InitiativeController::class, 'reject'])->name('initiatives.reject');
         Route::resource('lost-found', \App\Http\Controllers\Admin\LostFoundController::class);
         Route::resource('books', \App\Http\Controllers\Admin\BookController::class);
 
