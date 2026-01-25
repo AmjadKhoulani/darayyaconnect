@@ -22,6 +22,18 @@ const INFRA_COLORS = {
     phone: { color: '#10b981', label: 'الهاتف' }
 };
 
+const INFRA_ICONS: Record<string, string> = {
+    water_tank: '🏰',
+    pump: '⚙️',
+    valve: '🔧',
+    transformer: '⚡',
+    pole: '💡',
+    generator: '🔋',
+    manhole: '🕳️',
+    exchange: '🏢',
+    cabinet: '📦'
+};
+
 export default function Map() {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
@@ -44,6 +56,7 @@ export default function Map() {
     const [filteredServices, setFilteredServices] = useState<any[]>([]);
     const [allServices, setAllServices] = useState<any[]>([]);
     const [timeOffset, setTimeOffset] = useState(0);
+    const [selectedInfra, setSelectedInfra] = useState<any | null>(null);
 
     const selectedDate = useMemo(() => {
         const d = new Date();
@@ -189,17 +202,60 @@ export default function Map() {
                             };
 
                             mapInstance.addSource(`infra-${type}-nodes`, { type: 'geojson', data: nodesGeoJson });
+
+                            // Background circle for the icon
                             mapInstance.addLayer({
-                                id: `infra-${type}-nodes-layer`,
+                                id: `infra-${type}-nodes-bg`,
                                 type: 'circle',
                                 source: `infra-${type}-nodes`,
                                 paint: {
-                                    'circle-radius': 5,
-                                    'circle-color': util.color,
+                                    'circle-radius': 12,
+                                    'circle-color': '#fff',
+                                    'circle-opacity': 0.8,
                                     'circle-stroke-width': 1,
-                                    'circle-stroke-color': '#fff'
+                                    'circle-stroke-color': util.color
                                 },
                                 layout: { 'visibility': 'none' }
+                            });
+
+                            // Symbol layer for emoji icon
+                            mapInstance.addLayer({
+                                id: `infra-${type}-nodes-layer`,
+                                type: 'symbol',
+                                source: `infra-${type}-nodes`,
+                                layout: {
+                                    'visibility': 'none',
+                                    'text-field': [
+                                        'match',
+                                        ['get', 'type'],
+                                        ...(Object.entries(INFRA_ICONS).flat() as string[]),
+                                        '📍'
+                                    ] as any,
+                                    'text-size': 14,
+                                    'text-allow-overlap': true,
+                                    'icon-allow-overlap': true
+                                }
+                            });
+
+                            // Click Handler
+                            mapInstance.on('click', `infra-${type}-nodes-layer`, (e) => {
+                                if (e.features && e.features[0]) {
+                                    const props = e.features[0].properties;
+                                    const coords = (e.features[0].geometry as any).coordinates;
+                                    setSelectedInfra({
+                                        ...props,
+                                        lng: coords[0],
+                                        lat: coords[1],
+                                        sector: type
+                                    });
+                                }
+                            });
+
+                            mapInstance.on('mouseenter', `infra-${type}-nodes-layer`, () => {
+                                mapInstance.getCanvas().style.cursor = 'pointer';
+                            });
+                            mapInstance.on('mouseleave', `infra-${type}-nodes-layer`, () => {
+                                mapInstance.getCanvas().style.cursor = '';
                             });
                         }
                     });
@@ -471,10 +527,24 @@ export default function Map() {
     };
 
     const toggleLayer = (layer: keyof typeof activeLayers) => {
+        const newState = !activeLayers[layer];
         setActiveLayers(prev => ({
             ...prev,
-            [layer]: !prev[layer]
+            [layer]: newState
         }));
+
+        if (map.current) {
+            const visibility = newState ? 'visible' : 'none';
+            if (map.current.getLayer(`infra-${layer}`)) {
+                map.current.setLayoutProperty(`infra-${layer}`, 'visibility', visibility);
+            }
+            if (map.current.getLayer(`infra-${layer}-nodes-layer`)) {
+                map.current.setLayoutProperty(`infra-${layer}-nodes-layer`, 'visibility', visibility);
+            }
+            if (map.current.getLayer(`infra-${layer}-nodes-bg`)) {
+                map.current.setLayoutProperty(`infra-${layer}-nodes-bg`, 'visibility', visibility);
+            }
+        }
     };
 
     return (
@@ -648,6 +718,79 @@ export default function Map() {
                                     <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
                                 </label>
                             ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Infra Detail Modal */}
+            {selectedInfra && (
+                <div className="absolute inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm px-4 pb-20" onClick={() => setSelectedInfra(null)}>
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                                    {INFRA_ICONS[selectedInfra.type] || '📍'}
+                                </div>
+                                <div className="text-right">
+                                    <h3 className="font-bold text-slate-900 dark:text-white">
+                                        {selectedInfra.type === 'water_tank' ? 'خزان مياه' :
+                                            selectedInfra.type === 'transformer' ? 'محولة كهرباء' :
+                                                selectedInfra.type === 'pole' ? 'عامود إنارة' :
+                                                    selectedInfra.type === 'pump' ? 'مضخة مياه' :
+                                                        selectedInfra.type === 'valve' ? 'صمام' :
+                                                            selectedInfra.type === 'generator' ? 'مولدة' :
+                                                                selectedInfra.type === 'manhole' ? 'ريكار' :
+                                                                    selectedInfra.type}
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        {INFRA_COLORS[selectedInfra.sector as keyof typeof INFRA_COLORS]?.label}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={() => setSelectedInfra(null)} className="p-2 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-400">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <div className="flex justify-between items-center text-sm p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                <span className="text-slate-500">الحالة</span>
+                                <span className="font-bold text-emerald-600">يعمل بشكل جيد</span>
+                            </div>
+                            {selectedInfra.meta && (
+                                <div className="text-sm p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-right">
+                                    <span className="text-slate-500 block mb-1">معلومات إضافية</span>
+                                    <span className="text-slate-700 dark:text-slate-300">
+                                        {typeof selectedInfra.meta === 'string' ? selectedInfra.meta : JSON.stringify(selectedInfra.meta)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={() => setSelectedInfra(null)}
+                                className="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm transition-active active:scale-95"
+                            >
+                                إغلاق
+                            </button>
+                            <button
+                                onClick={() => {
+                                    navigate('/add-report', {
+                                        state: {
+                                            prefill: {
+                                                type: 'infrastructure',
+                                                title: `عطل في ${(INFRA_ICONS[selectedInfra.type] || '')} ${selectedInfra.type}`,
+                                                latitude: selectedInfra.lat,
+                                                longitude: selectedInfra.lng
+                                            }
+                                        }
+                                    });
+                                }}
+                                className="py-3 px-4 rounded-2xl bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 transition-active active:scale-95"
+                            >
+                                تبليغ عن عطل
+                            </button>
                         </div>
                     </div>
                 </div>

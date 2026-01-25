@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GeolocationService } from '../services/GeolocationService';
 import api from '../services/api';
 import { NotificationService } from '../services/notification';
@@ -28,6 +28,20 @@ export default function AddReport() {
     const marker = useRef<maplibregl.Marker | null>(null);
 
     const navigate = useNavigate();
+    const locationState = useLocation().state as any;
+
+    // Prefill data if available
+    useEffect(() => {
+        if (locationState?.prefill) {
+            const { title, type, latitude, longitude } = locationState.prefill;
+            if (title) setTitle(title);
+            if (type) setType(type);
+            if (latitude && longitude) {
+                setLocation({ lat: latitude, lng: longitude });
+                setLocLoading(false);
+            }
+        }
+    }, [locationState]);
 
     // Track changes
     useEffect(() => {
@@ -297,10 +311,10 @@ export default function AddReport() {
                                 <label className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-500 mb-2 px-1">
                                     <span>درجة الخطورة ( {severity}/5 )</span>
                                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${severity === 1 ? 'bg-green-100 text-green-700' :
-                                            severity === 2 ? 'bg-blue-100 text-blue-700' :
-                                                severity === 3 ? 'bg-yellow-100 text-yellow-700' :
-                                                    severity === 4 ? 'bg-orange-100 text-orange-700' :
-                                                        'bg-red-100 text-red-700'
+                                        severity === 2 ? 'bg-blue-100 text-blue-700' :
+                                            severity === 3 ? 'bg-yellow-100 text-yellow-700' :
+                                                severity === 4 ? 'bg-orange-100 text-orange-700' :
+                                                    'bg-red-100 text-red-700'
                                         }`}>
                                         {severity === 1 ? 'منخفضة' : severity === 2 ? 'عادية' : severity === 3 ? 'متوسطة' : severity === 4 ? 'عالية' : 'حرجة'}
                                     </span>
