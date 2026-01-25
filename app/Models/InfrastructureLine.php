@@ -19,6 +19,7 @@ class InfrastructureLine extends Model
 
     protected $casts = [
         'coordinates' => 'array',
-        'meta' => 'array'
+        'meta' => 'array',
+        'is_published' => 'boolean'
     ];
 }

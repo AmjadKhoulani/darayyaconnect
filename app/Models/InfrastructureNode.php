@@ -19,6 +19,7 @@ class InfrastructureNode extends Model
     ];
 
     protected $casts = [
-        'meta' => 'array'
+        'meta' => 'array',
+        'is_published' => 'boolean'
     ];
 }

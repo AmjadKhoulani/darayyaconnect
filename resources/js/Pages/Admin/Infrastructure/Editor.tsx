@@ -178,7 +178,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     layout: { 'line-cap': 'round', 'line-join': 'round' },
                     paint: {
                         'line-color': config?.color || '#333',
-                        'line-dasharray': ['case', ['!', ['get', 'is_published']], ['literal', [2, 2]], ['literal', [1, 0]]],
+                        'line-dasharray': ['case', ['==', ['get', 'is_published'], false], ['literal', [2, 2]], ['literal', [1, 0]]],
                         'line-width': 4
                     },
                 },
@@ -277,7 +277,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     'line-color': config?.color || '#333',
                     'line-width': 4,
                     'line-opacity': 0.8,
-                    'line-dasharray': ['case', ['!', ['get', 'is_published']], ['literal', [2, 2]], ['literal', [1, 0]]]
+                    'line-dasharray': ['case', ['==', ['get', 'is_published'], false], ['literal', [2, 2]], ['literal', [1, 0]]]
                 }
             });
 
@@ -291,7 +291,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     'circle-color': config?.color || '#333',
                     'circle-stroke-width': 2,
                     'circle-stroke-color': '#fff',
-                    'circle-opacity': ['case', ['!', ['get', 'is_published']], 0.5, 1]
+                    'circle-opacity': ['case', ['==', ['get', 'is_published'], false], 0.5, 1]
                 }
             });
         }

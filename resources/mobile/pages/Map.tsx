@@ -196,9 +196,9 @@ export default function Map() {
             });
 
             // 3. Infrastructure Layers (Fetch from API)
-            fetch('/api/infrastructure')
-                .then(res => res.json())
-                .then(data => {
+            api.get('/infrastructure')
+                .then(res => {
+                    const data = res.data;
                     const mapInstance = map.current;
                     if (!mapInstance) return;
 
@@ -206,8 +206,9 @@ export default function Map() {
                         const lines = data.lines.filter((l: any) => l.type === type);
                         const points = data.nodes.filter((n: any) => {
                             if (type === 'sewage' && n.type === 'manhole') return true;
-                            if (type === 'electricity' && (n.type === 'transformer' || n.type === 'pole')) return true;
-                            if (type === 'water' && n.type === 'pump') return true;
+                            if (type === 'electricity' && (n.type === 'transformer' || n.type === 'pole' || n.type === 'generator')) return true;
+                            if (type === 'water' && (n.type === 'pump' || n.type === 'water_tank' || n.type === 'valve')) return true;
+                            if (type === 'phone' && (n.type === 'exchange' || n.type === 'cabinet')) return true;
                             return false;
                         });
 
