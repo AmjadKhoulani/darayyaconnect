@@ -82,13 +82,11 @@ class InfrastructureController extends Controller
         $queryLines = InfrastructureLine::query();
         $queryNodes = InfrastructureNode::query();
 
-        // If not admin, only show published items (Commented out for pilot to show all)
-        /*
+        // If not admin, only show published items
         if (!$request->user() || $request->user()->role !== 'admin') {
             $queryLines->where('is_published', true);
             $queryNodes->where('is_published', true);
         }
-        */
 
         $lines = $queryLines->get();
         $nodes = $queryNodes->get();

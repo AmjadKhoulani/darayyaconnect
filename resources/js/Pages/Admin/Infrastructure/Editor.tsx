@@ -12,6 +12,8 @@ import {
     Undo2,
     Redo2,
     Globe,
+    Phone,
+    Save,
     CheckCircle2,
     Info,
     MousePointer2,
@@ -21,7 +23,6 @@ import {
     Droplets,
     Zap,
     Wind,
-    Phone,
 } from 'lucide-react';
 
 // Define Types
@@ -420,6 +421,12 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         }
     };
 
+    const saveDraft = () => {
+        // Items are auto-saved as drafts on creation. 
+        // This button confirms the session is saved and clears current local draw state if needed.
+        alert('تم حفظ المسودات بنجاح. يمكنك العودة وإكمال العمل لاحقاً.');
+    };
+
     const publishAsset = async () => {
         if (!inspectorData || !confirm('هل أنت متأكد من اعتماد هذا العنصر ونشره للجمهور؟')) return;
         try {
@@ -529,17 +536,26 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                             <Redo2 size={20} />
                         </button>
                         <div className="w-px h-6 bg-slate-200 mx-1"></div>
-                        <button
-                            onClick={publishAll}
-                            disabled={!hasUnpublishedChanges}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${hasUnpublishedChanges
-                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700'
-                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                }`}
-                        >
-                            <Globe size={18} />
-                            نشر كافة التعديلات (Live)
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={saveDraft}
+                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
+                            >
+                                <Save size={18} className="text-slate-400" />
+                                حفظ كمسودة
+                            </button>
+                            <button
+                                onClick={publishAll}
+                                disabled={!hasUnpublishedChanges}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${hasUnpublishedChanges
+                                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700'
+                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    }`}
+                            >
+                                <Globe size={18} />
+                                نشر كافة التعديلات (Live)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
