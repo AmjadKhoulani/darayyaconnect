@@ -57,6 +57,8 @@ export default function Map() {
     const [allServices, setAllServices] = useState<any[]>([]);
     const [timeOffset, setTimeOffset] = useState(0);
     const [selectedInfra, setSelectedInfra] = useState<any | null>(null);
+    const [infraData, setInfraData] = useState<{ nodes: any[], lines: any[] }>({ nodes: [], lines: [] });
+    const [crowdData, setCrowdData] = useState<{ electricity?: any, water?: any }>({});
 
     const selectedDate = useMemo(() => {
         const d = new Date();
@@ -267,6 +269,9 @@ export default function Map() {
                             });
                         }
                     });
+
+                    setInfraData(data);
+                    updateStatusBubbles(data, {});
                 })
                 .catch(err => console.error("Failed to fetch infra", err));
 
@@ -366,6 +371,7 @@ export default function Map() {
                     const source = currentMap.getSource(`crowd-${type}-source`);
                     if (source) {
                         (source as any).setData(res.data);
+                        setCrowdData(prev => ({ ...prev, [type]: res.data }));
                     }
                 });
         });
@@ -408,7 +414,10 @@ export default function Map() {
                 map.current.setLayoutProperty(`crowd-${type}-circle`, 'visibility', isVisible);
             }
         });
-    }, [activeLayers]);
+
+        // Update status bubbles visibility/presence
+        updateStatusBubbles(infraData, crowdData);
+    }, [activeLayers, infraData, crowdData]);
 
 
     // Auto-locate on mount
@@ -468,6 +477,83 @@ export default function Map() {
 
     // Manage Markers
     const markersRef = useRef<maplibregl.Marker[]>([]);
+    const statusMarkersRef = useRef<maplibregl.Marker[]>([]);
+
+    const updateStatusBubbles = (data: { nodes: any[], lines: any[] }, crowd: { electricity?: any, water?: any }) => {
+        if (!map.current) return;
+
+        // Clean up
+        statusMarkersRef.current.forEach(m => m.remove());
+        statusMarkersRef.current = [];
+
+        // 1. Assets with Issues
+        data.nodes.forEach(node => {
+            const sector = getLayerForNodeType(node.type);
+            if (!sector) return;
+
+            // Only show if the sector layer is active
+            if (!activeLayers[sector as keyof typeof activeLayers]) return;
+
+            // Conditions for showing a status bubble
+            const isDamaged = node.status === 'damaged' || node.status === 'unsafe';
+            const isMaintenance = node.status === 'maintenance';
+
+            if (isDamaged || isMaintenance) {
+                const el = document.createElement('div');
+                el.className = `status-bubble ${isDamaged ? 'critical' : 'warning'}`;
+                el.innerHTML = isDamaged ? '💥' : '🏗️';
+
+                el.onclick = (e) => {
+                    e.stopPropagation();
+                    map.current?.flyTo({ center: [parseFloat(node.longitude), parseFloat(node.latitude)], zoom: 18 });
+                    setSelectedInfra({ ...node, lng: node.longitude, lat: node.latitude, sector });
+                };
+
+                const marker = new maplibregl.Marker({ element: el, anchor: 'bottom-left' })
+                    .setLngLat([parseFloat(node.longitude), parseFloat(node.latitude)])
+                    .setOffset([5, -20]) // Float above the normal icon
+                    .addTo(map.current!);
+
+                statusMarkersRef.current.push(marker);
+            }
+        });
+
+        // 2. Crowdsourced Cutoffs (Cities: Skylines "No Power/Water" feel)
+        ['electricity', 'water'].forEach(type => {
+            const stateKey = type === 'electricity' ? 'crowdElectricity' : 'crowdWater';
+            if (!activeLayers[stateKey as keyof typeof activeLayers]) return;
+
+            const features = crowd[type as keyof typeof crowd]?.features || [];
+            features.forEach((feat: any) => {
+                if (feat.properties.status === 'cutoff' && feat.geometry.type === 'Point') {
+                    const el = document.createElement('div');
+                    el.className = 'status-bubble pb-1 pt-1'; // Extra padding for icons
+                    el.innerHTML = type === 'electricity' ? '⚡' : '💧';
+                    el.style.borderColor = '#ef4444'; // Red border for cutoffs
+                    el.style.animationDelay = `${Math.random() * 2}s`; // Staggered float
+
+                    el.onclick = (e) => {
+                        e.stopPropagation();
+                        map.current?.flyTo({ center: feat.geometry.coordinates, zoom: 16 });
+                    };
+
+                    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom-left' })
+                        .setLngLat(feat.geometry.coordinates)
+                        .addTo(map.current!);
+
+                    statusMarkersRef.current.push(marker);
+                }
+            });
+        });
+    };
+
+    const getLayerForNodeType = (type: string) => {
+        if (['manhole'].includes(type)) return 'sewage';
+        if (['transformer', 'pole', 'generator'].includes(type)) return 'electricity';
+        if (['pump', 'water_tank', 'valve'].includes(type)) return 'water';
+        if (['exchange', 'cabinet'].includes(type)) return 'phone';
+        return null;
+    };
 
     useEffect(() => {
         if (!map.current) return;
