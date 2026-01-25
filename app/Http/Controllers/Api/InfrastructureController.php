@@ -20,6 +20,8 @@ class InfrastructureController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'image' => 'nullable|image|max:10240', // 10MB max
+            'infrastructure_node_id' => 'nullable|exists:infrastructure_nodes,id',
+            'infrastructure_line_id' => 'nullable|exists:infrastructure_lines,id',
         ]);
 
         try {
@@ -30,6 +32,8 @@ class InfrastructureController extends Controller
                 'category' => $routing['category'],
                 'department_id' => $routing['dept_id'],
                 'department_assigned' => $routing['dept_id'] ? true : false,
+                'infrastructure_node_id' => $validated['infrastructure_node_id'] ?? null,
+                'infrastructure_line_id' => $validated['infrastructure_line_id'] ?? null,
                 'description' => $validated['title'] . "\n\n" . $validated['description'],
                 'status' => 'pending',
                 'severity' => 2,
@@ -120,6 +124,7 @@ class InfrastructureController extends Controller
         try {
             $validated = $request->validate([
                 'type' => 'required|string',
+                'serial_number' => 'nullable|string',
                 'coordinates' => 'required|array',
                 'status' => 'nullable|string',
                 'meta' => 'nullable|array'
@@ -143,6 +148,7 @@ class InfrastructureController extends Controller
         try {
             $validated = $request->validate([
                 'type' => 'required|string',
+                'serial_number' => 'nullable|string|unique:infrastructure_nodes,serial_number',
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
                 'status' => 'nullable|string',
@@ -177,14 +183,14 @@ class InfrastructureController extends Controller
     public function updateLine(Request $request, $id)
     {
         $line = InfrastructureLine::findOrFail($id);
-        $line->update($request->only(['type', 'status', 'meta', 'coordinates', 'is_published']));
+        $line->update($request->only(['type', 'serial_number', 'status', 'meta', 'coordinates', 'is_published']));
         return response()->json($line);
     }
 
     public function updateNode(Request $request, $id)
     {
         $node = InfrastructureNode::findOrFail($id);
-        $node->update($request->only(['type', 'latitude', 'longitude', 'status', 'meta', 'is_published']));
+        $node->update($request->only(['type', 'serial_number', 'latitude', 'longitude', 'status', 'meta', 'is_published']));
         return response()->json($node);
     }
 

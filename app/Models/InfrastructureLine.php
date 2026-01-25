@@ -11,6 +11,7 @@ class InfrastructureLine extends Model
 
     protected $fillable = [
         'type',
+        'serial_number',
         'coordinates',
         'status',
         'meta',

@@ -26,6 +26,9 @@ import {
     MessageSquare,
     AlertCircle,
     ClipboardList,
+    Hash,
+    Settings,
+    Activity,
 } from 'lucide-react';
 
 // Define Types
@@ -118,6 +121,8 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     const [loading, setLoading] = useState(false);
     const [inspectorData, setInspectorData] = useState<any | null>(null);
     const [assignedNeighborhood, setAssignedNeighborhood] = useState('');
+    const [assetSerialNumber, setAssetSerialNumber] = useState('');
+    const [assetCondition, setAssetCondition] = useState('good');
     const [assetNotes, setAssetNotes] = useState('');
     const [associatedReports, setAssociatedReports] = useState<any[]>([]);
     const [history, setHistory] = useState<any[]>([]);
@@ -144,9 +149,12 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     useEffect(() => {
         if (inspectorData) {
             setAssignedNeighborhood(inspectorData.properties.meta?.assigned_neighborhood || '');
+            setAssetSerialNumber(inspectorData.properties.serial_number || '');
+            setAssetCondition(inspectorData.properties.status || 'active');
             setAssetNotes(inspectorData.properties.meta?.notes || '');
             fetchAssetReports(inspectorData);
         } else {
+            setAssetSerialNumber('');
             setAssetNotes('');
             setAssociatedReports([]);
         }
@@ -465,6 +473,8 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             };
 
             await axios.put(`/admin/api/infrastructure/${endpoint}/${inspectorData.id}`, {
+                serial_number: assetSerialNumber,
+                status: assetCondition,
                 meta: newMeta
             });
 
@@ -648,15 +658,54 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                         </div>
 
                         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
-                            <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
-                                <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase">نوع العنصر</div>
-                                <div className="font-bold text-slate-800">{inspectorData.properties.type}</div>
+                            <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 flex justify-between items-center">
+                                <div>
+                                    <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase">نوع العنصر</div>
+                                    <div className="font-bold text-slate-800">{inspectorData.properties.type}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase">رقم المعرف</div>
+                                    <div className="text-xs font-mono bg-white px-2 py-0.5 rounded border">ID-{inspectorData.id}</div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
+                                        <Hash size={14} className="text-slate-400" />
+                                        الرقم التسلسلي (Serial No.)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={assetSerialNumber}
+                                        onChange={(e) => setAssetSerialNumber(e.target.value)}
+                                        placeholder="مثلاً: TR-2024-001"
+                                        className="w-full rounded-xl border-slate-200 text-sm py-2.5 focus:ring-slate-900 focus:border-slate-900 shadow-sm bg-white"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
+                                        <Activity size={14} className="text-slate-400" />
+                                        الحالة الفنية
+                                    </label>
+                                    <select
+                                        value={assetCondition}
+                                        onChange={(e) => setAssetCondition(e.target.value)}
+                                        className="w-full rounded-xl border-slate-200 text-sm py-2.5 focus:ring-slate-900 focus:border-slate-900 shadow-sm bg-white"
+                                    >
+                                        <option value="active">يعمل (Active)</option>
+                                        <option value="maintenance">تحت الصيانة (Maintenance)</option>
+                                        <option value="broken">معطل (Broken)</option>
+                                        <option value="planned">مخطط له (Planned)</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
                                     <MessageSquare size={14} className="text-slate-400" />
-                                    ملاحظات الإدارة
+                                    ملاحظات فنية وإدارية
                                 </label>
                                 <textarea
                                     value={assetNotes}

@@ -22,8 +22,20 @@ class Report extends Model
         'images',
         'user_id',
         'department_id',
-        'department_assigned'
+        'department_assigned',
+        'infrastructure_node_id',
+        'infrastructure_line_id'
     ];
+
+    public function infrastructureNode()
+    {
+        return $this->belongsTo(InfrastructureNode::class);
+    }
+
+    public function infrastructureLine()
+    {
+        return $this->belongsTo(InfrastructureLine::class);
+    }
 
     public function infrastructurePoint()
     {

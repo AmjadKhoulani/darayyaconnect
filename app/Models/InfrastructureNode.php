@@ -11,6 +11,7 @@ class InfrastructureNode extends Model
 
     protected $fillable = [
         'type',
+        'serial_number',
         'latitude',
         'longitude',
         'status',

@@ -20,6 +20,9 @@ export default function AddReport() {
     const [locLoading, setLocLoading] = useState(true);
     const [locError, setLocError] = useState<string | null>(null);
     const [isDirty, setIsDirty] = useState(false);
+    const [linkedNodeId, setLinkedNodeId] = useState<number | null>(null);
+    const [linkedLineId, setLinkedLineId] = useState<number | null>(null);
+    const [linkedSerial, setLinkedSerial] = useState<string | null>(null);
 
     // Map Picker State
     const [showMapPicker, setShowMapPicker] = useState(false);
@@ -33,13 +36,16 @@ export default function AddReport() {
     // Prefill data if available
     useEffect(() => {
         if (locationState?.prefill) {
-            const { title, type, latitude, longitude } = locationState.prefill;
+            const { title, type, latitude, longitude, infrastructure_node_id, infrastructure_line_id, serial_number } = locationState.prefill;
             if (title) setTitle(title);
             if (type) setType(type);
             if (latitude && longitude) {
                 setLocation({ lat: latitude, lng: longitude });
                 setLocLoading(false);
             }
+            if (infrastructure_node_id) setLinkedNodeId(infrastructure_node_id);
+            if (infrastructure_line_id) setLinkedLineId(infrastructure_line_id);
+            if (serial_number) setLinkedSerial(serial_number);
         }
     }, [locationState]);
 
@@ -197,6 +203,12 @@ export default function AddReport() {
             if (image) {
                 formData.append('image', image);
             }
+            if (linkedNodeId) {
+                formData.append('infrastructure_node_id', linkedNodeId.toString());
+            }
+            if (linkedLineId) {
+                formData.append('infrastructure_line_id', linkedLineId.toString());
+            }
 
             await api.post('/infrastructure/reports', formData, {
                 headers: {
@@ -223,7 +235,9 @@ export default function AddReport() {
                     description,
                     latitude: location?.lat,
                     longitude: location?.lng,
-                    image: imageBase64 || undefined
+                    image: imageBase64 || undefined,
+                    infrastructure_node_id: linkedNodeId,
+                    infrastructure_line_id: linkedLineId
                 });
 
                 alert('⚠️ لا يوجد اتصال بالإنترنت.\nتم حفظ البلاغ في جهازك وسيتم إرساله تلقائياً عند عودة الاتصال.');
@@ -252,7 +266,12 @@ export default function AddReport() {
                         </button>
                         <div>
                             <h1 className="text-2xl font-black text-white">إضافة بلاغ</h1>
-                            <p className="text-slate-400 dark:text-slate-500 text-xs font-medium">ساهم في تحسين مدينتك</p>
+                            {linkedSerial && (
+                                <div className="text-[10px] font-bold text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-full inline-block mt-1">
+                                    مرتبط بالعنصر: {linkedSerial}
+                                </div>
+                            )}
+                            {!linkedSerial && <p className="text-slate-400 dark:text-slate-500 text-xs font-medium">ساهم في تحسين مدينتك</p>}
                         </div>
                     </div>
                 </header>

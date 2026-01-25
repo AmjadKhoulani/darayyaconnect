@@ -165,7 +165,11 @@ export default function Map() {
                             features: lines.map((l: any) => ({
                                 type: 'Feature',
                                 geometry: { type: 'LineString', coordinates: l.coordinates },
-                                properties: { type: l.type }
+                                properties: {
+                                    id: l.id,
+                                    type: l.type,
+                                    serial_number: l.serial_number
+                                }
                             }))
                         };
 
@@ -197,7 +201,11 @@ export default function Map() {
                                 features: points.map((p: any) => ({
                                     type: 'Feature',
                                     geometry: { type: 'Point', coordinates: [parseFloat(p.longitude), parseFloat(p.latitude)] },
-                                    properties: { type: p.type }
+                                    properties: {
+                                        id: p.id,
+                                        type: p.type,
+                                        serial_number: p.serial_number
+                                    }
                                 }))
                             };
 
@@ -743,7 +751,7 @@ export default function Map() {
                                                                     selectedInfra.type}
                                     </h3>
                                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        {INFRA_COLORS[selectedInfra.sector as keyof typeof INFRA_COLORS]?.label}
+                                        {INFRA_COLORS[selectedInfra.sector as keyof typeof INFRA_COLORS]?.label} | {selectedInfra.serial_number || `ID: ${selectedInfra.id}`}
                                     </p>
                                 </div>
                             </div>
@@ -782,7 +790,10 @@ export default function Map() {
                                                 type: 'infrastructure',
                                                 title: `عطل في ${(INFRA_ICONS[selectedInfra.type] || '')} ${selectedInfra.type}`,
                                                 latitude: selectedInfra.lat,
-                                                longitude: selectedInfra.lng
+                                                longitude: selectedInfra.lng,
+                                                infrastructure_node_id: selectedInfra.sector !== 'line' ? selectedInfra.id : null,
+                                                infrastructure_line_id: selectedInfra.sector === 'line' ? selectedInfra.id : null,
+                                                serial_number: selectedInfra.serial_number
                                             }
                                         }
                                     });

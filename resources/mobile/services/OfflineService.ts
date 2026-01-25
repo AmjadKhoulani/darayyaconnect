@@ -9,6 +9,8 @@ export interface OfflineReport {
     latitude?: number;
     longitude?: number;
     image?: string; // Base64 string
+    infrastructure_node_id?: number | null;
+    infrastructure_line_id?: number | null;
     timestamp: number;
 }
 
@@ -81,6 +83,13 @@ export const OfflineService = {
 
                 if (report.latitude) formData.append('latitude', report.latitude.toString());
                 if (report.longitude) formData.append('longitude', report.longitude.toString());
+
+                if (report.infrastructure_node_id) {
+                    formData.append('infrastructure_node_id', report.infrastructure_node_id.toString());
+                }
+                if (report.infrastructure_line_id) {
+                    formData.append('infrastructure_line_id', report.infrastructure_line_id.toString());
+                }
 
                 if (report.image) {
                     // Convert Base64 back to Blob (if it's a data URL)
