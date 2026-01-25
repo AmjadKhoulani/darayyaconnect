@@ -67,7 +67,7 @@ const SECTOR_CONFIG: Record<string, {
         icon: Zap,
         nodeTypes: [
             { type: 'transformer', label: 'محولة كهرباء', icon: '⚡', canFeedNeighborhood: true },
-            { type: 'pole', label: 'عامود إنارة', icon: '💡' },
+            { type: 'pole', label: 'عامود إنارة', icon: '🗼' },
             { type: 'generator', label: 'مولدة', icon: '🔋', canFeedNeighborhood: true },
         ],
         lineTypes: [
@@ -121,10 +121,10 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
 
     // Refs for event listeners to avoid closure issues
     const subTypeRef = useRef<string>(selectedSubType);
-    const toolRef = useRef<'select' | 'line' | 'point'>(activeTool);
+    const activeToolRef = useRef<'select' | 'line' | 'point'>(activeTool);
 
     useEffect(() => { subTypeRef.current = selectedSubType; }, [selectedSubType]);
-    useEffect(() => { toolRef.current = activeTool; }, [activeTool]);
+    useEffect(() => { activeToolRef.current = activeTool; }, [activeTool]);
 
     const config = SECTOR_CONFIG[sector] || SECTOR_CONFIG['water'];
 
@@ -397,7 +397,14 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             }
 
             draw.current?.deleteAll();
-            startTool('select');
+
+            // Stay in tool mode for continuous addition
+            if (activeToolRef.current === 'point' || activeToolRef.current === 'line') {
+                startTool(activeToolRef.current, subTypeRef.current);
+            } else {
+                startTool('select');
+            }
+
             fetchData();
         } catch (e: any) {
             const errorMsg = e.response?.data?.message || e.message || 'خطأ غير معروف';

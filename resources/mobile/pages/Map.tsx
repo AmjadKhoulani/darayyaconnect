@@ -27,7 +27,7 @@ const INFRA_ICONS: Record<string, string> = {
     pump: '⚙️',
     valve: '🔧',
     transformer: '⚡',
-    pole: '💡',
+    pole: '🗼',
     generator: '🔋',
     manhole: '🕳️',
     exchange: '🏢',
