@@ -74,51 +74,79 @@ class InfrastructureController extends Controller
 
     public function index(Request $request)
     {
+        \Log::info('Infrastructure index requested', [
+            'user_id' => $request->user()?->id,
+            'role' => $request->user()?->role
+        ]);
+
         $queryLines = InfrastructureLine::query();
         $queryNodes = InfrastructureNode::query();
 
         // If not admin, only show published items
-        // Since this is used by both Admin Editor and Portal Map, we check for auth or a flag
         if (!$request->user() || $request->user()->role !== 'admin') {
             $queryLines->where('is_published', true);
             $queryNodes->where('is_published', true);
         }
 
+        $lines = $queryLines->get();
+        $nodes = $queryNodes->get();
+
+        \Log::info('Infrastructure index returning', [
+            'lines_count' => $lines->count(),
+            'nodes_count' => $nodes->count()
+        ]);
+
         return response()->json([
-            'lines' => $queryLines->get(),
-            'nodes' => $queryNodes->get()
+            'lines' => $lines,
+            'nodes' => $nodes
         ]);
     }
 
     public function storeLine(Request $request)
     {
-        $validated = $request->validate([
-            'type' => 'required|string',
-            'coordinates' => 'required|array',
-            'status' => 'nullable|string',
-            'meta' => 'nullable|array'
-        ]);
+        \Log::info('Store line request', $request->all());
 
-        $validated['is_published'] = false; // New items are drafts
-        
-        $line = InfrastructureLine::create($validated);
-        return response()->json($line, 201);
+        try {
+            $validated = $request->validate([
+                'type' => 'required|string',
+                'coordinates' => 'required|array',
+                'status' => 'nullable|string',
+                'meta' => 'nullable|array'
+            ]);
+
+            $validated['is_published'] = false; // New items are drafts
+            
+            $line = InfrastructureLine::create($validated);
+            \Log::info('Line created', ['id' => $line->id]);
+            return response()->json($line, 201);
+        } catch (\Exception $e) {
+            \Log::error('Store line failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function storeNode(Request $request)
     {
-        $validated = $request->validate([
-            'type' => 'required|string',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'status' => 'nullable|string',
-            'meta' => 'nullable|array'
-        ]);
+        \Log::info('Store node request', $request->all());
 
-        $validated['is_published'] = false; // New items are drafts
+        try {
+            $validated = $request->validate([
+                'type' => 'required|string',
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'status' => 'nullable|string',
+                'meta' => 'nullable|array'
+            ]);
 
-        $node = InfrastructureNode::create($validated);
-        return response()->json($node, 201);
+            $validated['is_published'] = false; // New items are drafts
+
+            $node = InfrastructureNode::create($validated);
+            \Log::info('Node created', ['id' => $node->id]);
+            return response()->json($node, 201);
+        } catch (\Exception $e) {
+            \Log::error('Store node failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function publishLine($id)
