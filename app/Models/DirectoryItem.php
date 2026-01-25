@@ -19,6 +19,8 @@ class DirectoryItem extends Model
         'rating',
         'metadata',
         'is_active',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [

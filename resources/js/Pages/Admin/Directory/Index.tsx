@@ -16,6 +16,8 @@ interface DirectoryItem {
     category: string;
     icon: string;
     is_active: boolean;
+    latitude?: number;
+    longitude?: number;
 }
 
 export default function DirectoryIndex({
@@ -41,6 +43,8 @@ export default function DirectoryIndex({
         category: 'official',
         icon: 'Building2',
         description: '',
+        latitude: '' as string | number,
+        longitude: '' as string | number,
     });
 
     const openModal = (item: DirectoryItem | null = null) => {
@@ -53,6 +57,8 @@ export default function DirectoryIndex({
                 category: item.category,
                 icon: item.icon || 'Building2',
                 description: '', // Description assumed to be fetched or optional
+                latitude: item.latitude || '',
+                longitude: item.longitude || '',
             });
         } else {
             reset();
@@ -147,7 +153,7 @@ export default function DirectoryIndex({
                                                 </td>
                                                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                                     {item.category ===
-                                                    'official'
+                                                        'official'
                                                         ? 'رسمي'
                                                         : 'شركة/خاص'}
                                                 </td>

@@ -358,14 +358,20 @@ export default function Map() {
     useEffect(() => {
         api.get('/directory')
             .then(res => {
-                const services = res.data.map((item: any) => ({
-                    id: item.id,
-                    name: item.name,
-                    type: item.category,
-                    lat: parseFloat(item.latitude),
-                    lng: parseFloat(item.longitude),
-                    emoji: getCategoryEmoji(item.category)
-                }));
+                const services = res.data
+                    .filter((item: any) => {
+                        const lat = parseFloat(item.latitude);
+                        const lng = parseFloat(item.longitude);
+                        return !isNaN(lat) && !isNaN(lng);
+                    })
+                    .map((item: any) => ({
+                        id: item.id,
+                        name: item.name,
+                        type: item.category,
+                        lat: parseFloat(item.latitude),
+                        lng: parseFloat(item.longitude),
+                        emoji: getCategoryEmoji(item.category)
+                    }));
                 setAllServices(services);
                 setFilteredServices(services);
             })

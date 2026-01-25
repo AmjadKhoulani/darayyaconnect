@@ -38,6 +38,8 @@ class DirectoryController extends Controller
             'description' => 'nullable|string',
             'rating' => 'nullable|numeric|min:0|max:5',
             'metadata' => 'nullable|array',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $item = DirectoryItem::create($validated);
@@ -57,7 +59,9 @@ class DirectoryController extends Controller
             'description' => 'nullable|string',
             'rating' => 'nullable|numeric|min:0|max:5',
             'metadata' => 'nullable|array',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $item->update($validated);
