@@ -90,6 +90,15 @@ Route::middleware('auth:sanctum')->post('/user/profile', [\App\Http\Controllers\
 Route::get('/infrastructure', [App\Http\Controllers\Api\InfrastructureController::class, 'index']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/infrastructure/my-reports', [InfrastructureController::class, 'myReports']);
+        
+        // Map Editor Routes
+        Route::post('/infrastructure/nodes', [InfrastructureController::class, 'storeNode']);
+        Route::put('/infrastructure/nodes/{id}/update', [InfrastructureController::class, 'updateNode']);
+        Route::delete('/infrastructure/nodes/{id}', [InfrastructureController::class, 'destroyNode']);
+
+        Route::post('/infrastructure/lines', [InfrastructureController::class, 'storeLine']);
+        Route::put('/infrastructure/lines/{id}/update', [InfrastructureController::class, 'updateLine']);
+        Route::delete('/infrastructure/lines/{id}', [InfrastructureController::class, 'destroyLine']);
     });
 
 // Crowdsourced Status Layer (Outside Auth for easy map access or same level as infrastructure)
