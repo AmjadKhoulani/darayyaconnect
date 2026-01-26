@@ -217,10 +217,15 @@ export default function AddReport() {
                 timeout: 5000 // Short timeout to trigger offline mode quickly
             });
 
-            await NotificationService.schedule(
-                'تم استلام بلاغك! ✅',
-                'شكراً لمساهمتك في تحسين داريا. سنقوم بمراجعة البلاغ قريباً.'
-            );
+            try {
+                await NotificationService.schedule(
+                    'تم استلام بلاغك! ✅',
+                    'شكراً لمساهمتك في تحسين داريا. سنقوم بمراجعة البلاغ قريباً.'
+                );
+            } catch (notifError) {
+                console.error('Notification failed:', notifError);
+                // Continue execution - do not block
+            }
 
             navigate('/', { replace: true });
 
@@ -251,6 +256,8 @@ export default function AddReport() {
 
                 if (serverMsg) {
                     errorText += `\nالسبب: ${serverMsg}`;
+                } else if (err.message) {
+                    errorText += `\n(${err.message})`;
                 }
 
                 if (validationErrors) {
