@@ -312,24 +312,50 @@ export default function MapEditor() {
         if (!type || activeToolRef.current === 'select') return;
 
         try {
+            let res;
             if (activeToolRef.current === 'point') {
                 const coords = feature.geometry.coordinates;
-                await api.post('/infrastructure/nodes', {
+                res = await api.post('/infrastructure/nodes', {
                     type,
                     latitude: coords[1],
                     longitude: coords[0],
                     status: 'active'
                 });
             } else if (activeToolRef.current === 'line') {
-                await api.post('/infrastructure/lines', {
+                res = await api.post('/infrastructure/lines', {
                     type,
                     coordinates: feature.geometry.coordinates,
                     status: 'active'
                 });
             }
+
+            // Optimistic Update: Add to map immediately
+            if (res && res.data && map.current) {
+                const newItem = res.data;
+                const source = map.current.getSource('net-layer') as maplibregl.GeoJSONSource;
+                if (source) {
+                    // @ts-ignore
+                    const currentData: any = source._data || { type: 'FeatureCollection', features: [] };
+
+                    const newFeature = {
+                        type: 'Feature',
+                        geometry: activeToolRef.current === 'point'
+                            ? { type: 'Point', coordinates: [parseFloat(newItem.longitude), parseFloat(newItem.latitude)] }
+                            : { type: 'LineString', coordinates: newItem.coordinates },
+                        properties: { ...newItem, id: newItem.id, type: newItem.type }
+                    };
+
+                    source.setData({
+                        ...currentData,
+                        features: [...currentData.features, newFeature]
+                    });
+                }
+            }
+
             alert('تم الحفظ!');
             draw.current?.deleteAll();
-            fetchData(); // Refresh to see styled custom layer version
+            // skip fetchData() to avoid race condition/flicker, or delay it
+            // fetchData(); 
 
             // Stay in mode? Or exit? Web editor stays. Let's stay.
             startTool(activeToolRef.current, subTypeRef.current);
