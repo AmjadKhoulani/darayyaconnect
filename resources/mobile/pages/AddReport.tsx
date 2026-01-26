@@ -281,7 +281,7 @@ export default function AddReport() {
                             <ArrowRight size={20} />
                         </button>
                         <div>
-                            <h1 className="text-2xl font-black text-white">إضافة بلاغ</h1>
+                            <h1 className="text-2xl font-black text-white">إنشاء بلاغ</h1>
                             {linkedSerial && (
                                 <div className="text-[10px] font-bold text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-full inline-block mt-1">
                                     مرتبط بالعنصر: {linkedSerial}
@@ -298,7 +298,7 @@ export default function AddReport() {
                     {/* Report Type Selection */}
                     <div>
                         <label className="flex items-center gap-2 text-sm font-black text-slate-800 dark:text-slate-100 mb-3 px-1">
-                            <div className="w-1.5 h-4 bg-slate-900 dark:bg-slate-400 rounded-full"></div>
+                            <div className="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
                             نوع البلاغ
                         </label>
                         <div className="grid grid-cols-2 gap-3">
@@ -307,18 +307,18 @@ export default function AddReport() {
                                     key={t.id}
                                     type="button"
                                     onClick={() => setType(t.id)}
-                                    className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden group ${type === t.id
-                                        ? 'bg-slate-900 dark:bg-indigo-600 border-slate-900 dark:border-indigo-500 text-white shadow-lg'
+                                    className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden group h-32 ${type === t.id
+                                        ? 'bg-slate-800 dark:bg-emerald-600 border-slate-800 dark:border-emerald-500 text-white shadow-lg scale-[1.02]'
                                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                                         }`}
                                 >
-                                    <div className={`p-3 rounded-full mb-1 transition-colors ${type === t.id ? 'bg-white/10 text-white' : `${t.color.replace('border', 'bg').replace('text', 'text')} bg-opacity-50`
+                                    <div className={`p-3 rounded-full mb-1 transition-colors ${type === t.id ? 'bg-white/20 text-white' : `${t.color.replace('border', 'bg').replace('text', 'text')} bg-opacity-10`
                                         }`}>
                                         {t.icon}
                                     </div>
-                                    <span className="text-xs font-bold">{t.label}</span>
+                                    <span className="text-sm font-bold">{t.label}</span>
                                     {type === t.id && (
-                                        <div className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                        <div className="absolute top-2 right-2 w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]"></div>
                                     )}
                                 </button>
                             ))}
