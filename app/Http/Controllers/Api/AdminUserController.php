@@ -53,11 +53,39 @@ class AdminUserController extends Controller
 
     public function activeLocations()
     {
-        $users = User::whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->where('last_active_at', '>=', now()->subMinutes(15))
+        // Fetch users active active recently OR having an active SOS
+        $users = User::query()
+            ->where(function ($q) {
+                // Case 1: Active in last 15 mins AND has location
+                $q->whereNotNull('latitude')
+                  ->whereNotNull('longitude')
+                  ->where('last_active_at', '>=', now()->subMinutes(15));
+            })
+            ->orWhereHas('sosAlerts', function ($q) {
+                // Case 2: Has an ACTIVE SOS alert
+                $q->where('status', 'active');
+            })
+            ->with(['sosAlerts' => function ($q) {
+                $q->where('status', 'active')->latest()->limit(1);
+            }])
             ->select('id', 'name', 'latitude', 'longitude', 'last_active_at', 'role')
-            ->get();
+            ->get()
+            ->map(function ($user) {
+                $sos = $user->sosAlerts->first();
+                if ($sos) {
+                    // Override location with live SOS tracking if available
+                    $user->is_sos = true;
+                    $user->sos_type = $sos->emergency_type;
+                    $user->sos_message = $sos->message;
+                    $user->latitude = $sos->current_latitude ?? $sos->latitude; // Dynamic SOS lat
+                    $user->longitude = $sos->current_longitude ?? $sos->longitude; // Dynamic SOS lng
+                    $user->sos_started_at = $sos->created_at;
+                } else {
+                    $user->is_sos = false;
+                }
+                unset($user->sosAlerts);
+                return $user;
+            });
 
         return response()->json($users);
     }

@@ -109,4 +109,9 @@ class User extends Authenticatable
 
         return $this->role === $roles;
     }
+
+    public function sosAlerts()
+    {
+        return $this->hasMany(SosAlert::class);
+    }
 }
