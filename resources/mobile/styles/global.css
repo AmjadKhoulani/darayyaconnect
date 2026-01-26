@@ -337,8 +337,8 @@ body {
     width: 44px;
     height: 44px;
     background: #ffffff;
-    border-radius: 12px;
-    /* Square rounded */
+    border-radius: 50%;
+    /* Circle */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -380,7 +380,7 @@ body {
 .status-bubble::after {
     content: '';
     position: absolute;
-    bottom: -10px;
+    bottom: -8px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;

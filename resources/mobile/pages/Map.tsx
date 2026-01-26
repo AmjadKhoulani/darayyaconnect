@@ -393,7 +393,18 @@ export default function Map() {
             map.current.on('click', 'public-reports-layer', (e) => {
                 if (e.features && e.features[0]) {
                     const props = e.features[0].properties;
-                    alert(`بلاغ: ${props.category}\nالحالة: ${props.status}\nالوصف: ${props.title}`);
+                    const categoryAr = {
+                        water: 'شبكة المياه',
+                        electricity: 'شبكة الكهرباء',
+                        lighting: 'الإنارة العامة',
+                        sanitation: 'الصرف الصحي',
+                        trash: 'النظافة العامة',
+                        road: 'الطرق والجسور',
+                        communication: 'الاتصالات',
+                        other: 'بلاغ عام'
+                    }[props.category as string] || 'بلاغ خدمة';
+
+                    alert(`📅 تاريخ البلاغ: ${props.created_at || 'غير محدد'}\n⚠️ نوع البلاغ: ${categoryAr}`);
                 }
             });
         });

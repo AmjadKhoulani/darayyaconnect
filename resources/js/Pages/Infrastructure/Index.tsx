@@ -268,7 +268,18 @@ export default function InfrastructureIndex({ auth, points }: any) {
                         el.style.animationDelay = `${Math.random() * -4}s`;
 
                         el.onclick = () => {
-                            alert(`بلاغ: ${props.category}\nالحالة: ${props.status}\nالوصف: ${props.title}`);
+                            const categoryAr = {
+                                water: 'شبكة المياه',
+                                electricity: 'شبكة الكهرباء',
+                                lighting: 'الإنارة العامة',
+                                sanitation: 'الصرف الصحي',
+                                trash: 'النظافة العامة',
+                                road: 'الطرق والجسور',
+                                communication: 'الاتصالات',
+                                other: 'بلاغ عام'
+                            }[props.category as string] || 'بلاغ خدمة';
+
+                            alert(`📅 تاريخ البلاغ: ${props.created_at || 'غير محدد'}\n⚠️ نوع البلاغ: ${categoryAr}`);
                         };
 
                         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })

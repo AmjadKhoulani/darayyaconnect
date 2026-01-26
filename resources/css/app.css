@@ -231,3 +231,94 @@ body {
 .animate-pulse-emerald {
     animation: pulse-emerald 2s infinite;
 }
+
+/* Cities: Skylines Style Status Bubbles - Revamped to Circle */
+@keyframes city-bubble-float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    33% {
+        transform: translateY(-6px) rotate(1deg);
+    }
+
+    66% {
+        transform: translateY(-2px) rotate(-1deg);
+    }
+
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+@keyframes bubble-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.status-bubble {
+    width: 44px;
+    height: 44px;
+    background: #ffffff;
+    border-radius: 50%;
+    /* Circle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow:
+        0 8px 16px -4px rgba(0, 0, 0, 0.15),
+        0 4px 8px -2px rgba(0, 0, 0, 0.1),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.05);
+    border: 3px solid #ffffff;
+    animation: city-bubble-float 4s ease-in-out infinite;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 10;
+}
+
+.status-bubble:hover {
+    transform: scale(1.2) translateY(-5px);
+    z-index: 100;
+}
+
+.status-bubble.critical {
+    border-color: #ef4444;
+    animation: city-bubble-float 4s ease-in-out infinite, bubble-pulse 2s infinite;
+}
+
+.status-bubble.warning {
+    border-color: #f59e0b;
+}
+
+.status-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #ffffff;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+.status-bubble.critical::after {
+    border-top-color: #ef4444;
+}
+
+.status-bubble.warning::after {
+    border-top-color: #f59e0b;
+}
