@@ -73,6 +73,7 @@ class InfrastructureController extends Controller
 
     private function mapTypeToCategoryAndDept($type)
     {
+        $map = [
             'water' => ['category' => 'water', 'dept' => 'water'],
             'electricity' => ['category' => 'electricity', 'dept' => 'electricity'],
             'lighting' => ['category' => 'electricity', 'dept' => 'electricity'], // Added lighting
