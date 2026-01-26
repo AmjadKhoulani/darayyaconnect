@@ -36,6 +36,7 @@ export default function AdminDashboard() {
         { title: 'إدارة الأمبيرات', icon: <Zap className="text-yellow-500" />, path: '/admin/generators' },
         { title: 'دليل المدينة', icon: <BookOpen className="text-blue-500" />, path: '/admin/directory' },
         { title: 'محرر الخريطة', icon: <Map className="text-emerald-500" />, path: '/admin/map-editor' },
+        { title: 'التتبع المباشر', icon: <Crosshair className="text-red-500" />, path: '/admin/user-map' },
     ];
 
     return (
