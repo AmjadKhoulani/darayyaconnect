@@ -33,6 +33,7 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/polls/active', [DashboardController::class, 'activePoll']);
     Route::prefix('analytics')->group(function () {
         Route::get('/heatmap', [\App\Http\Controllers\AnalyticsController::class, 'heatmap']);
+        Route::get('/reports/heatmap', [\App\Http\Controllers\AnalyticsController::class, 'heatmap']); // Added specific route
         Route::get('/pulse', [\App\Http\Controllers\AnalyticsController::class, 'pulse']);
     });
     // Locations
