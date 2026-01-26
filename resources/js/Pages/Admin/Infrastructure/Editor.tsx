@@ -34,14 +34,11 @@ import {
 // Define Types
 type SectorType = 'water' | 'electricity' | 'sewage' | 'phone';
 
+import { User } from '@/types';
+
 interface Props {
     auth: {
-        user: {
-            id: number;
-            name: string;
-            email: string;
-            role: string;
-        };
+        user: User;
     };
     sector: SectorType;
 }
