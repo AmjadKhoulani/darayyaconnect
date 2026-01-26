@@ -112,7 +112,25 @@ export default function Map() {
 
         map.current.on('load', () => {
             if (!map.current) return;
+            if (!map.current) return;
             console.log("Mobile Map Loaded");
+
+            // Load Custom Infrastructure Icons
+            const images = [
+                { id: 'icon_water_tank', url: '/mobile_assets/map-icons/water_tank.png' },
+                { id: 'icon_transformer', url: '/mobile_assets/map-icons/transformer.png' },
+                { id: 'icon_manhole', url: '/mobile_assets/map-icons/manhole.png' },
+                { id: 'icon_cabinet', url: '/mobile_assets/map-icons/cabinet.png' },
+            ];
+
+            images.forEach(img => {
+                if (!map.current!.hasImage(img.id)) {
+                    map.current!.loadImage(img.url, (error, image) => {
+                        if (error) console.error(error);
+                        if (image && !map.current!.hasImage(img.id)) map.current!.addImage(img.id, image);
+                    });
+                }
+            });
 
             // 1. Add Population Source
             // 1. Initial Population Source (Empty, will be filled by useEffect)
@@ -214,33 +232,32 @@ export default function Map() {
                                 }))
                             };
 
-                            // Add custom markers for nodes
-                            points.forEach((p: any) => {
-                                const typeInfo = INFRA_ICONS[p.type] || { icon: '📍', bg: '#f3f4f6', color: '#374151' };
-                                const el = document.createElement('div');
-                                el.className = `infra-marker-${type} flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg transition-transform active:scale-90`;
-                                el.style.backgroundColor = typeInfo.bg;
-                                el.style.fontSize = '14px';
-                                el.innerHTML = typeInfo.icon;
-                                el.style.visibility = activeLayers[type as keyof typeof activeLayers] ? 'visible' : 'hidden';
+                            mapInstance.addSource(`infra-${type}-nodes`, {
+                                type: 'geojson',
+                                data: nodesGeoJson
+                            });
 
-                                const marker = new maplibregl.Marker({ element: el })
-                                    .setLngLat([parseFloat(p.longitude), parseFloat(p.latitude)])
-                                    .addTo(mapInstance);
-
-                                el.onclick = () => {
-                                    setSelectedInfra({
-                                        ...p,
-                                        lng: parseFloat(p.longitude),
-                                        lat: parseFloat(p.latitude),
-                                        sector: type
-                                    });
-                                };
-
-                                // Store marker reference for visibility toggling
-                                if (!(mapInstance as any)._infraMarkers) (mapInstance as any)._infraMarkers = {};
-                                if (!(mapInstance as any)._infraMarkers[type]) (mapInstance as any)._infraMarkers[type] = [];
-                                (mapInstance as any)._infraMarkers[type].push({ marker, element: el });
+                            mapInstance.addLayer({
+                                id: `infra-${type}-nodes-layer`,
+                                type: 'symbol',
+                                source: `infra-${type}-nodes`,
+                                layout: {
+                                    'visibility': activeLayers[type as keyof typeof activeLayers] ? 'visible' : 'none',
+                                    'icon-image': [
+                                        'match',
+                                        ['get', 'type'],
+                                        'water_tank', 'icon_water_tank',
+                                        'pump', 'icon_water_tank', // Fallback/Shared
+                                        'transformer', 'icon_transformer',
+                                        'generator', 'icon_transformer', // Fallback/Shared
+                                        'manhole', 'icon_manhole',
+                                        'cabinet', 'icon_cabinet',
+                                        'exchange', 'icon_cabinet', // Fallback/Shared
+                                        'marker-15'
+                                    ],
+                                    'icon-size': 0.12, // Slightly smaller for public map view
+                                    'icon-allow-overlap': true
+                                }
                             });
 
                             // Click Handler
