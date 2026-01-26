@@ -139,6 +139,23 @@ export default function Profile() {
                         </div>
                     </div>
 
+                    {/* Edit Profile Button */}
+                    <button
+                        onClick={() => navigate('/profile/edit')}
+                        className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between group active:scale-[0.99] transition-all"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center border border-indigo-100 dark:border-indigo-800/50 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <Edit2 size={20} />
+                            </div>
+                            <div className="text-right">
+                                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">تعديل الملف الشخصي</h3>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400">تحديث المعلومات، كلمة المرور، والعنوان</p>
+                            </div>
+                        </div>
+                        <ChevronLeft size={18} className="text-slate-400 group-hover:-translate-x-1 transition-transform" />
+                    </button>
+
                     {/* Quick Actions - Grid */}
                     <div className="grid grid-cols-2 gap-3">
                         <button
