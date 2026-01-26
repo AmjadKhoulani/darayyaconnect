@@ -61,6 +61,8 @@ import GeneratorManagement from './pages/GeneratorManagement';
 import DirectoryManagement from './pages/DirectoryManagement';
 import MapEditor from './pages/MapEditor';
 import BroadcastAlert from './pages/BroadcastAlert';
+import AdminUserMap from './pages/AdminUserMap';
+import LiveTrackUser from './pages/LiveTrackUser';
 import Settings from './pages/Settings';
 import EditProfile from './pages/EditProfile';
 import About from './pages/About';
@@ -268,6 +270,8 @@ function AppContent() {
                 <Route path="/admin/directory" element={<DirectoryManagement />} />
                 <Route path="/admin/map-editor" element={<MapEditor />} />
                 <Route path="/admin/broadcast" element={<BroadcastAlert />} />
+                <Route path="/admin/user-map" element={<AdminUserMap />} />
+                <Route path="/live-track" element={<LiveTrackUser />} />
                 <Route path="/gov-dashboard" element={<GovDashboard />} />
                 <Route path="/report-detail/:id" element={<ReportDetail />} />
                 <Route path="/about" element={<About />} />
