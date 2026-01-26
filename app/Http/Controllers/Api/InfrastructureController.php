@@ -57,7 +57,7 @@ class InfrastructureController extends Controller
             $report = Report::create($reportData);
 
             return response()->json([
-                'message' => 'تم استلام البلاغ بنجاح',
+                'message' => 'Success',
                 'id' => $report->id
             ], 201);
         } catch (\Exception $e) {
