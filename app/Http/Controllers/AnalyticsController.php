@@ -65,6 +65,7 @@ class AnalyticsController extends Controller
                     ],
                     'properties' => [
                         'weight' => $weight,
+                        'category' => $report->category,
                     ],
                 ];
             });
