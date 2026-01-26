@@ -212,7 +212,7 @@ class InfrastructureController extends Controller
             $validated['is_published'] = true; // Auto-publish from Map Editor
 
             $node = InfrastructureNode::create($validated);
-            \Log::info('Node created', ['id' => $node->id]);
+            \Log::info('Node created', ['id' => $node->id, 'is_published' => $node->is_published]);
             return response()->json($node, 201);
         } catch (\Exception $e) {
             \Log::error('Store node failed: ' . $e->getMessage());
