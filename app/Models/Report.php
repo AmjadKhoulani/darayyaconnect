@@ -31,6 +31,15 @@ class Report extends Model
         'infrastructure_line_id'
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'coordinates',
+    ];
+
     public function infrastructureNode()
     {
         return $this->belongsTo(InfrastructureNode::class);
