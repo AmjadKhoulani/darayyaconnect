@@ -20,11 +20,13 @@ export default function Home() {
     const [discussions, setDiscussions] = useState<any[]>([]);
     const [serviceStates, setServiceStates] = useState<any[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [loading, setLoading] = useState(false);
     const [featuredSlides, setFeaturedSlides] = useState<any[]>([]);
 
     // Fetch dashboard data
     const fetchDashboardData = useCallback(async () => {
         try {
+            setLoading(true);
             const [statsRes, newsRes, discussionsRes, servicesRes, notificationsRes, featuredRes] = await Promise.all([
                 api.get('/dashboard/stats'),
                 api.get('/dashboard/news'),
@@ -53,6 +55,8 @@ export default function Home() {
             }
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
+        } finally {
+            setLoading(false);
         }
     }, []);
 
@@ -81,7 +85,7 @@ export default function Home() {
 
                 <main className="px-4 space-y-6 max-w-md mx-auto pt-2">
                     {/* 1. Live Status Ticker - Critical Info First */}
-                    <StatusWidget serviceStates={serviceStates} />
+                    <StatusWidget serviceStates={serviceStates} loading={loading} />
 
                     {/* 2. Hero Banner - Welcome & Brand */}
                     <div className="relative overflow-hidden rounded-[32px] p-6 shadow-premium group min-h-[140px] flex items-center mb-2">

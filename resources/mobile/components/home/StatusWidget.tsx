@@ -3,9 +3,10 @@ import { AlertTriangle, Zap, Droplets } from 'lucide-react';
 
 interface StatusWidgetProps {
     serviceStates: any[];
+    loading?: boolean;
 }
 
-export default function StatusWidget({ serviceStates }: StatusWidgetProps) {
+export default function StatusWidget({ serviceStates, loading = false }: StatusWidgetProps) {
     const getServiceIcon = (name: string) => {
         if (name.includes('كهرباء')) return <Zap size={16} />;
         if (name.includes('مياه')) return <Droplets size={16} />;
@@ -27,7 +28,13 @@ export default function StatusWidget({ serviceStates }: StatusWidgetProps) {
                     </div>
 
                     <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                        {serviceStates.length > 0 ? (
+                        {loading ? (
+                            <div className="flex gap-2 w-full">
+                                {[1, 2].map(i => (
+                                    <div key={i} className="flex-1 h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl animate-pulse"></div>
+                                ))}
+                            </div>
+                        ) : serviceStates.length > 0 ? (
                             serviceStates.map((service) => (
                                 <div
                                     key={service.id}
@@ -43,10 +50,9 @@ export default function StatusWidget({ serviceStates }: StatusWidgetProps) {
                                 </div>
                             ))
                         ) : (
-                            <div className="flex gap-2 w-full">
-                                {[1, 2].map(i => (
-                                    <div key={i} className="flex-1 h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl animate-pulse"></div>
-                                ))}
+                            <div className="w-full py-2 flex items-center justify-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+                                <span className="text-lg">✨</span>
+                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">جميع الخدمات تعمل بشكل جيد</span>
                             </div>
                         )}
                     </div>
