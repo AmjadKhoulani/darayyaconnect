@@ -100,7 +100,6 @@ class AdminManagementController extends Controller
             'color' => 'required|string|max:20',
             'gradient' => 'required|string|max:100',
             'summary' => 'required|string',
-            'summary' => 'required|string',
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
             'scenario' => 'required|array',
