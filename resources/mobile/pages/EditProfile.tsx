@@ -65,19 +65,26 @@ export default function EditProfile() {
         setSuccess('');
 
         try {
-            const payload: any = {
-                name: formData.name,
-                email: formData.email,
-                mobile: formData.mobile,
-            };
+            const data = new FormData();
+            data.append('name', formData.name);
+            data.append('email', formData.email);
+            if (formData.mobile) data.append('mobile', formData.mobile);
 
-            if (showPasswordSection && formData.new_password) {
-                payload.current_password = formData.current_password;
-                payload.new_password = formData.new_password;
-                payload.new_password_confirmation = formData.new_password_confirmation;
+            // @ts-ignore
+            if (formData.photo) {
+                // @ts-ignore
+                data.append('photo', formData.photo);
             }
 
-            const res = await api.post('/user/profile', payload);
+            if (showPasswordSection && formData.new_password) {
+                data.append('current_password', formData.current_password);
+                data.append('new_password', formData.new_password);
+                data.append('new_password_confirmation', formData.new_password_confirmation);
+            }
+
+            const res = await api.post('/user/profile', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
 
             // Update local storage
             const updatedUser = { ...user, ...res.data.user };
@@ -86,8 +93,8 @@ export default function EditProfile() {
 
             setSuccess('تم حفظ التغييرات بنجاح');
 
-            // Clear password fields (optional)
-            setFormData(prev => ({ ...prev, current_password: '', new_password: '', new_password_confirmation: '' }));
+            // Clear sensitive fields
+            setFormData(prev => ({ ...prev, current_password: '', new_password: '', new_password_confirmation: '', photo: undefined }));
             setShowPasswordSection(false);
 
             setTimeout(() => navigate(-1), 1500);
@@ -131,6 +138,46 @@ export default function EditProfile() {
                             {success}
                         </div>
                     )}
+
+                    {/* Profile Picture */}
+                    <div className="flex flex-col items-center justify-center gap-3 py-4">
+                        <div className="relative group cursor-pointer" onClick={() => document.getElementById('photo-upload')?.click()}>
+                            <div className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative">
+                                {user.profile_photo_url ? (
+                                    <img src={user.profile_photo_url} alt={user.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-3xl font-black text-slate-400">{user.name?.charAt(0)}</span>
+                                )}
+                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Camera className="text-white" />
+                                </div>
+                            </div>
+                            <div className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full border-2 border-white dark:border-slate-800 shadow-md">
+                                <Camera size={16} />
+                            </div>
+                        </div>
+                        <p className="text-xs font-bold text-slate-400">اضغط لتغيير الصورة</p>
+                        <input
+                            id="photo-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    // Handle preview immediately (optional)
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => {
+                                        setUser(prev => ({ ...prev, profile_photo_url: ev.target?.result }));
+                                    };
+                                    reader.readAsDataURL(file);
+
+                                    // Add to formData for upload (we'll need to change handleSubmit logic)
+                                    setFormData(prev => ({ ...prev, photo: file }));
+                                }
+                            }}
+                        />
+                    </div>
 
                     {/* Basic Info */}
                     <div className="space-y-4">
