@@ -13,6 +13,7 @@ import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import HashtagChat from './pages/HashtagChat';
 import SkillsPortal from './pages/SkillsPortal';
+import PrivacyPolicyMobile from './pages/PrivacyPolicyMobile';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Splash from './pages/Splash';
@@ -61,7 +62,7 @@ import './styles/global.css';
 function AppContent() {
     const location = useLocation();
     const navigate = useNavigate();
-    const hideNavRoutes = ['/login', '/register', '/splash', '/skills', '/add-report', '/study'];
+    const hideNavRoutes = ['/login', '/register', '/splash', '/skills', '/add-report', '/study', '/privacy-policy-mobile'];
     const showBottomNav = !hideNavRoutes.some(path => location.pathname.includes(path));
     const showFab = showBottomNav;
 
@@ -142,6 +143,7 @@ function AppContent() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/services-status" element={<ServicesStatus />} />
                 <Route path="/water-status" element={<WaterStatus />} />
+                <Route path="/privacy-policy-mobile" element={<PrivacyPolicyMobile />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/events/:id" element={<EventDetail />} />
                 <Route path="/hashtag" element={<HashtagChat />} />

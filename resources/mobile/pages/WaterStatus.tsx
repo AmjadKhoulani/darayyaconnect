@@ -6,9 +6,25 @@ export default function WaterStatus() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        api.get('/api/infrastructure/water')
-            .then(res => setZones(res.data))
-            .catch(err => console.error(err))
+        api.get('/infrastructure/status-heatmap', {
+            params: { type: 'water' }
+        })
+            .then(res => {
+                // The API returns a FeatureCollection. We map features to our zone format.
+                const features = res.data.features || [];
+                const mappedZones = features.map((f: any) => ({
+                    id: f.properties.neighborhood, // using neighborhood name as ID for now
+                    name: f.properties.neighborhood,
+                    status: f.properties.status === 'available' ? 'Working' : 'Cutoff',
+                    updated_at: res.data.properties.generated_at
+                }));
+                setZones(mappedZones);
+            })
+            .catch(err => {
+                console.error('Failed to fetch water status:', err);
+                // Fallback to empty state, do not show dummy data
+                setZones([]);
+            })
             .finally(() => setLoading(false));
     }, []);
 

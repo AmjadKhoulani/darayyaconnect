@@ -11,17 +11,28 @@ interface Props {
 }
 
 export default function EmergencyModal({ isOpen, onClose }: Props) {
-    const [status, setStatus] = useState<'idle' | 'locating' | 'sending' | 'success' | 'error'>('idle');
+    const [status, setStatus] = useState<'idle' | 'confirming' | 'locating' | 'sending' | 'success' | 'error'>('idle');
+    const [selectedType, setSelectedType] = useState<{ id: string, label: string, icon: string } | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         if (!isOpen) {
             // Reset status when closed
-            setTimeout(() => setStatus('idle'), 300);
+            setTimeout(() => {
+                setStatus('idle');
+                setSelectedType(null);
+            }, 300);
         }
     }, [isOpen]);
 
-    const handleSOS = async (type: string) => {
+    const initiateSOS = (type: any) => {
+        setSelectedType(type);
+        setStatus('confirming');
+    };
+
+    const handleConfirmedSOS = async () => {
+        if (!selectedType) return;
+
         try {
             setStatus('locating');
             HapticService.heavyImpact();
@@ -38,8 +49,8 @@ export default function EmergencyModal({ isOpen, onClose }: Props) {
             await api.post('/sos/trigger', {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
-                emergency_type: type,
-                message: `SOS Triggered from mobile app. Type: ${type}`
+                emergency_type: selectedType.id,
+                message: `SOS Triggered from mobile app. Type: ${selectedType.id}`
             });
 
             setStatus('success');
@@ -78,7 +89,7 @@ export default function EmergencyModal({ isOpen, onClose }: Props) {
                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">اختر نوع الطارئ وسيتم إرسال موقعك فوراً لغرفة العمليات</p>
                 </div>
 
-                {status === 'idle' ? (
+                {status === 'idle' && (
                     <div className="grid grid-cols-1 gap-3">
                         {[
                             { id: 'general', label: 'إشارة عامة', icon: '🆘', color: 'bg-rose-600' },
@@ -88,7 +99,7 @@ export default function EmergencyModal({ isOpen, onClose }: Props) {
                         ].map((item) => (
                             <button
                                 key={item.id}
-                                onClick={() => handleSOS(item.id)}
+                                onClick={() => initiateSOS(item)}
                                 className={`flex items-center gap-4 p-4 rounded-2xl ${item.color} text-white font-bold active:scale-95 transition-all shadow-lg`}
                             >
                                 <span className="text-2xl">{item.icon}</span>
@@ -96,7 +107,34 @@ export default function EmergencyModal({ isOpen, onClose }: Props) {
                             </button>
                         ))}
                     </div>
-                ) : (
+                )}
+
+                {status === 'confirming' && selectedType && (
+                    <div className="text-center py-4">
+                        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2">تأكيد الإرسال؟</h4>
+                        <p className="text-slate-600 dark:text-slate-300 text-sm mb-6">
+                            سيتم إرسال بلاغ
+                            <span className="font-bold mx-1 text-rose-600">"{selectedType.label}"</span>
+                            مع موقعك الحالي.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setStatus('idle')}
+                                className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold"
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                onClick={handleConfirmedSOS}
+                                className="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold shadow-lg shadow-rose-500/30"
+                            >
+                                تأكيد وإرسال
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {(status === 'locating' || status === 'sending' || status === 'success' || status === 'error') && (
                     <div className="py-12 flex flex-col items-center justify-center text-center">
                         {status === 'locating' && (
                             <>

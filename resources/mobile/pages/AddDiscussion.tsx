@@ -88,9 +88,26 @@ export default function AddDiscussion() {
             setIsDirty(false);
             showToast('تم نشر الموضوع بنجاح 🎉', 'success');
             navigate('/discussions');
-        } catch (err) {
+            navigate('/discussions');
+        } catch (err: any) {
             console.error(err);
-            showToast('حدث خطأ أثناء النشر', 'error');
+            const serverMsg = err.response?.data?.message;
+            const validationErrors = err.response?.data?.errors;
+
+            let errorText = 'حدث خطأ أثناء النشر. ';
+
+            if (serverMsg) {
+                errorText += `\nالسبب: ${serverMsg}`;
+            }
+
+            if (validationErrors) {
+                const firstError = Object.values(validationErrors)[0] as string[];
+                if (Array.isArray(firstError)) {
+                    errorText += `\n(${firstError[0]})`;
+                }
+            }
+
+            alert(errorText);
         } finally {
             setSubmitting(false);
         }
