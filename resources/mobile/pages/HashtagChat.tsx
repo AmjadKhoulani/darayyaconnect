@@ -263,7 +263,7 @@ export default function HashtagChat() {
                 </header>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto scrollbar-hide bg-pattern relative w-full">
+                <div className="flex-1 overflow-y-auto scrollbar-hide bg-pattern relative w-full pb-24">
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#6366f1 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                     <div ref={scrollRef} className="p-4 space-y-4 pb-4 min-h-full flex flex-col justify-end">
                         {loading && messages.length === 0 && (
@@ -328,7 +328,7 @@ export default function HashtagChat() {
                 </div>
 
                 {/* Input Area */}
-                <div className="flex-none z-20 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-[env(safe-area-inset-bottom)] shadow-up">
+                <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-[env(safe-area-inset-bottom)] shadow-up md:absolute md:w-full">
                     {replyingTo && (
                         <div className="px-4 pt-3 pb-1 flex items-center justify-between animate-slide-up">
                             <div className="flex-1 bg-slate-50 dark:bg-slate-800 border-l-4 border-indigo-500 rounded-r-lg px-3 py-2">
