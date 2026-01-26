@@ -171,6 +171,40 @@ export default function Profile() {
                                 </div>
                             </div>
                         </button>
+
+                        {user.role === 'admin' && (
+                            <button
+                                onClick={() => navigate('/admin-dashboard')}
+                                className="bg-slate-900 rounded-2xl p-4 border border-slate-700 shadow-sm relative overflow-hidden group active:scale-[0.98] transition-all col-span-2"
+                            >
+                                <div className="relative z-10 flex flex-col items-start h-full justify-between gap-4">
+                                    <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
+                                        <Shield size={20} className="text-emerald-400" />
+                                    </div>
+                                    <div className="text-right">
+                                        <h4 className="font-bold text-white text-sm mb-0.5">لوحة التحكم الإدارية</h4>
+                                        <p className="text-[10px] text-slate-400">إدارة النظام والبلاغات</p>
+                                    </div>
+                                </div>
+                            </button>
+                        )}
+
+                        {user.role === 'official' && (
+                            <button
+                                onClick={() => navigate('/gov-dashboard')}
+                                className="bg-indigo-900 rounded-2xl p-4 border border-indigo-700 shadow-sm relative overflow-hidden group active:scale-[0.98] transition-all col-span-2"
+                            >
+                                <div className="relative z-10 flex flex-col items-start h-full justify-between gap-4">
+                                    <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center border border-indigo-500/30">
+                                        <Zap size={20} className="text-indigo-400" />
+                                    </div>
+                                    <div className="text-right">
+                                        <h4 className="font-bold text-white text-sm mb-0.5">بوابة الجهة الحكومية</h4>
+                                        <p className="text-[10px] text-indigo-200">إدارة بلاغات {user.department?.name}</p>
+                                    </div>
+                                </div>
+                            </button>
+                        )}
                     </div>
 
 

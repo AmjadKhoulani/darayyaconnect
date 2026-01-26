@@ -17,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/sos/trigger', [\App\Http\Controllers\Api\SosController::class, 'trigger']);
+    Route::post('/sos/track/{alert}', [\App\Http\Controllers\Api\SosController::class, 'track']);
     Route::get('/sos/status/{alert}', [\App\Http\Controllers\Api\SosController::class, 'status']);
     Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
 });
@@ -114,6 +115,9 @@ Route::get('/lost-found/{id}', [App\Http\Controllers\Api\LostFoundController::cl
 
 Route::middleware('auth:sanctum')->group(function () {
     // --- Chat System ---
+    Route::get('/chat-channels', [App\Http\Controllers\Api\ChatController::class, 'channels']);
+    Route::post('/chat-channels', [App\Http\Controllers\Api\ChatController::class, 'storeChannel']);
+    Route::post('/chat-channels/{channelId}/mute', [App\Http\Controllers\Api\ChatController::class, 'toggleMute']);
     Route::get('/chat/{channel}', [App\Http\Controllers\Api\ChatController::class, 'index']);
     Route::post('/chat/{channel}', [App\Http\Controllers\Api\ChatController::class, 'store']);
 
@@ -157,6 +161,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // --- Dynamic Directory & Service Status ---
 Route::get('/directory', [App\Http\Controllers\Api\DirectoryController::class, 'index']);
 Route::get('/service-states', [App\Http\Controllers\Api\ServiceStateController::class, 'index']);
+Route::get('/portal/service-logs/status', [App\Http\Controllers\Api\ServiceStatusController::class, 'getStatus']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Directory Management
@@ -166,6 +171,58 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Service Status Management
     Route::put('/service-states/{key}', [App\Http\Controllers\Api\ServiceStateController::class, 'update']);
+
+    // Admin & Gov Dashboards
+    Route::get('/admin/dashboard', [App\Http\Controllers\Api\InfrastructureController::class, 'adminDashboardData']);
+    Route::get('/gov/dashboard', [App\Http\Controllers\Api\InfrastructureController::class, 'govDashboardData']);
+    Route::get('/reports/{id}', [App\Http\Controllers\Api\InfrastructureController::class, 'showReport']);
+    Route::post('/reports/{id}/update', [App\Http\Controllers\Api\InfrastructureController::class, 'updateReport']);
+
+    // Admin API Extensions
+    Route::get('/admin/service-states', [App\Http\Controllers\Api\ServiceStateController::class, 'index']); // Extend to show all if needed
+    Route::get('/admin/moderation/pending', [App\Http\Controllers\Api\AdminModerationController::class, 'pending']);
+    Route::post('/admin/moderation/{type}/{id}/approve', [App\Http\Controllers\Api\AdminModerationController::class, 'approve']);
+    Route::post('/admin/moderation/{type}/{id}/reject', [App\Http\Controllers\Api\AdminModerationController::class, 'reject']);
+    Route::get('/admin/users', [App\Http\Controllers\Api\AdminUserController::class, 'index']);
+    Route::post('/admin/users/{user}/update', [App\Http\Controllers\Api\AdminUserController::class, 'update']);
+    Route::get('/admin/departments', [App\Http\Controllers\Api\AdminUserController::class, 'departments']);
+
+    // Total Admin Management Parity
+    Route::prefix('admin/manage')->group(function () {
+        // Volunteering
+        Route::get('/volunteering', [App\Http\Controllers\Api\AdminManagementController::class, 'volunteerIndex']);
+        Route::post('/volunteering', [App\Http\Controllers\Api\AdminManagementController::class, 'volunteerStore']);
+        Route::post('/volunteering/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'volunteerUpdate']);
+        Route::delete('/volunteering/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'volunteerDestroy']);
+        Route::post('/volunteering/applications/{id}/status', [App\Http\Controllers\Api\AdminManagementController::class, 'updateVolunteerApplicationStatus']);
+
+        // AI Studies
+        Route::get('/ai-studies', [App\Http\Controllers\Api\AdminManagementController::class, 'aiStudyIndex']);
+        Route::post('/ai-studies', [App\Http\Controllers\Api\AdminManagementController::class, 'aiStudyStore']);
+        Route::post('/ai-studies/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'aiStudyUpdate']);
+        Route::delete('/ai-studies/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'aiStudyDestroy']);
+
+        // Generators
+        Route::get('/generators', [App\Http\Controllers\Api\AdminManagementController::class, 'generatorIndex']);
+        Route::post('/generators', [App\Http\Controllers\Api\AdminManagementController::class, 'generatorStore']);
+        Route::post('/generators/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'generatorUpdate']);
+        Route::delete('/generators/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'generatorDestroy']);
+
+        // Directory
+        Route::get('/directory', [App\Http\Controllers\Api\AdminManagementController::class, 'directoryIndex']);
+        Route::post('/directory', [App\Http\Controllers\Api\AdminManagementController::class, 'directoryStore']);
+        Route::post('/directory/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'directoryUpdate']);
+        Route::delete('/directory/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'directoryDestroy']);
+
+        // Departments
+        Route::get('/departments', [App\Http\Controllers\Api\AdminManagementController::class, 'departmentIndex']);
+        Route::post('/departments', [App\Http\Controllers\Api\AdminManagementController::class, 'departmentStore']);
+        Route::post('/departments/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'departmentUpdate']);
+        Route::delete('/departments/{id}', [App\Http\Controllers\Api\AdminManagementController::class, 'departmentDestroy']);
+
+        // Alerts
+        Route::post('/alerts', [App\Http\Controllers\Api\AdminManagementController::class, 'sendAlert']);
+    });
 });
 Route::get('/books/{id}', [App\Http\Controllers\Api\BookController::class, 'show']);
 

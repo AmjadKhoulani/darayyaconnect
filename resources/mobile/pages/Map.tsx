@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Crosshair, Layers, X, Clock } from 'lucide-react';
+import { ArrowRight, Crosshair, Layers, X, Clock, Edit3 } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { GeolocationService } from '../services/GeolocationService';
@@ -22,16 +22,17 @@ const INFRA_COLORS = {
     phone: { color: '#10b981', label: 'الهاتف' }
 };
 
-const INFRA_ICONS: Record<string, string> = {
-    water_tank: '🏰',
-    pump: '⚙️',
-    valve: '🔧',
-    transformer: '⚡',
-    pole: '🗼',
-    generator: '🔋',
-    manhole: '🕳️',
-    exchange: '🏢',
-    cabinet: '📦'
+const INFRA_ICONS: Record<string, { icon: string, bg: string, color: string }> = {
+    water_tank: { icon: '🏰', bg: '#dbeafe', color: '#1d4ed8' },
+    pump: { icon: '⚙️', bg: '#dbeafe', color: '#1d4ed8' },
+    valve: { icon: '🔧', bg: '#dbeafe', color: '#1d4ed8' },
+    transformer: { icon: '⚡', bg: '#fef3c7', color: '#b45309' },
+    pole: { icon: '🗼', bg: '#fef3c7', color: '#b45309' },
+    generator: { icon: '🔋', bg: '#fef3c7', color: '#b45309' },
+    manhole: { icon: '🕳️', bg: '#ffedd5', color: '#9a3412' },
+    exchange: { icon: '🏢', bg: '#d1fae5', color: '#047857' },
+    cabinet: { icon: '📦', bg: '#d1fae5', color: '#047857' },
+    antenna: { icon: '📡', bg: '#d1fae5', color: '#047857' },
 };
 
 export default function Map() {
@@ -56,6 +57,7 @@ export default function Map() {
 
     const [filteredServices, setFilteredServices] = useState<any[]>([]);
     const [allServices, setAllServices] = useState<any[]>([]);
+    const [user, setUser] = useState<any>(null);
     const [timeOffset, setTimeOffset] = useState(0);
     const [selectedInfra, setSelectedInfra] = useState<any | null>(null);
     const [infraData, setInfraData] = useState<{ nodes: any[], lines: any[] }>({ nodes: [], lines: [] });
@@ -212,40 +214,33 @@ export default function Map() {
                                 }))
                             };
 
-                            mapInstance.addSource(`infra-${type}-nodes`, { type: 'geojson', data: nodesGeoJson });
+                            // Add custom markers for nodes
+                            points.forEach((p: any) => {
+                                const typeInfo = INFRA_ICONS[p.type] || { icon: '📍', bg: '#f3f4f6', color: '#374151' };
+                                const el = document.createElement('div');
+                                el.className = `infra-marker-${type} flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg transition-transform active:scale-90`;
+                                el.style.backgroundColor = typeInfo.bg;
+                                el.style.fontSize = '14px';
+                                el.innerHTML = typeInfo.icon;
+                                el.style.visibility = activeLayers[type as keyof typeof activeLayers] ? 'visible' : 'hidden';
 
-                            // Background circle for the icon
-                            mapInstance.addLayer({
-                                id: `infra-${type}-nodes-bg`,
-                                type: 'circle',
-                                source: `infra-${type}-nodes`,
-                                paint: {
-                                    'circle-radius': 12,
-                                    'circle-color': '#fff',
-                                    'circle-opacity': 0.8,
-                                    'circle-stroke-width': 1,
-                                    'circle-stroke-color': util.color
-                                },
-                                layout: { 'visibility': 'none' }
-                            });
+                                const marker = new maplibregl.Marker({ element: el })
+                                    .setLngLat([parseFloat(p.longitude), parseFloat(p.latitude)])
+                                    .addTo(mapInstance);
 
-                            // Symbol layer for emoji icon
-                            mapInstance.addLayer({
-                                id: `infra-${type}-nodes-layer`,
-                                type: 'symbol',
-                                source: `infra-${type}-nodes`,
-                                layout: {
-                                    'visibility': 'none',
-                                    'text-field': [
-                                        'match',
-                                        ['get', 'type'],
-                                        ...(Object.entries(INFRA_ICONS).flat() as string[]),
-                                        '📍'
-                                    ] as any,
-                                    'text-size': 14,
-                                    'text-allow-overlap': true,
-                                    'icon-allow-overlap': true
-                                }
+                                el.onclick = () => {
+                                    setSelectedInfra({
+                                        ...p,
+                                        lng: parseFloat(p.longitude),
+                                        lat: parseFloat(p.latitude),
+                                        sector: type
+                                    });
+                                };
+
+                                // Store marker reference for visibility toggling
+                                if (!(mapInstance as any)._infraMarkers) (mapInstance as any)._infraMarkers = {};
+                                if (!(mapInstance as any)._infraMarkers[type]) (mapInstance as any)._infraMarkers[type] = [];
+                                (mapInstance as any)._infraMarkers[type].push({ marker, element: el });
                             });
 
                             // Click Handler
@@ -534,6 +529,11 @@ export default function Map() {
                 setFilteredServices(services);
             })
             .catch(err => console.error("Failed to fetch directory", err));
+
+        // Fetch User Info for Admin check
+        api.get('/user')
+            .then(res => setUser(res.data))
+            .catch(() => setUser(null));
     }, []);
 
     const getCategoryEmoji = (category: string) => {
@@ -724,6 +724,14 @@ export default function Map() {
             if (map.current.getLayer(`infra-${layer}-nodes-bg`)) {
                 map.current.setLayoutProperty(`infra-${layer}-nodes-bg`, 'visibility', visibility);
             }
+
+            // Toggle custom HTML markers
+            const markers = (map.current as any)._infraMarkers?.[layer];
+            if (markers) {
+                markers.forEach((m: any) => {
+                    m.element.style.visibility = newState ? 'visible' : 'hidden';
+                });
+            }
         }
     };
 
@@ -789,6 +797,15 @@ export default function Map() {
                     >
                         <Crosshair size={24} />
                     </button>
+
+                    {user?.role === 'admin' && (
+                        <button
+                            onClick={() => navigate('/admin/map-editor')}
+                            className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-800"
+                        >
+                            <Edit3 size={20} />
+                        </button>
+                    )}
                 </div>
 
                 {/* Time Machine Slider */}
@@ -910,7 +927,7 @@ export default function Map() {
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                                    {INFRA_ICONS[selectedInfra.type] || '📍'}
+                                    {(INFRA_ICONS[selectedInfra.type] as any)?.icon || '📍'}
                                 </div>
                                 <div className="text-right">
                                     <h3 className="font-bold text-slate-900 dark:text-white">

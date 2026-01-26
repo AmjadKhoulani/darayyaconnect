@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Hash, Send, Users, MoreVertical, Plus, Image as ImageIcon, Smile } from 'lucide-react';
+import { ArrowRight, Hash, Send, Users, MoreVertical, Plus, Image as ImageIcon, Smile, Bell, BellOff, X, Settings } from 'lucide-react';
 import api from '../services/api';
+import { NotificationService } from '../services/notification';
 
 interface ChatMessage {
     id: number;
@@ -14,23 +15,27 @@ interface ChatMessage {
     reactions?: Record<string, number>; // Local only for now
 }
 
-const channels = [
-    { id: 'general', name: 'عام', description: 'دردشة عامة لكل أهل داريا' },
-    { id: 'help', name: 'مساعدة', description: 'طلب وتقديم المساعدة العاجلة' },
-    { id: 'news', name: 'أخبار-المدينة', description: 'آخر المستجدات لحظة بلحظة' },
-    { id: 'trading', name: 'بيع-وشراء', description: 'سوق محلي لتبادل السلع' },
-    { id: 'tech', name: 'تقنية', description: 'نقاشات حول التكنولوجيا والبرمجة' },
-];
+interface Channel {
+    id: number;
+    name: string;
+    slug: string;
+    description: string;
+    icon: string;
+    is_muted: boolean;
+}
 
 export default function HashtagChat() {
     const navigate = useNavigate();
+    const [channels, setChannels] = useState<Channel[]>([]);
     const [activeChannelId, setActiveChannelId] = useState('general');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [showChannels, setShowChannels] = useState(false);
+    const [showAddChannel, setShowAddChannel] = useState(false);
     const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [newChannelData, setNewChannelData] = useState({ name: '', description: '' });
 
     // Swipe & Touch states
     const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -41,11 +46,22 @@ export default function HashtagChat() {
     const longPressTimer = useRef<any>(null);
     const pollingInterval = useRef<any>(null);
 
+    const fetchChannels = async () => {
+        try {
+            const res = await api.get('/chat-channels');
+            setChannels(res.data.channels);
+        } catch (error) {
+            console.error('Failed to fetch channels', error);
+        }
+    };
+
     useEffect(() => {
         const userStr = localStorage.getItem('user');
         if (userStr) {
             setCurrentUser(JSON.parse(userStr));
         }
+        fetchChannels();
+        NotificationService.requestPermissions();
     }, []);
 
     const fetchMessages = useCallback(async () => {
@@ -140,10 +156,33 @@ export default function HashtagChat() {
         setSwipingCardId(null);
     };
 
-    const activeChannel = channels.find(c => c.id === activeChannelId);
+    const toggleMute = async (channelId: number) => {
+        try {
+            const res = await api.post(`/chat-channels/${channelId}/mute`);
+            setChannels(prev => prev.map(c => c.id === channelId ? { ...c, is_muted: res.data.is_muted } : c));
+        } catch (error) {
+            console.error('Failed to toggle mute', error);
+        }
+    };
+
+    const handleCreateChannel = async () => {
+        if (!newChannelData.name) return;
+        try {
+            const slug = newChannelData.name.toLowerCase().replace(/\s+/g, '-');
+            await api.post('/chat-channels', { ...newChannelData, slug });
+            setShowAddChannel(false);
+            setNewChannelData({ name: '', description: '' });
+            fetchChannels();
+        } catch (error) {
+            alert('Failed to create channel');
+        }
+    };
+
+    const activeChannel = channels.find(c => c.slug === activeChannelId);
+    const isAdmin = currentUser?.role === 'admin';
 
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden" dir="rtl">
+        <div className="flex h-[100dvh] bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden" dir="rtl">
             {/* Sidebar */}
             <aside className={`fixed inset-y-0 right-0 z-40 w-64 bg-slate-100 dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 transition-transform duration-300 transform ${showChannels ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 md:relative`}>
                 <div className="flex flex-col h-full">
@@ -153,19 +192,37 @@ export default function HashtagChat() {
                     </div>
                     <div className="flex-1 overflow-y-auto p-2 space-y-1">
                         {channels.map((channel) => (
-                            <button
-                                key={channel.id}
-                                onClick={() => { setActiveChannelId(channel.id); setShowChannels(false); }}
-                                className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all ${activeChannelId === channel.id
-                                    ? 'bg-indigo-600 text-white shadow-lg'
-                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'
-                                    }`}
-                            >
-                                <Hash size={18} className={activeChannelId === channel.id ? 'text-indigo-200' : 'text-slate-400'} />
-                                <span>{channel.name}</span>
-                            </button>
+                            <div key={channel.id} className="flex items-center gap-1 group/channel">
+                                <button
+                                    onClick={() => { setActiveChannelId(channel.slug); setShowChannels(false); }}
+                                    className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all ${activeChannelId === channel.slug
+                                        ? 'bg-indigo-600 text-white shadow-lg'
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'
+                                        }`}
+                                >
+                                    <Hash size={18} className={activeChannelId === channel.slug ? 'text-indigo-200' : 'text-slate-400'} />
+                                    <span>{channel.name}</span>
+                                </button>
+                                <button
+                                    onClick={() => toggleMute(channel.id)}
+                                    className={`p-2 rounded-lg transition-colors ${channel.is_muted ? 'text-slate-400' : 'text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'} active:scale-90`}
+                                >
+                                    {channel.is_muted ? <BellOff size={16} /> : <Bell size={16} />}
+                                </button>
+                            </div>
                         ))}
                     </div>
+                    {isAdmin && (
+                        <div className="p-2 border-t border-slate-200 dark:border-slate-700">
+                            <button
+                                onClick={() => setShowAddChannel(true)}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                            >
+                                <Plus size={14} />
+                                إضافة قناة جديدة
+                            </button>
+                        </div>
+                    )}
                     {currentUser && (
                         <div className="p-4 bg-slate-200 dark:bg-slate-900/50 flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-indigo-500 border-2 border-white dark:border-slate-700 flex items-center justify-center text-white font-bold">
@@ -181,9 +238,9 @@ export default function HashtagChat() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col h-full relative bg-slate-50 dark:bg-slate-900 w-full max-w-full">
+            <main className="flex-1 flex flex-col relative bg-slate-50 dark:bg-slate-900 overflow-hidden">
                 {/* Header */}
-                <header className="h-16 flex-none flex items-center justify-between px-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-30 shadow-sm">
+                <header className="flex-none h-16 flex items-center justify-between px-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-30 shadow-sm">
                     <div className="flex items-center gap-3">
                         <button onClick={() => navigate(-1)} className="w-10 h-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 md:hidden active:scale-95">
                             <ArrowRight size={20} />
@@ -300,6 +357,48 @@ export default function HashtagChat() {
 
             {/* Show Channels Overlay */}
             {showChannels && <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden animate-fade-in" onClick={() => setShowChannels(false)} />}
+
+            {/* Add Channel Modal */}
+            {showAddChannel && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-black text-slate-800 dark:text-white">إنشاء قناة جديدة</h3>
+                            <button onClick={() => setShowAddChannel(false)} className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-400">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">اسم القناة</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
+                                    placeholder="مثلاً: أخبار-الحي"
+                                    value={newChannelData.name}
+                                    onChange={(e) => setNewChannelData({ ...newChannelData, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">الوصف</label>
+                                <textarea
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium resize-none h-24"
+                                    placeholder="عن ماذا تتحدث هذه القناة؟"
+                                    value={newChannelData.description}
+                                    onChange={(e) => setNewChannelData({ ...newChannelData, description: e.target.value })}
+                                />
+                            </div>
+                            <button
+                                onClick={handleCreateChannel}
+                                disabled={!newChannelData.name}
+                                className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:bg-slate-400"
+                            >
+                                إنشاء القناة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

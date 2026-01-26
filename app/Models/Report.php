@@ -24,6 +24,7 @@ class Report extends Model
         'longitude',
         'status',
         'images',
+        'official_notes',
         'user_id',
         'department_id',
         'department_assigned',

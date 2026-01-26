@@ -12,7 +12,7 @@ export default function Volunteering() {
 
     const fetchData = async () => {
         try {
-            const res = await api.get('/api/volunteering');
+            const res = await api.get('/volunteering');
             setOpportunities(res.data);
         } catch (error) {
             console.error('Failed to fetch opportunities:', error);

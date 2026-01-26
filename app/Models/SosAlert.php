@@ -10,6 +10,8 @@ class SosAlert extends Model
         'user_id',
         'latitude',
         'longitude',
+        'current_latitude',
+        'current_longitude',
         'status',
         'message',
         'emergency_type',

@@ -39,16 +39,21 @@ export default function AdminLayout({
                         لوحة التحكم
                     </SidebarLink>
 
-                    <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
-                        الإدارة
-                    </p>
-                    <SidebarLink
-                        href={route('admin.users.index')}
-                        active={route().current('admin.users.*')}
-                        icon="👥"
-                    >
-                        المستخدمين
-                    </SidebarLink>
+                    {user.role === 'admin' && (
+                        <>
+                            <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
+                                الإدارة
+                            </p>
+                            <SidebarLink
+                                href={route('admin.users.index')}
+                                active={route().current('admin.users.*')}
+                                icon="👥"
+                            >
+                                المستخدمين
+                            </SidebarLink>
+                        </>
+                    )}
+
                     <SidebarLink
                         href={route('admin.reports.index')}
                         active={route().current('admin.reports.*')}
@@ -56,98 +61,113 @@ export default function AdminLayout({
                     >
                         البلاغات
                     </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.moderation.index')}
-                        active={route().current('admin.moderation.*')}
-                        icon="🛡️"
-                    >
-                        الرقابة والموافقة
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.volunteers.index')}
-                        active={route().current('admin.volunteers.*')}
-                        icon="🤝"
-                    >
-                        المتطوعين
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.infrastructure.water')}
-                        active={route().current('admin.infrastructure.water')}
-                        icon="💧"
-                    >
-                        إدارة المياه
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.departments.index')}
-                        active={route().current('admin.departments.*')}
-                        icon="🏢"
-                    >
-                        الجهات الحكومية
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.infrastructure.editor')}
-                        active={route().current('admin.infrastructure.editor')}
-                        icon="🏗️"
-                    >
-                        محرر الخريطة
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.service-states.index')}
-                        active={route().current('admin.service-states.index')}
-                        icon="⚡"
-                    >
-                        حالة الخدمات
-                    </SidebarLink>
+                    {user.role === 'admin' && (
+                        <>
+                            <SidebarLink
+                                href={route('admin.moderation.index')}
+                                active={route().current('admin.moderation.*')}
+                                icon="🛡️"
+                            >
+                                الرقابة والموافقة
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.volunteers.index')}
+                                active={route().current('admin.volunteers.*')}
+                                icon="🤝"
+                            >
+                                المتطوعين
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.infrastructure.water')}
+                                active={route().current('admin.infrastructure.water')}
+                                icon="💧"
+                            >
+                                إدارة المياه
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.departments.index')}
+                                active={route().current('admin.departments.*')}
+                                icon="🏢"
+                            >
+                                الجهات الحكومية
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.infrastructure.editor')}
+                                active={route().current('admin.infrastructure.editor')}
+                                icon="🏗️"
+                            >
+                                محرر الخريطة
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.service-states.index')}
+                                active={route().current('admin.service-states.index')}
+                                icon="⚡"
+                            >
+                                حالة الخدمات
+                            </SidebarLink>
+                        </>
+                    )}
 
-                    <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
-                        الخدمات المجتمعية
-                    </p>
-                    <SidebarLink
-                        href={route('admin.directory.index')}
-                        active={route().current('admin.directory.*')}
-                        icon="📒"
-                    >
-                        دليل المدينة
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.generators.index')}
-                        active={route().current('admin.generators.*')}
-                        icon="🔌"
-                    >
-                        الأمبيرات
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.initiatives.index')}
-                        active={route().current('admin.initiatives.*')}
-                        icon="🗳️"
-                    >
-                        المبادرات
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.lost-found.index')}
-                        active={route().current('admin.lost-found.*')}
-                        icon="🔍"
-                    >
-                        المفقودات
-                    </SidebarLink>
-                    <SidebarLink
-                        href={route('admin.books.index')}
-                        active={route().current('admin.books.*')}
-                        icon="📚"
-                    >
-                        المكتبة
-                    </SidebarLink>
+                    {user.role === 'admin' && (
+                        <>
+                            <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
+                                الخدمات المجتمعية
+                            </p>
+                            <SidebarLink
+                                href={route('admin.directory.index')}
+                                active={route().current('admin.directory.*')}
+                                icon="📒"
+                            >
+                                دليل المدينة
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.generators.index')}
+                                active={route().current('admin.generators.*')}
+                                icon="🔌"
+                            >
+                                الأمبيرات
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.initiatives.index')}
+                                active={route().current('admin.initiatives.*')}
+                                icon="🗳️"
+                            >
+                                المبادرات
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.lost-found.index')}
+                                active={route().current('admin.lost-found.*')}
+                                icon="🔍"
+                            >
+                                المفقودات
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.discussions.index')}
+                                active={route().current('admin.discussions.*')}
+                                icon="💬"
+                            >
+                                النقاشات
+                            </SidebarLink>
+                            <SidebarLink
+                                href={route('admin.books.index')}
+                                active={route().current('admin.books.*')}
+                                icon="📚"
+                            >
+                                المكتبة
+                            </SidebarLink>
 
-                    <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
-                        الذكاء الاصطناعي
-                    </p>
-                    <SidebarLink
-                        href={route('admin.ai-studies.index')}
-                        active={route().current('admin.ai-studies.*')}
-                        icon="🤖"
-                    >
-                        إدارة الدراسات
-                    </SidebarLink>
+                            <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
+                                الذكاء الاصطناعي
+                            </p>
+                            <SidebarLink
+                                href={route('admin.ai-studies.index')}
+                                active={route().current('admin.ai-studies.*')}
+                                icon="🤖"
+                            >
+                                إدارة الدراسات
+                            </SidebarLink>
+                        </>
+                    )}
 
                     <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
                         الإعدادات
@@ -169,7 +189,7 @@ export default function AdminLayout({
                         <div>
                             <div className="text-sm font-bold">{user?.name || 'مستخدم'}</div>
                             <div className="text-xs text-slate-500">
-                                مشرف النظام
+                                {user.role === 'admin' ? 'مشرف النظام' : `جهة حكومية: ${user.department?.name || ''}`}
                             </div>
                         </div>
                     </div>

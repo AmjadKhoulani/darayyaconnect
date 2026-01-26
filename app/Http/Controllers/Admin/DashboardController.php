@@ -85,6 +85,13 @@ class DashboardController extends Controller
             'avg_stall_days' => 0,
             'citizens_count' => $safeFetch(fn() => User::count(), 0),
             'active_alerts' => $safeFetch(fn() => ServiceAlert::active()->count(), 0),
+            'moderation_pending' => $safeFetch(fn() => 
+                \App\Models\Initiative::where('moderation_status', 'pending')->count() +
+                \App\Models\Discussion::where('moderation_status', 'pending')->count() +
+                \App\Models\Book::where('moderation_status', 'pending')->count() +
+                \App\Models\VolunteerOpportunity::where('moderation_status', 'pending')->count() +
+                \App\Models\LostFoundItem::where('moderation_status', 'pending')->count()
+            , 0),
         ];
 
         // Helper to sanitize UTF-8 recursively

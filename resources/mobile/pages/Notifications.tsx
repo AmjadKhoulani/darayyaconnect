@@ -67,10 +67,14 @@ export default function Notifications() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-1">
-                                        {notif.data?.title || 'إشعار جديد'}
+                                        {notif.data?.type === 'chat_message'
+                                            ? `رسالة جديدة في #${notif.data.channel_name}`
+                                            : (notif.data?.title || 'إشعار جديد')}
                                     </h3>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
-                                        {notif.data?.message || notif.data?.body || '...'}
+                                        {notif.data?.type === 'chat_message'
+                                            ? `${notif.data.sender_name}: ${notif.data.message_snippet}`
+                                            : (notif.data?.message || notif.data?.body || '...')}
                                     </p>
                                     <div className="flex items-center gap-1 text-[10px] text-slate-400">
                                         <Calendar size={10} />

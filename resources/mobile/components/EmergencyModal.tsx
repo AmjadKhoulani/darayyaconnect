@@ -46,12 +46,16 @@ export default function EmergencyModal({ isOpen, onClose }: Props) {
             setStatus('sending');
 
             // 2. Send to API
-            await api.post('/sos/trigger', {
+            const response = await api.post('/sos/trigger', {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
                 emergency_type: selectedType.id,
                 message: `SOS Triggered from mobile app. Type: ${selectedType.id}`
             });
+
+            if (response.data && response.data.alert) {
+                localStorage.setItem('active_sos_id', response.data.alert.id.toString());
+            }
 
             setStatus('success');
             HapticService.notificationSuccess();

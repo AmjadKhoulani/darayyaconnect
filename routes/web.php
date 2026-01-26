@@ -39,7 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin Panel
     Route::prefix('admin')
-        ->middleware(['auth', 'verified', 'role:admin'])
+        ->middleware(['auth', 'verified', 'role:admin,official'])
         ->name('admin.')
         ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/initiatives/{initiative}/reject', [\App\Http\Controllers\Admin\InitiativeController::class, 'reject'])->name('initiatives.reject');
         Route::resource('lost-found', \App\Http\Controllers\Admin\LostFoundController::class);
         Route::resource('books', \App\Http\Controllers\Admin\BookController::class);
+        Route::resource('discussions', \App\Http\Controllers\Admin\DiscussionController::class);
 
         // Infrastructure Controls (For Admins/Institutions)
         Route::post('/infrastructure/{id}/toggle', [InfrastructureManagerController::class, 'toggleStatus'])
@@ -110,7 +111,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('reports.heatmap');
         
         // Reports List
-        Route::resource('reports', \App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show']);
+        Route::resource('reports', \App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show', 'update']);
 
         // Moderation & Chat Filter
         Route::get('/moderation', [\App\Http\Controllers\Admin\ModerationController::class, 'index'])->name('moderation.index');

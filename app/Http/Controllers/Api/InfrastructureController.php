@@ -380,4 +380,75 @@ class InfrastructureController extends Controller
             'features' => $features
         ]);
     }
+
+    public function adminDashboardData()
+    {
+        $stats = [
+            'reports_pending' => \App\Models\Report::whereIn('status', ['received', 'pending'])->count(),
+            'citizens_count' => \App\Models\User::count(),
+            'active_alerts' => \App\Models\ServiceAlert::active()->count(),
+            'moderation_pending' => 
+                \App\Models\Initiative::where('moderation_status', 'pending')->count() +
+                \App\Models\Discussion::where('moderation_status', 'pending')->count() +
+                \App\Models\Book::where('moderation_status', 'pending')->count() +
+                \App\Models\VolunteerOpportunity::where('moderation_status', 'pending')->count() +
+                \App\Models\LostFoundItem::where('moderation_status', 'pending')->count(),
+        ];
+
+        return response()->json([
+            'stats' => $stats,
+            'total_reports' => \App\Models\Report::count(), // keep for legacy if needed
+        ]);
+    }
+
+    public function govDashboardData(Request $request)
+    {
+        $user = $request->user();
+        if (!$user->department_id) {
+            return response()->json(['message' => 'User not assigned to a department'], 403);
+        }
+
+        $reports = Report::where('department_id', $user->department_id)
+            ->with('user')
+            ->latest()
+            ->get();
+
+        $stats = [
+            'total' => $reports->count(),
+            'pending' => $reports->where('status', 'pending')->count(),
+            'in_progress' => $reports->where('status', 'in_progress')->count(),
+            'resolved' => $reports->where('status', 'resolved')->count(),
+        ];
+
+        return response()->json([
+            'reports' => $reports,
+            'stats' => $stats,
+            'department_name' => $user->department?->name
+        ]);
+    }
+
+    public function showReport($id)
+    {
+        $report = Report::with(['user', 'department', 'infrastructureNode', 'infrastructureLine'])->findOrFail($id);
+        return response()->json($report);
+    }
+
+    public function updateReport(Request $request, $id)
+    {
+        $report = Report::findOrFail($id);
+        
+        // Security check
+        if ($request->user()->role === 'official' && $report->department_id !== $request->user()->department_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:pending,in_progress,resolved',
+            'official_notes' => 'nullable|string',
+        ]);
+
+        $report->update($validated);
+
+        return response()->json(['message' => 'Report updated successfully', 'report' => $report]);
+    }
 }

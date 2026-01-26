@@ -28,8 +28,7 @@ export default function ServiceLog() {
             setUserLogs(res.data.userLogs || []);
             setCommunityStats(res.data.communityStats || { electricity: 0, water: '0%' });
         } catch (err) {
-            // Demo data
-            setCommunityStats({ electricity: 67, water: '45%' });
+            console.error('Failed to fetch stats', err);
         } finally {
             setLoading(false);
         }
@@ -39,7 +38,7 @@ export default function ServiceLog() {
         fetchData();
     }, [fetchData]);
 
-    const { isRefreshing, pullMoveY, handlers } = usePullToRefresh(fetchData);
+    const { isRefreshing, containerRef, indicatorRef, handlers } = usePullToRefresh(fetchData);
 
     const handleSubmit = async (type: 'electricity' | 'water') => {
         setSubmitting(true);
@@ -65,7 +64,7 @@ export default function ServiceLog() {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20" dir="rtl" {...handlers}>
-            <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
+            <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
                 {/* Header */}
                 <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-4 shadow-sm">
                     <div className="flex items-center justify-between">
@@ -141,8 +140,8 @@ export default function ServiceLog() {
                                                 <button
                                                     onClick={() => setFormData({ ...formData, status: 'available' })}
                                                     className={`py-3 rounded-xl text-sm font-bold border-2 transition ${formData.status === 'available'
-                                                            ? 'bg-emerald-500 text-white border-emerald-600'
-                                                            : 'bg-white border-slate-200 text-slate-600'
+                                                        ? 'bg-emerald-500 text-white border-emerald-600'
+                                                        : 'bg-white border-slate-200 text-slate-600'
                                                         }`}
                                                 >
                                                     إجت ✅
@@ -150,8 +149,8 @@ export default function ServiceLog() {
                                                 <button
                                                     onClick={() => setFormData({ ...formData, status: 'cut_off' })}
                                                     className={`py-3 rounded-xl text-sm font-bold border-2 transition ${formData.status === 'cut_off'
-                                                            ? 'bg-rose-500 text-white border-rose-600'
-                                                            : 'bg-white border-slate-200 text-slate-600'
+                                                        ? 'bg-rose-500 text-white border-rose-600'
+                                                        : 'bg-white border-slate-200 text-slate-600'
                                                         }`}
                                                 >
                                                     مقطوعة ❌
@@ -196,8 +195,8 @@ export default function ServiceLog() {
                                                                 key={q.key}
                                                                 onClick={() => setFormData({ ...formData, quality: q.key })}
                                                                 className={`py-2 rounded-lg text-[11px] font-bold border transition ${formData.quality === q.key
-                                                                        ? `bg-${q.color}-100 text-${q.color}-700 border-${q.color}-300`
-                                                                        : 'bg-white border-slate-200'
+                                                                    ? `bg-${q.color}-100 text-${q.color}-700 border-${q.color}-300`
+                                                                    : 'bg-white border-slate-200'
                                                                     }`}
                                                             >
                                                                 {q.label}
@@ -274,8 +273,8 @@ export default function ServiceLog() {
                                                 <button
                                                     onClick={() => setFormData({ ...formData, status: 'available' })}
                                                     className={`py-3 rounded-xl text-sm font-bold border-2 transition ${formData.status === 'available'
-                                                            ? 'bg-emerald-500 text-white border-emerald-600'
-                                                            : 'bg-white border-slate-200 text-slate-600'
+                                                        ? 'bg-emerald-500 text-white border-emerald-600'
+                                                        : 'bg-white border-slate-200 text-slate-600'
                                                         }`}
                                                 >
                                                     إجت ✅
@@ -283,8 +282,8 @@ export default function ServiceLog() {
                                                 <button
                                                     onClick={() => setFormData({ ...formData, status: 'cut_off' })}
                                                     className={`py-3 rounded-xl text-sm font-bold border-2 transition ${formData.status === 'cut_off'
-                                                            ? 'bg-rose-500 text-white border-rose-600'
-                                                            : 'bg-white border-slate-200 text-slate-600'
+                                                        ? 'bg-rose-500 text-white border-rose-600'
+                                                        : 'bg-white border-slate-200 text-slate-600'
                                                         }`}
                                                 >
                                                     مقطوعة ❌

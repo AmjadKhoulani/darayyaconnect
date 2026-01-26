@@ -23,7 +23,7 @@ export default function VolunteeringDetail() {
     const fetchData = async () => {
         if (!opp) setLoading(true);
         try {
-            const res = await api.get(`/api/volunteering/${id}`);
+            const res = await api.get(`/volunteering/${id}`);
             setOpp(res.data);
         } catch (error) {
             console.error(error);
@@ -47,7 +47,7 @@ export default function VolunteeringDetail() {
         // In a real app we might show a modal to confirm details first
         setApplying(true);
         try {
-            await api.post(`/api/volunteering/${id}/apply`, {
+            await api.post(`/volunteering/${id}/apply`, {
                 full_name: user?.name || 'Unknown',
                 phone_number: user?.phone || '0000000000', // Should be collected from user if missing
                 availability: 'Flexible' // Placeholder

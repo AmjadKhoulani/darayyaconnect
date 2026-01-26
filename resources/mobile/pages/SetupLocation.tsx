@@ -95,7 +95,7 @@ export default function SetupLocation() {
             // Re-using the logic from App.tsx but ensuring we save residency too
             // We might need a specific endpoint to update profile fully or just use user/location
             // For now, let's assume we can update user profile via a PUT request or similar
-            // But wait, the task plan said "Submit to /api/user/location".
+            // But wait, the task plan said "Submit to /user/location".
             // Let's use the updateLocation endpoint but we might need to send is_resident too.
             // The UserController updateLocation only takes lat/long in standard Laravel usually?
             // Actually, AuthController has updateLocation maybe?

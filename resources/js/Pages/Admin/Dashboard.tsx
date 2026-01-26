@@ -68,6 +68,16 @@ export default function Dashboard({
 
     const [selectedSos, setSelectedSos] = useState<any>(null);
 
+    // Auto-refresh SOS alerts every 10 seconds if any are active
+    useState(() => {
+        if (active_sos_alerts && active_sos_alerts.length > 0) {
+            const interval = setInterval(() => {
+                router.reload({ only: ['active_sos_alerts'] });
+            }, 10000);
+            return () => clearInterval(interval);
+        }
+    });
+
     return (
         <AdminLayout
             user={auth?.user || { name: 'Admin', role: 'admin' }}
@@ -190,13 +200,24 @@ export default function Dashboard({
                                         </div>
                                     )}
 
-                                    <div className="flex gap-4 pt-4 border-t border-slate-100">
+                                    <div className="flex flex-col gap-3 pt-4 border-t border-slate-100">
                                         <a
                                             href={`https://www.google.com/maps?q=${selectedSos.latitude},${selectedSos.longitude}`}
                                             target="_blank"
-                                            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-4 text-sm font-black text-white transition hover:bg-emerald-700 shadow-lg shadow-emerald-100"
+                                            className="flex items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
                                         >
-                                            📍 تتبع الموقع الدقيق
+                                            📍 موقع طلب الاستغاثة (الأصلي)
+                                        </a>
+                                        <a
+                                            href={`https://www.google.com/maps?q=${selectedSos.current_latitude || selectedSos.latitude},${selectedSos.current_longitude || selectedSos.longitude}`}
+                                            target="_blank"
+                                            className="relative flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-4 text-sm font-black text-white transition hover:bg-emerald-700 shadow-lg shadow-emerald-100 overflow-hidden"
+                                        >
+                                            <span className="absolute top-2 right-2 flex h-2 w-2">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                            </span>
+                                            ⚡ تتبع الموقع الحالي (مباشر)
                                         </a>
                                     </div>
 

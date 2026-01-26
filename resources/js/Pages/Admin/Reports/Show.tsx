@@ -1,5 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef } from 'react';
@@ -7,6 +7,22 @@ import { useEffect, useRef } from 'react';
 export default function Show({ auth, report }: any) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
+
+    const { data, setData, put, processing } = useForm({
+        status: report.status || 'pending',
+        official_notes: report.official_notes || '',
+    });
+
+    const handleUpdate = (e: React.FormEvent) => {
+        e.preventDefault();
+        put(route('admin.reports.update', report.id));
+    };
+
+    const handleDelete = () => {
+        if (confirm('هل أنت متأكد من حذف هذا البلاغ؟')) {
+            // Implement delete if needed
+        }
+    };
 
     useEffect(() => {
         if (!mapContainer.current || !report.latitude || !report.longitude) return;
@@ -133,14 +149,61 @@ export default function Show({ auth, report }: any) {
                                 </div>
                             </div>
 
-                            {/* Action Buttons (Mock) */}
-                            <div className="pt-4 border-t border-slate-100 flex gap-3">
-                                <button className="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition">
-                                    تغيير الحالة
-                                </button>
-                                <button className="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold hover:bg-red-100 transition border border-red-100">
-                                    حذف البلاغ
-                                </button>
+                            {report.official_notes && (
+                                <div>
+                                    <label className="text-xs font-bold text-emerald-600 block mb-2">الملاحظات المسجلة</label>
+                                    <p className="text-slate-700 font-bold bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                                        {report.official_notes}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Action Buttons & Management */}
+                            <div className="pt-6 border-t border-slate-100">
+                                <form onSubmit={handleUpdate} className="space-y-4">
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-400 block mb-2">تحديث الحالة</label>
+                                        <select
+                                            value={data.status}
+                                            onChange={e => setData('status', e.target.value)}
+                                            className="w-full rounded-xl border-slate-200 font-bold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500"
+                                        >
+                                            <option value="pending">قيد الانتظار</option>
+                                            <option value="in_progress">جاري المعالجة</option>
+                                            <option value="resolved">تم الحل</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-400 block mb-2">ملاحظات الجهة المسؤولة</label>
+                                        <textarea
+                                            value={data.official_notes}
+                                            onChange={e => setData('official_notes', e.target.value)}
+                                            rows={3}
+                                            placeholder="أضف ملاحظات التنفيذ هنا..."
+                                            className="w-full rounded-xl border-slate-200 font-bold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500"
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition disabled:opacity-50"
+                                        >
+                                            {processing ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+                                        </button>
+                                        {auth.user.role === 'admin' && (
+                                            <button
+                                                type="button"
+                                                onClick={handleDelete}
+                                                className="bg-red-50 text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-100 transition border border-red-100"
+                                            >
+                                                حذف
+                                            </button>
+                                        )}
+                                    </div>
+                                </form>
                             </div>
                         </div>
 

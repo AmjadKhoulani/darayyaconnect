@@ -48,11 +48,25 @@ import AddBook from './pages/AddBook';
 import AwarenessCampaigns from './pages/AwarenessCampaigns';
 import CampaignDetail from './pages/CampaignDetail';
 import ArticleView from './pages/ArticleView';
+import AdminDashboard from './pages/AdminDashboard';
+import GovDashboard from './pages/GovDashboard';
+import ReportDetail from './pages/ReportDetail';
+import ServiceManagement from './pages/ServiceManagement';
+import ModerationCenter from './pages/ModerationCenter';
+import AdminUserList from './pages/AdminUserList';
+import VolunteerManagement from './pages/VolunteerManagement';
+import DepartmentManagement from './pages/DepartmentManagement';
+import AiStudyManagement from './pages/AiStudyManagement';
+import GeneratorManagement from './pages/GeneratorManagement';
+import DirectoryManagement from './pages/DirectoryManagement';
+import MapEditor from './pages/MapEditor';
+import BroadcastAlert from './pages/BroadcastAlert';
 import Settings from './pages/Settings';
 import EditProfile from './pages/EditProfile';
 import About from './pages/About';
 import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
+import { NotificationService } from './services/notification';
 import OfflineIndicator from './components/OfflineIndicator';
 import ScrollToTop from './components/ScrollToTop';
 import { ThemeProvider } from './components/ThemeContext';
@@ -63,7 +77,7 @@ import './styles/global.css';
 function AppContent() {
     const location = useLocation();
     const navigate = useNavigate();
-    const hideNavRoutes = ['/login', '/register', '/splash', '/skills', '/add-report', '/study', '/privacy-policy-mobile'];
+    const hideNavRoutes = ['/login', '/register', '/splash', '/skills', '/add-report', '/study', '/privacy-policy-mobile', '/hashtag'];
     const showBottomNav = !hideNavRoutes.some(path => location.pathname.includes(path));
     const showFab = showBottomNav;
 
@@ -108,17 +122,74 @@ function AppContent() {
                     }, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
+
+                    // Live SOS Tracking
+                    const activeSosId = localStorage.getItem('active_sos_id');
+                    if (activeSosId) {
+                        try {
+                            const sosStatus = await api.get(`/api/sos/status/${activeSosId}`);
+                            if (sosStatus.data.status === 'active') {
+                                await api.post(`/api/sos/track/${activeSosId}`, {
+                                    latitude: position.coords.latitude,
+                                    longitude: position.coords.longitude,
+                                });
+                            } else {
+                                localStorage.removeItem('active_sos_id');
+                            }
+                        } catch (e) {
+                            console.error('SOS Tracking Error:', e);
+                            localStorage.removeItem('active_sos_id');
+                        }
+                    }
                 }
             } catch (error) {
                 // Silent fail on tracking
             }
         };
 
+        // Notification Polling
+        const checkNotifications = async () => {
+            if (!token) return;
+            try {
+                const res = await api.get('/notifications/unread-count');
+                const lastCount = parseInt(localStorage.getItem('last_notif_count') || '0');
+                const newCount = res.data.count;
+
+                if (newCount > lastCount) {
+                    const latestRes = await api.get('/notifications');
+                    const latest = latestRes.data.data[0]; // Paginated result
+                    if (latest && !latest.read_at) {
+                        const notifData = latest.data;
+                        if (notifData.type === 'chat_message') {
+                            await NotificationService.schedule(
+                                `رسالة جديدة في #${notifData.channel_name}`,
+                                `${notifData.sender_name}: ${notifData.message_snippet}`
+                            );
+                        } else {
+                            await NotificationService.schedule(latest.data.title || 'تنبيه جديد', latest.data.body || 'لديك إشعار جديد');
+                        }
+                    }
+                }
+                localStorage.setItem('last_notif_count', newCount.toString());
+            } catch (e) {
+                console.error('Notification polling error', e);
+            }
+        };
+
         if (token) {
             trackLocation();
+            checkNotifications();
             // We can keep the interval if we want background-ish tracking, but ensure it's silent
-            const interval = setInterval(trackLocation, 300000);
-            return () => clearInterval(interval);
+            const activeSosId = localStorage.getItem('active_sos_id');
+            const intervalTime = activeSosId ? 30000 : 300000; // 30s during SOS, 5m regular
+            const interval = setInterval(trackLocation, intervalTime);
+
+            const notifInterval = setInterval(checkNotifications, 10000); // Check every 10s
+
+            return () => {
+                clearInterval(interval);
+                clearInterval(notifInterval);
+            };
         }
 
         // Global Sync Logic (moved inside here to respect token but it was general before)
@@ -186,6 +257,19 @@ function AppContent() {
                 <Route path="/awareness/campaign/:campaignId/:articleId" element={<ArticleView />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/profile/edit" element={<EditProfile />} />
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/services" element={<ServiceManagement />} />
+                <Route path="/admin/moderation" element={<ModerationCenter />} />
+                <Route path="/admin/users" element={<AdminUserList />} />
+                <Route path="/admin/volunteers" element={<VolunteerManagement />} />
+                <Route path="/admin/departments" element={<DepartmentManagement />} />
+                <Route path="/admin/ai-studies" element={<AiStudyManagement />} />
+                <Route path="/admin/generators" element={<GeneratorManagement />} />
+                <Route path="/admin/directory" element={<DirectoryManagement />} />
+                <Route path="/admin/map-editor" element={<MapEditor />} />
+                <Route path="/admin/broadcast" element={<BroadcastAlert />} />
+                <Route path="/gov-dashboard" element={<GovDashboard />} />
+                <Route path="/report-detail/:id" element={<ReportDetail />} />
                 <Route path="/about" element={<About />} />
             </Routes>
 
