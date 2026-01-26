@@ -141,8 +141,8 @@ class InfrastructureController extends Controller
         $queryLines = InfrastructureLine::query();
         $queryNodes = InfrastructureNode::query();
 
-        // If not admin, only show published items
-        if (!$request->user() || $request->user()->role !== 'admin') {
+        // If not admin or official, only show published items
+        if (!$request->user() || !in_array($request->user()->role, ['admin', 'official'])) {
             $queryLines->where('is_published', true);
             $queryNodes->where('is_published', true);
         }
@@ -184,7 +184,7 @@ class InfrastructureController extends Controller
                 'meta' => 'nullable|array'
             ]);
 
-            $validated['is_published'] = false; // New items are drafts
+            $validated['is_published'] = true; // Auto-publish from Map Editor
             
             $line = InfrastructureLine::create($validated);
             \Log::info('Line created', ['id' => $line->id]);
@@ -209,7 +209,7 @@ class InfrastructureController extends Controller
                 'meta' => 'nullable|array'
             ]);
 
-            $validated['is_published'] = false; // New items are drafts
+            $validated['is_published'] = true; // Auto-publish from Map Editor
 
             $node = InfrastructureNode::create($validated);
             \Log::info('Node created', ['id' => $node->id]);
