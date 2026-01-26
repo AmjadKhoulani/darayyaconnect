@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Users, Crosshair, RefreshCw } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import api from '../../services/api';
+import api from '../services/api';
 
 export default function AdminUserMap() {
     const navigate = useNavigate();
