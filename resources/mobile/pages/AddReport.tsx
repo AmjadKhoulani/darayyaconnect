@@ -278,7 +278,12 @@ export default function AddReport() {
                     if (Array.isArray(firstError)) {
                         errorText += `\n(${firstError[0]})`;
                     }
+                    errorText += `\nFull Validation: ${JSON.stringify(validationErrors)}`;
                 }
+
+                // Debug Info
+                errorText += `\nStatus: ${err.response?.status}`;
+                errorText += `\nData: ${JSON.stringify(err.response?.data)}`;
 
                 alert(errorText);
             }
