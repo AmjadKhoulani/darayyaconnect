@@ -777,220 +777,221 @@ export default function Map() {
                         </div>
 
                     </div>
+                </div>
 
-                    {/* FABs - Adjusted Bottom Position for Nav Bar */}
-                    <div className="absolute bottom-32 left-4 z-10 flex flex-col gap-3 pointer-events-auto pb-safe">
+                {/* FABs - Adjusted Bottom Position for Nav Bar */}
+                <div className="absolute bottom-32 left-4 z-10 flex flex-col gap-3 pointer-events-auto pb-safe">
+                    <button
+                        onClick={() => setShowLayersMenu(true)}
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border ${showLayersMenu ? 'bg-emerald-600 dark:bg-emerald-500 text-white border-emerald-700 dark:border-emerald-400' : 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border-slate-100 dark:border-slate-700'}`}
+                    >
+                        <Layers size={22} />
+                    </button>
+                    <button
+                        onClick={locateUser}
+                        className="w-12 h-12 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-100 dark:border-slate-700"
+                    >
+                        <Crosshair size={24} />
+                    </button>
+
+                    {user?.role === 'admin' && (
                         <button
-                            onClick={() => setShowLayersMenu(true)}
-                            className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border ${showLayersMenu ? 'bg-emerald-600 dark:bg-emerald-500 text-white border-emerald-700 dark:border-emerald-400' : 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border-slate-100 dark:border-slate-700'}`}
+                            onClick={() => navigate('/admin/map-editor')}
+                            className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-800"
                         >
-                            <Layers size={22} />
+                            <Edit3 size={20} />
                         </button>
-                        <button
-                            onClick={locateUser}
-                            className="w-12 h-12 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-100 dark:border-slate-700"
-                        >
-                            <Crosshair size={24} />
-                        </button>
+                    )}
+                </div>
 
-                        {user?.role === 'admin' && (
-                            <button
-                                onClick={() => navigate('/admin/map-editor')}
-                                className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-800"
-                            >
-                                <Edit3 size={20} />
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Time Machine Slider */}
-                    <div className="absolute bottom-10 left-6 right-6 z-40">
-                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-xl">
-                            <div className="flex justify-between items-center mb-2 px-1">
-                                <h4 className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                    <Clock size={12} className="text-emerald-500" />
-                                    آلة الزمن
-                                </h4>
-                                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
-                                    {selectedDateLabel}
-                                </span>
-                            </div>
-                            <input
-                                type="range"
-                                min="-7"
-                                max="0"
-                                step="1"
-                                value={timeOffset}
-                                onChange={(e) => setTimeOffset(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 mb-1"
-                            />
-                            <div className="flex justify-between px-1">
-                                <span className="text-[9px] text-slate-400 font-bold">قبل أسبوع</span>
-                                <span className="text-[9px] text-slate-400 font-bold">اليوم</span>
-                            </div>
+                {/* Time Machine Slider */}
+                <div className="absolute bottom-10 left-6 right-6 z-40">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-xl">
+                        <div className="flex justify-between items-center mb-2 px-1">
+                            <h4 className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                <Clock size={12} className="text-emerald-500" />
+                                آلة الزمن
+                            </h4>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
+                                {selectedDateLabel}
+                            </span>
+                        </div>
+                        <input
+                            type="range"
+                            min="-7"
+                            max="0"
+                            step="1"
+                            value={timeOffset}
+                            onChange={(e) => setTimeOffset(parseInt(e.target.value))}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 mb-1"
+                        />
+                        <div className="flex justify-between px-1">
+                            <span className="text-[9px] text-slate-400 font-bold">قبل أسبوع</span>
+                            <span className="text-[9px] text-slate-400 font-bold">اليوم</span>
                         </div>
                     </div>
                 </div>
-
-                {/* Layers Bottom Sheet - Improved Z-Index */}
-                {showLayersMenu && (
-                    <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLayersMenu(false)}>
-                        <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] p-6 animate-in slide-in-from-bottom duration-300 mb-safe" onClick={e => e.stopPropagation()}>
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                    <span className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                                        <Layers size={18} />
-                                    </span>
-                                    طبقات الخريطة
-                                </h3>
-                                <button onClick={() => setShowLayersMenu(false)} className="bg-slate-50 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar overscroll-contain pb-10 touch-pan-y" onTouchStart={(e) => e.stopPropagation()}>
-                                <div className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-                                    <label className="flex items-center gap-3 cursor-pointer">
-                                        <div className="relative">
-                                            <input type="checkbox" checked={activeLayers.heatmap} onChange={() => toggleLayer('heatmap')} className="peer sr-only" />
-                                            <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
-                                        </div>
-                                        <div className="flex-1 text-right">
-                                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">الكثافة السكانية</span>
-                                            <span className="text-[10px] text-slate-500 dark:text-slate-400">خريطة حرارية لتوزيع السكان</span>
-                                        </div>
-                                        <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-blue-300 to-red-500 shadow-sm"></div>
-                                    </label>
-                                </div>
-
-                                <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right uppercase tracking-wider">البنية التحتية</div>
-
-                                {[
-                                    { id: 'water', label: 'شبكة المياه', color: 'bg-blue-500', sub: 'خطوط التوزيع الرئيسية' },
-                                    { id: 'electricity', label: 'الكهرباء', color: 'bg-yellow-500', sub: 'المجرورات الرئيسية' },
-                                    { id: 'sewage', label: 'الصرف الصحي', color: 'bg-orange-800', sub: 'المجرورات الرئيسية' },
-                                    { id: 'phone', label: 'الهاتف', color: 'bg-emerald-500', sub: 'كابلات الاتصالات' },
-                                ].map(layer => (
-                                    <label key={layer.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-800/50">
-                                        <div className="relative item-center flex">
-                                            <input
-                                                type="checkbox"
-                                                checked={activeLayers[layer.id as keyof typeof activeLayers]}
-                                                onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
-                                                className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 transition-all"
-                                            />
-                                        </div>
-                                        <div className="flex-1 text-right">
-                                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
-                                            <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
-                                        </div>
-                                        <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
-                                    </label>
-                                ))}
-
-                                <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right uppercase tracking-wider">حالة الشبكة (مجتمعي)</div>
-
-                                {[
-                                    { id: 'crowdElectricity', label: 'كهرباء (بلاغات)', color: 'bg-yellow-500', sub: 'حالة الكهرباء الآن' },
-                                    { id: 'crowdWater', label: 'مياه (بلاغات)', color: 'bg-blue-500', sub: 'حالة المياه الآن' },
-                                    { id: 'publicReports', label: 'بلاغات المواطنين', color: 'bg-rose-500', sub: 'أماكن المشاكل الحالية' },
-                                ].map(layer => (
-                                    <label key={layer.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-800/50">
-                                        <div className="relative item-center flex">
-                                            <input
-                                                type="checkbox"
-                                                checked={activeLayers[layer.id as keyof typeof activeLayers]}
-                                                onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
-                                                className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 transition-all"
-                                            />
-                                        </div>
-                                        <div className="flex-1 text-right">
-                                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
-                                            <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
-                                        </div>
-                                        <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-                {/* Infra Detail Modal */}
-                {selectedInfra && (
-                    <div className="absolute inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm px-4 pb-20" onClick={() => setSelectedInfra(null)}>
-                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                                        {(INFRA_ICONS[selectedInfra.type] as any)?.icon || '📍'}
-                                    </div>
-                                    <div className="text-right">
-                                        <h3 className="font-bold text-slate-900 dark:text-white">
-                                            {selectedInfra.type === 'water_tank' ? 'خزان مياه' :
-                                                selectedInfra.type === 'transformer' ? 'محولة كهرباء' :
-                                                    selectedInfra.type === 'pole' ? 'عامود إنارة' :
-                                                        selectedInfra.type === 'pump' ? 'مضخة مياه' :
-                                                            selectedInfra.type === 'valve' ? 'صمام' :
-                                                                selectedInfra.type === 'generator' ? 'مولدة' :
-                                                                    selectedInfra.type === 'manhole' ? 'ريكار' :
-                                                                        selectedInfra.type}
-                                        </h3>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            {INFRA_COLORS[selectedInfra.sector as keyof typeof INFRA_COLORS]?.label} | {selectedInfra.serial_number || `ID: ${selectedInfra.id}`}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setSelectedInfra(null)} className="p-2 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-400">
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-3 mb-6">
-                                <div className="flex justify-between items-center text-sm p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                                    <span className="text-slate-500">الحالة</span>
-                                    <span className="font-bold text-emerald-600">يعمل بشكل جيد</span>
-                                </div>
-                                {selectedInfra.meta && (
-                                    <div className="text-sm p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-right">
-                                        <span className="text-slate-500 block mb-1">معلومات إضافية</span>
-                                        <span className="text-slate-700 dark:text-slate-300">
-                                            {typeof selectedInfra.meta === 'string' ? selectedInfra.meta : JSON.stringify(selectedInfra.meta)}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={() => setSelectedInfra(null)}
-                                    className="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm transition-active active:scale-95"
-                                >
-                                    إغلاق
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        navigate('/add-report', {
-                                            state: {
-                                                prefill: {
-                                                    type: 'infrastructure',
-                                                    title: `عطل في ${(INFRA_ICONS[selectedInfra.type] || '')} ${selectedInfra.type}`,
-                                                    latitude: selectedInfra.lat,
-                                                    longitude: selectedInfra.lng,
-                                                    infrastructure_node_id: selectedInfra.sector !== 'line' ? selectedInfra.id : null,
-                                                    infrastructure_line_id: selectedInfra.sector === 'line' ? selectedInfra.id : null,
-                                                    serial_number: selectedInfra.serial_number
-                                                }
-                                            }
-                                        });
-                                    }}
-                                    className="py-3 px-4 rounded-2xl bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 transition-active active:scale-95"
-                                >
-                                    تبليغ عن عطل
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
-            );
+
+            {/* Layers Bottom Sheet - Improved Z-Index */}
+            {showLayersMenu && (
+                <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLayersMenu(false)}>
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] p-6 animate-in slide-in-from-bottom duration-300 mb-safe" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <span className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                    <Layers size={18} />
+                                </span>
+                                طبقات الخريطة
+                            </h3>
+                            <button onClick={() => setShowLayersMenu(false)} className="bg-slate-50 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar overscroll-contain pb-10 touch-pan-y" onTouchStart={(e) => e.stopPropagation()}>
+                            <div className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <div className="relative">
+                                        <input type="checkbox" checked={activeLayers.heatmap} onChange={() => toggleLayer('heatmap')} className="peer sr-only" />
+                                        <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
+                                    </div>
+                                    <div className="flex-1 text-right">
+                                        <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">الكثافة السكانية</span>
+                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">خريطة حرارية لتوزيع السكان</span>
+                                    </div>
+                                    <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-blue-300 to-red-500 shadow-sm"></div>
+                                </label>
+                            </div>
+
+                            <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right uppercase tracking-wider">البنية التحتية</div>
+
+                            {[
+                                { id: 'water', label: 'شبكة المياه', color: 'bg-blue-500', sub: 'خطوط التوزيع الرئيسية' },
+                                { id: 'electricity', label: 'الكهرباء', color: 'bg-yellow-500', sub: 'المجرورات الرئيسية' },
+                                { id: 'sewage', label: 'الصرف الصحي', color: 'bg-orange-800', sub: 'المجرورات الرئيسية' },
+                                { id: 'phone', label: 'الهاتف', color: 'bg-emerald-500', sub: 'كابلات الاتصالات' },
+                            ].map(layer => (
+                                <label key={layer.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-800/50">
+                                    <div className="relative item-center flex">
+                                        <input
+                                            type="checkbox"
+                                            checked={activeLayers[layer.id as keyof typeof activeLayers]}
+                                            onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
+                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 transition-all"
+                                        />
+                                    </div>
+                                    <div className="flex-1 text-right">
+                                        <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
+                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
+                                    </div>
+                                    <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
+                                </label>
+                            ))}
+
+                            <div className="text-xs font-bold text-slate-400 dark:text-slate-600 mt-4 mb-2 pr-2 text-right uppercase tracking-wider">حالة الشبكة (مجتمعي)</div>
+
+                            {[
+                                { id: 'crowdElectricity', label: 'كهرباء (بلاغات)', color: 'bg-yellow-500', sub: 'حالة الكهرباء الآن' },
+                                { id: 'crowdWater', label: 'مياه (بلاغات)', color: 'bg-blue-500', sub: 'حالة المياه الآن' },
+                                { id: 'publicReports', label: 'بلاغات المواطنين', color: 'bg-rose-500', sub: 'أماكن المشاكل الحالية' },
+                            ].map(layer => (
+                                <label key={layer.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-800/50">
+                                    <div className="relative item-center flex">
+                                        <input
+                                            type="checkbox"
+                                            checked={activeLayers[layer.id as keyof typeof activeLayers]}
+                                            onChange={() => toggleLayer(layer.id as keyof typeof activeLayers)}
+                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 transition-all"
+                                        />
+                                    </div>
+                                    <div className="flex-1 text-right">
+                                        <span className="font-bold text-slate-700 dark:text-slate-200 text-sm block">{layer.label}</span>
+                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">{layer.sub}</span>
+                                    </div>
+                                    <div className={`w-2 h-8 rounded-full ${layer.color} opacity-80 shadow-sm`}></div>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Infra Detail Modal */}
+            {selectedInfra && (
+                <div className="absolute inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm px-4 pb-20" onClick={() => setSelectedInfra(null)}>
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                                    {(INFRA_ICONS[selectedInfra.type] as any)?.icon || '📍'}
+                                </div>
+                                <div className="text-right">
+                                    <h3 className="font-bold text-slate-900 dark:text-white">
+                                        {selectedInfra.type === 'water_tank' ? 'خزان مياه' :
+                                            selectedInfra.type === 'transformer' ? 'محولة كهرباء' :
+                                                selectedInfra.type === 'pole' ? 'عامود إنارة' :
+                                                    selectedInfra.type === 'pump' ? 'مضخة مياه' :
+                                                        selectedInfra.type === 'valve' ? 'صمام' :
+                                                            selectedInfra.type === 'generator' ? 'مولدة' :
+                                                                selectedInfra.type === 'manhole' ? 'ريكار' :
+                                                                    selectedInfra.type}
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        {INFRA_COLORS[selectedInfra.sector as keyof typeof INFRA_COLORS]?.label} | {selectedInfra.serial_number || `ID: ${selectedInfra.id}`}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={() => setSelectedInfra(null)} className="p-2 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-400">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <div className="flex justify-between items-center text-sm p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                <span className="text-slate-500">الحالة</span>
+                                <span className="font-bold text-emerald-600">يعمل بشكل جيد</span>
+                            </div>
+                            {selectedInfra.meta && (
+                                <div className="text-sm p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-right">
+                                    <span className="text-slate-500 block mb-1">معلومات إضافية</span>
+                                    <span className="text-slate-700 dark:text-slate-300">
+                                        {typeof selectedInfra.meta === 'string' ? selectedInfra.meta : JSON.stringify(selectedInfra.meta)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={() => setSelectedInfra(null)}
+                                className="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm transition-active active:scale-95"
+                            >
+                                إغلاق
+                            </button>
+                            <button
+                                onClick={() => {
+                                    navigate('/add-report', {
+                                        state: {
+                                            prefill: {
+                                                type: 'infrastructure',
+                                                title: `عطل في ${(INFRA_ICONS[selectedInfra.type] || '')} ${selectedInfra.type}`,
+                                                latitude: selectedInfra.lat,
+                                                longitude: selectedInfra.lng,
+                                                infrastructure_node_id: selectedInfra.sector !== 'line' ? selectedInfra.id : null,
+                                                infrastructure_line_id: selectedInfra.sector === 'line' ? selectedInfra.id : null,
+                                                serial_number: selectedInfra.serial_number
+                                            }
+                                        }
+                                    });
+                                }}
+                                className="py-3 px-4 rounded-2xl bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 transition-active active:scale-95"
+                            >
+                                تبليغ عن عطل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
