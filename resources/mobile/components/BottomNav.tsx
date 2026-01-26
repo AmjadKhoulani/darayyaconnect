@@ -40,7 +40,7 @@ export default function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-4 left-4 right-4 h-[72px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[24px] flex justify-around items-center z-[100] shadow-premium safe-bottom transition-all duration-300 overflow-hidden">
+        <div className="fixed bottom-4 left-4 right-4 h-[72px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[24px] flex justify-around items-center z-[100] shadow-premium transition-all duration-300 overflow-hidden">
             {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus, PackageSearch, AlertCircle, CheckCircle2, Calendar, MapPin } from 'lucide-react';
+import { Search, Filter, Plus, PackageSearch, AlertCircle, CheckCircle2, Calendar, MapPin, ArrowRight } from 'lucide-react';
 import api from '../services/api';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { usePullToRefresh, PullToRefreshContainer } from '../hooks/usePullToRefresh';
@@ -47,7 +47,7 @@ export default function LostFound() {
         }
     }, [activeTab, filters]);
 
-    const { isRefreshing, pullMoveY, handlers } = usePullToRefresh(fetchItems);
+    const { isRefreshing, containerRef, indicatorRef, handlers } = usePullToRefresh(fetchItems);
 
     useEffect(() => {
         fetchItems();
@@ -67,14 +67,22 @@ export default function LostFound() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
-            <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
+            <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
                 {/* Header */}
                 <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm transition-colors duration-300">
                     <div className="px-5 py-4">
                         <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100">المفقودات 🔍</h1>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">ساعد في إعادة الأغراض لأصحابها</p>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                    <ArrowRight size={20} />
+                                </button>
+                                <div>
+                                    <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100">المفقودات 🔍</h1>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">ساعد في إعادة الأغراض لأصحابها</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => navigate('/lost-found/add')}

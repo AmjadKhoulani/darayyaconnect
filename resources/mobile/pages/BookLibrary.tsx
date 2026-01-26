@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Plus, Search } from 'lucide-react';
+import { BookOpen, Plus, Search, ArrowRight } from 'lucide-react';
 import api from '../services/api';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { usePullToRefresh, PullToRefreshContainer } from '../hooks/usePullToRefresh';
@@ -39,7 +39,7 @@ export default function BookLibrary() {
         }
     }, [filters]);
 
-    const { isRefreshing, pullMoveY, handlers } = usePullToRefresh(fetchBooks);
+    const { isRefreshing, containerRef, indicatorRef, handlers } = usePullToRefresh(fetchBooks);
 
     useEffect(() => {
         fetchBooks();
@@ -47,17 +47,25 @@ export default function BookLibrary() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
-            <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
+            <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
                 <header className="bg-gradient-to-br from-teal-600 to-emerald-700 text-white sticky top-0 z-30 shadow-xl overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
                     <div className="px-5 py-6 relative z-10">
                         <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <h1 className="text-2xl font-black flex items-center gap-2">
-                                    <BookOpen size={28} />
-                                    مكتبة تبادل الكتب
-                                </h1>
-                                <p className="text-xs text-teal-100 font-medium mt-1">شارك واستعير مجاناً</p>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 hover:bg-white/30 transition-all text-white"
+                                >
+                                    <ArrowRight size={24} />
+                                </button>
+                                <div>
+                                    <h1 className="text-2xl font-black flex items-center gap-2">
+                                        <BookOpen size={28} />
+                                        مكتبة تبادل الكتب
+                                    </h1>
+                                    <p className="text-xs text-teal-100 font-medium mt-1">شارك واستعير مجاناً</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => navigate('/books/add')}
