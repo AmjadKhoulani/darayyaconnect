@@ -47,7 +47,7 @@ export default function HomeHeader({ user, unreadCount }: HomeHeaderProps) {
                             className="w-10 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 active:scale-95 transition-all border border-slate-200 dark:border-slate-800 shadow-card"
                             title="بلاغاتي"
                         >
-                            <User size={20} />
+                            <FileText size={20} />
                         </button>
 
                         <button
