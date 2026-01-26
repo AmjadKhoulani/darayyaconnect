@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\InfrastructureNode;
+use App\Models\InfrastructureLine;
+use App\Models\InfrastructurePoint;
 
 class Report extends Model
 {
