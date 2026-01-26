@@ -173,8 +173,10 @@ export default function HashtagChat() {
             setShowAddChannel(false);
             setNewChannelData({ name: '', description: '' });
             fetchChannels();
-        } catch (error) {
-            alert('Failed to create channel');
+        } catch (error: any) {
+            console.error(error);
+            const msg = error.response?.data?.message || 'Failed to create channel';
+            alert(`خطأ: ${msg}`);
         }
     };
 
