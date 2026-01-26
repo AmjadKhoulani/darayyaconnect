@@ -75,15 +75,14 @@ export default function AdminUserMap() {
             const isRecent = (now - lastActive) < 2 * 60 * 1000;
 
             el.innerHTML = `
-            el.innerHTML = `
-                < div class="relative group" >
+                <div class="relative group">
                     <div class="w-8 h-8 rounded-full border-2 border-white shadow-lg overflow-hidden ${isRecent ? 'ring-2 ring-emerald-500 ring-offset-1' : 'bg-slate-200'}">
                         ${user.profile_photo_url ?
-                            `<img src="${user.profile_photo_url}" class="w-full h-full object-cover" />` :
-                            `<div class="w-full h-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">${user.name.charAt(0)}</div>`
-                        }
+                    `<img src="${user.profile_photo_url}" class="w-full h-full object-cover" />` :
+                    `<div class="w-full h-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">${user.name.charAt(0)}</div>`
+                }
                     </div>
-                    ${ isRecent ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border border-white animate-pulse"></div>' : '' }
+                    ${isRecent ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border border-white animate-pulse"></div>' : ''}
             <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-[10px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                 ${user.name} <br /> <span class="text-slate-400">منذ ${Math.round((now - lastActive) / 60000)} دقيقة</span>
             </div>
