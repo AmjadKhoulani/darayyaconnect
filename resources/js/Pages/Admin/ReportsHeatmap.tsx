@@ -60,34 +60,61 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                 data: data,
             });
 
+            // Helper to add emoji as icon
+            const addEmojiIcon = (id: string, emoji: string) => {
+                if (map.current?.hasImage(id)) return;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.font = '48px serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(emoji, 32, 32);
+                    const imageData = ctx.getImageData(0, 0, 64, 64);
+                    map.current?.addImage(id, imageData);
+                }
+            };
+
+            // Add all necessary icons
+            addEmojiIcon('icon-water', '💧');
+            addEmojiIcon('icon-electricity', '⚡');
+            addEmojiIcon('icon-lighting', '💡');
+            addEmojiIcon('icon-trash', '🗑️');
+            addEmojiIcon('icon-road', '🚧');
+            addEmojiIcon('icon-comm', '📡');
+            addEmojiIcon('icon-alert', '⚠️');
+
             map.current.addLayer({
                 id: 'reports-icons',
                 type: 'symbol',
                 source: 'reports',
                 minzoom: 12, // Show icons when zoomed in
                 layout: {
-                    'text-field': [
+                    'icon-image': [
                         'match',
                         ['get', 'category'],
-                        'water', '💧',
-                        'electricity', '⚡',
-                        'lighting', '💡',
-                        'sanitation', '🗑️',
-                        'trash', '🗑️',
-                        'road', '🚧',
-                        'infrastructure', '🚧',
-                        'communication', '📡',
-                        '⚠️' // Default
+                        'water', 'icon-water',
+                        'electricity', 'icon-electricity',
+                        'lighting', 'icon-lighting',
+                        'sanitation', 'icon-trash',
+                        'trash', 'icon-trash',
+                        'road', 'icon-road',
+                        'infrastructure', 'icon-road',
+                        'communication', 'icon-comm',
+                        'icon-alert' // Default
                     ],
-                    'text-size': [
+                    'icon-size': [
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        12, 10,
-                        15, 25,
-                        18, 40
+                        12, 0.5,
+                        15, 0.8,
+                        18, 1.2
                     ],
-                    'text-allow-overlap': false
+                    'icon-allow-overlap': false
                 }
             });
 
