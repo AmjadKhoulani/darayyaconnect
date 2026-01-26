@@ -50,28 +50,14 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
 
     const fetchHeatmapData = async () => {
         try {
-            const response = await axios.get('/api/reports/heatmap');
-            const data = response.data; // Array of [lat, lng, intensity]
+            const response = await axios.get('/api/analytics/reports/heatmap');
+            const data = response.data; // GeoJSON FeatureCollection
 
             if (!map.current) return;
 
-            const features = data.map((point: number[]) => ({
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [point[1], point[0]], // GeoJSON is [lng, lat]
-                },
-                properties: {
-                    intensity: point[2],
-                },
-            }));
-
             map.current.addSource('reports', {
                 type: 'geojson',
-                data: {
-                    type: 'FeatureCollection',
-                    features: features,
-                },
+                data: data,
             });
 
             map.current.addLayer({
@@ -84,7 +70,7 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                     'heatmap-weight': [
                         'interpolate',
                         ['linear'],
-                        ['get', 'intensity'],
+                        ['get', 'weight'],
                         0,
                         0,
                         1,
@@ -159,7 +145,7 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                         [
                             'interpolate',
                             ['linear'],
-                            ['get', 'intensity'],
+                            ['get', 'weight'],
                             1,
                             1,
                             6,
@@ -169,7 +155,7 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                         [
                             'interpolate',
                             ['linear'],
-                            ['get', 'intensity'],
+                            ['get', 'weight'],
                             1,
                             5,
                             6,
@@ -179,7 +165,7 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                     'circle-color': [
                         'interpolate',
                         ['linear'],
-                        ['get', 'intensity'],
+                        ['get', 'weight'],
                         0,
                         'rgba(33,102,172,0)',
                         0.2,
