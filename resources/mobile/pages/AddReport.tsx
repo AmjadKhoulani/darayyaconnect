@@ -244,7 +244,23 @@ export default function AddReport() {
                 navigate('/', { replace: true });
             } else {
                 console.error('Report submission error:', err);
-                alert('حدث خطأ أثناء إرسال البلاغ. يرجى المحاولة مرة أخرى.');
+                const serverMsg = err.response?.data?.message;
+                const validationErrors = err.response?.data?.errors;
+
+                let errorText = 'حدث خطأ أثناء إرسال البلاغ. ';
+
+                if (serverMsg) {
+                    errorText += `\nالسبب: ${serverMsg}`;
+                }
+
+                if (validationErrors) {
+                    const firstError = Object.values(validationErrors)[0];
+                    if (Array.isArray(firstError)) {
+                        errorText += `\n(${firstError[0]})`;
+                    }
+                }
+
+                alert(errorText);
             }
         } finally {
             setIsDirty(false);

@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Geolocation } from '@capacitor/geolocation';
+import { PermissionService } from './services/PermissionService';
 import Home from './pages/Home';
 import Studies from './pages/Studies';
 import StudyDetail from './pages/StudyDetail';
@@ -64,6 +65,12 @@ function AppContent() {
     const showBottomNav = !hideNavRoutes.some(path => location.pathname.includes(path));
     const showFab = showBottomNav;
 
+    // Effect 1: Check permissions ONCE on mount
+    useEffect(() => {
+        PermissionService.checkAndRequestLocationPermission();
+    }, []);
+
+    // Effect 2: Track location on navigation (only if allowed)
     useEffect(() => {
         // Auth Guard
         const publicRoutes = ['/splash', '/login', '/register'];
@@ -77,8 +84,6 @@ function AppContent() {
             if (userStr) {
                 try {
                     const user = JSON.parse(userStr);
-                    // If user hasn't completed setup (verified location OR skipped), redirect
-                    // Note: location_verified_at is set even if they skip
                     if (!user.location_verified_at) {
                         navigate('/setup-location');
                     }
@@ -90,13 +95,11 @@ function AppContent() {
 
         const trackLocation = async () => {
             try {
-                const permissions = await Geolocation.checkPermissions();
-                if (permissions.location !== 'granted') {
-                    await Geolocation.requestPermissions();
-                }
-                const position = await Geolocation.getCurrentPosition();
+                // SILENT CHECK: Do not request permissions here!
+                const hasPermission = await PermissionService.hasLocationPermission();
 
-                if (token) {
+                if (hasPermission && token) {
+                    const position = await Geolocation.getCurrentPosition();
                     await api.post('/api/user/location', {
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude,
@@ -105,17 +108,18 @@ function AppContent() {
                     });
                 }
             } catch (error) {
-                console.error('Location tracking failed', error);
+                // Silent fail on tracking
             }
         };
 
         if (token) {
             trackLocation();
-            const interval = setInterval(trackLocation, 300000); // 5 mins
+            // We can keep the interval if we want background-ish tracking, but ensure it's silent
+            const interval = setInterval(trackLocation, 300000);
             return () => clearInterval(interval);
         }
 
-        // Global Sync Logic
+        // Global Sync Logic (moved inside here to respect token but it was general before)
         const handleSync = async () => {
             if (navigator.onLine) {
                 await import('./services/OfflineService').then(m => m.OfflineService.syncReports());
@@ -123,7 +127,7 @@ function AppContent() {
         };
 
         window.addEventListener('online', handleSync);
-        handleSync(); // Initial check
+        handleSync();
 
         return () => window.removeEventListener('online', handleSync);
     }, [location.pathname]);

@@ -40,7 +40,7 @@ export default function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/98 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/60 flex justify-around items-center z-[100] shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)] safe-bottom transition-all duration-300">
+        <div className="fixed bottom-4 left-4 right-4 h-[72px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[24px] flex justify-around items-center z-[100] shadow-premium safe-bottom transition-all duration-300 overflow-hidden">
             {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -48,20 +48,20 @@ export default function BottomNav() {
                         key={item.path}
                         to={item.path}
                         onClick={() => HapticService.lightImpact()}
-                        className={`flex flex-col items-center justify-center w-full h-16 transition-all relative ${isActive ? 'text-emerald-600' : 'text-slate-400'
+                        className={`flex-1 flex flex-col items-center justify-center h-full relative transition-all duration-300 group ${isActive ? 'text-emerald-600 dark:text-emerald-500' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                             }`}
                     >
-                        <span className={`mb-1 transition-transform ${isActive ? 'scale-110 -translate-y-0.5' : ''}`}>
+                        {isActive && (
+                            <div className="absolute top-0 w-12 h-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-b-full shadow-[0_4px_12px_rgba(52,211,153,0.4)] animate-in fade-in zoom-in-75 duration-300"></div>
+                        )}
+
+                        <div className={`transition-all duration-300 transform ${isActive ? 'scale-110 -translate-y-1' : 'group-active:scale-95'}`}>
                             {item.icon}
-                        </span>
-                        <span className={`text-[10px] font-bold ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                        </div>
+
+                        <span className={`text-[10px] font-bold mt-1 transition-all duration-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 hidden'}`}>
                             {item.label}
                         </span>
-
-                        {/* Active Indicator */}
-                        {isActive && (
-                            <div className="absolute bottom-0 w-12 h-1 bg-emerald-600 rounded-t-full shadow-[0_-2px_6px_rgba(5,150,105,0.3)]" />
-                        )}
                     </NavLink>
                 );
             })}

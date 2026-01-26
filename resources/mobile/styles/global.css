@@ -1,6 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
     font-family: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --primary-main: #10b981;
+    /* Default Emerald */
+    --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --glass-border: rgba(255, 255, 255, 0.5);
+}
+
+.dark {
+    --bg-main: #0f172a;
+    --card-bg: #1e293b;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    background-color: var(--bg-main);
+    color: #0f172a;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+}
+
+.dark body {
+    color: #f8fafc;
+}
+
+/* Premium Shadows - Soft & Deep */
+.shadow-premium {
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 15px -3px rgba(0, 0, 0, 0.05),
+        0 0 0 1px rgba(0, 0, 0, 0.02);
+    /* Subtle border ring */
+}
+
+.dark .shadow-premium {
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.3),
+        0 10px 15px -3px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.shadow-glow {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* Glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+}
+
+.dark .glass {
+    background: rgba(30, 41, 59, 0.8);
+}
+
+/* Modern Card */
+.premium-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.dark .premium-card {
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Custom Animations */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.animate-float-slow {
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes slide-up {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-up-fade {
+    animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hide Scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Cities: Skylines Style Status Bubbles */
+@keyframes city-bubble-float {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-8px) scale(1.05);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes bubble-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.status-bubble {
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 50% 50% 50% 0;
+    /* Tear drop shape */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.15);
+    border: 2px solid #fff;
+    animation: city-bubble-float 3s ease-in-out infinite;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: bottom left;
+}
+
+.dark .status-bubble {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(71, 85, 105, 0.5);
+    box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4);
+}
+
+.status-bubble:hover {
+    transform: scale(1.15) rotate(5deg);
+    z-index: 100;
+}
+
+.status-bubble.critical {
+    border-color: #ef4444;
+    color: #ef4444;
+    animation: city-bubble-float 3s ease-in-out infinite, bubble-pulse 2s infinite;
+}
+
+.status-bubble.warning {
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.status-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #fff;
+}
+
+.dark .status-bubble::after {
+    border-top-color: rgba(30, 41, 59, 0.95);
 }
 
 :root {
