@@ -40,6 +40,7 @@ export default function InfrastructureIndex({ auth, points }: any) {
     const [activeLayers, setActiveLayers] = useState<string[]>([
         'points',
         'crowd-status',
+        'citizen-reports',
     ]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -252,6 +253,46 @@ export default function InfrastructureIndex({ auth, points }: any) {
                     });
                 });
 
+            // 4. Public Reports Layer
+            fetch('/api/infrastructure/public-reports')
+                .then((res) => res.json())
+                .then((data) => {
+                    if (!map.current) return;
+                    map.current.addSource('public-reports-source', {
+                        type: 'geojson',
+                        data: data,
+                    });
+
+                    map.current.addLayer({
+                        id: 'public-reports-layer',
+                        type: 'symbol',
+                        source: 'public-reports-source',
+                        layout: {
+                            'visibility': activeLayers.includes('citizen-reports') ? 'visible' : 'none',
+                            'text-field': [
+                                'match',
+                                ['get', 'category'],
+                                'water', '💧',
+                                'electricity', '⚡',
+                                'lighting', '💡',
+                                'sanitation', '🗑️',
+                                'trash', '🗑️',
+                                'road', '🚧',
+                                'communication', '📡',
+                                '⚠️'
+                            ],
+                            'text-size': 20,
+                            'text-allow-overlap': true,
+                        }
+                    });
+
+                    map.current.on('click', 'public-reports-layer', (e) => {
+                        const feature = e.features![0];
+                        const props = feature.properties as any;
+                        alert(`بلاغ: ${props.category}\nالحالة: ${props.status}\nالوصف: ${props.title}`);
+                    });
+                });
+
             // 3. Points of Interest (Markers/Icons)
             points.forEach((point: Point) => {
                 const el = document.createElement('div');
@@ -294,6 +335,14 @@ export default function InfrastructureIndex({ auth, points }: any) {
                 'status-zones-fill',
                 'visibility',
                 activeLayers.includes('crowd-status') ? 'visible' : 'none',
+            );
+        }
+
+        if (map.current!.getLayer('public-reports-layer')) {
+            map.current!.setLayoutProperty(
+                'public-reports-layer',
+                'visibility',
+                activeLayers.includes('citizen-reports') ? 'visible' : 'none',
             );
         }
     }, [activeLayers]);
@@ -523,6 +572,18 @@ export default function InfrastructureIndex({ auth, points }: any) {
                                         }
                                         icon={<ShieldAlert size={16} />}
                                         label="خريطة التوافر (مجتمعي)"
+                                        color="rose"
+                                    />
+
+                                    <LayerItem
+                                        active={activeLayers.includes(
+                                            'citizen-reports',
+                                        )}
+                                        onClick={() =>
+                                            toggleLayer('citizen-reports')
+                                        }
+                                        icon={<ShieldAlert size={16} />}
+                                        label="بلاغات المواطنين"
                                         color="rose"
                                     />
                                 </div>

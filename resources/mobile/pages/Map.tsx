@@ -50,7 +50,8 @@ export default function Map() {
         sewage: false,
         phone: false,
         crowdElectricity: true,
-        crowdWater: true
+        crowdWater: true,
+        publicReports: true
     });
 
     const [filteredServices, setFilteredServices] = useState<any[]>([]);
@@ -337,6 +338,64 @@ export default function Map() {
                     }
                 });
             });
+
+            // 4. Public Reports Layer
+            map.current.addSource('public-reports-source', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            const addEmojiIcon = (id: string, emoji: string) => {
+                if (map.current?.hasImage(id)) return;
+                const canvas = document.createElement('canvas');
+                canvas.width = 64; canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.font = '48px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(emoji, 32, 32);
+                    const imageData = ctx.getImageData(0, 0, 64, 64);
+                    map.current?.addImage(id, imageData);
+                }
+            };
+
+            addEmojiIcon('report-water', '💧');
+            addEmojiIcon('report-electricity', '⚡');
+            addEmojiIcon('report-lighting', '💡');
+            addEmojiIcon('report-sanitation', '🗑️');
+            addEmojiIcon('report-trash', '🗑️');
+            addEmojiIcon('report-road', '🚧');
+            addEmojiIcon('report-comm', '📡');
+            addEmojiIcon('report-other', '⚠️');
+
+            map.current.addLayer({
+                id: 'public-reports-layer',
+                type: 'symbol',
+                source: 'public-reports-source',
+                layout: {
+                    'visibility': activeLayers.publicReports ? 'visible' : 'none',
+                    'icon-image': [
+                        'match',
+                        ['get', 'category'],
+                        'water', 'report-water',
+                        'electricity', 'report-electricity',
+                        'lighting', 'report-lighting',
+                        'sanitation', 'report-sanitation',
+                        'trash', 'report-trash',
+                        'road', 'report-road',
+                        'communication', 'report-comm',
+                        'report-other'
+                    ],
+                    'icon-size': 0.6,
+                    'icon-allow-overlap': true
+                }
+            });
+
+            map.current.on('click', 'public-reports-layer', (e) => {
+                if (e.features && e.features[0]) {
+                    const props = e.features[0].properties;
+                    alert(`بلاغ: ${props.category}\nالحالة: ${props.status}\nالوصف: ${props.title}`);
+                }
+            });
         });
 
         // Removed default NavigationControl as per user request (buttons behind bar) and mobile preference (pinch zoom).
@@ -415,9 +474,24 @@ export default function Map() {
             }
         });
 
-        // Update status bubbles visibility/presence
         updateStatusBubbles(infraData, crowdData);
+
+        if (map.current?.getLayer('public-reports-layer')) {
+            map.current.setLayoutProperty('public-reports-layer', 'visibility', activeLayers.publicReports ? 'visible' : 'none');
+        }
     }, [activeLayers, infraData, crowdData]);
+
+    // Fetch Public Reports
+    useEffect(() => {
+        if (!map.current) return;
+        api.get('/infrastructure/public-reports')
+            .then(res => {
+                const source = map.current?.getSource('public-reports-source');
+                if (source) {
+                    (source as any).setData(res.data);
+                }
+            });
+    }, [activeLayers.publicReports]);
 
 
     // Auto-locate on mount
@@ -795,6 +869,7 @@ export default function Map() {
                             {[
                                 { id: 'crowdElectricity', label: 'كهرباء (بلاغات)', color: 'bg-yellow-500', sub: 'حالة الكهرباء الآن' },
                                 { id: 'crowdWater', label: 'مياه (بلاغات)', color: 'bg-blue-500', sub: 'حالة المياه الآن' },
+                                { id: 'publicReports', label: 'بلاغات المواطنين', color: 'bg-rose-500', sub: 'أماكن المشاكل الحالية' },
                             ].map(layer => (
                                 <label key={layer.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 active:bg-slate-50 dark:active:bg-slate-800 transition cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-800/50">
                                     <div className="relative item-center flex">

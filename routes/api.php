@@ -44,6 +44,7 @@ Route::middleware('throttle:60,1')->group(function () {
 // Infrastructure & Reporting (Urban Platform)
 Route::get('/infrastructure/vector-layers', [\App\Http\Controllers\Api\VectorLayerController::class, 'index']); // RESTORED
 Route::get('/infrastructure/layers', [InfrastructureController::class, 'getLayerPoints']);
+Route::get('/infrastructure/public-reports', [InfrastructureController::class, 'publicReports']);
 Route::post('/infrastructure/reports', [InfrastructureController::class, 'storeReport']);
 
 // Portal

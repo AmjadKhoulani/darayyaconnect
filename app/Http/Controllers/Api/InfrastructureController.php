@@ -346,4 +346,38 @@ class InfrastructureController extends Controller
 
         return response()->json($reports);
     }
+
+    public function publicReports()
+    {
+        $reports = Report::whereIn('status', ['pending', 'in_progress'])
+            ->select('id', 'category', 'description', 'latitude', 'longitude', 'status', 'created_at')
+            ->latest()
+            ->limit(500)
+            ->get();
+
+        $features = $reports->map(function ($report) {
+            return [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [
+                        (float) $report->longitude,
+                        (float) $report->latitude,
+                    ]
+                ],
+                'properties' => [
+                    'id' => $report->id,
+                    'category' => $report->category,
+                    'status' => $report->status,
+                    'title' => substr($report->description, 0, 50) . (strlen($report->description) > 50 ? '...' : ''),
+                    'created_at' => $report->created_at ? $report->created_at->diffForHumans() : '',
+                ]
+            ];
+        });
+
+        return response()->json([
+            'type' => 'FeatureCollection',
+            'features' => $features
+        ]);
+    }
 }
