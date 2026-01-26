@@ -47,5 +47,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Darayya Connect needs your location to show relevant services, track SOS alerts, and verify your residency.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Darayya Connect needs your location to help you find nearby services and report infrastructure issues.</string>
 </dict>
 </plist>
