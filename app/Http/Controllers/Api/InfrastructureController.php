@@ -64,7 +64,9 @@ class InfrastructureController extends Controller
             \Log::error('Report submission error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'حدث خطأ أثناء حفظ البلاغ',
-                'error' => $e->getMessage() // Dev only, remove in prod
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
             ], 500);
         }
     }
@@ -84,6 +86,12 @@ class InfrastructureController extends Controller
         $res = $map[$type] ?? ['category' => 'other', 'dept' => 'municipality'];
         
         $dept = \App\Models\Department::where('slug', $res['dept'])->first();
+        // Fallback: If department not found, don't crash, just leave it null.
+        // Also ensure category is valid enum
+        $validCategories = ['electricity', 'water', 'sanitation', 'safety', 'communication', 'infrastructure', 'other'];
+        if (!in_array($res['category'], $validCategories)) {
+            $res['category'] = 'other';
+        }
         $res['dept_id'] = $dept ? $dept->id : null;
         
         return $res;
