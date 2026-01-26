@@ -19,7 +19,7 @@ export default function StatusWidget({ serviceStates }: StatusWidgetProps) {
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 text-sm">
                             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                            الوضع الحالي للخدمات
+                            حالة الخدمات في حيّك
                         </h3>
                         <span className="text-[10px] text-slate-400 flex items-center gap-1 group-hover:text-rose-500 transition-colors">
                             التفاصيل <span className="text-sm">👈</span>

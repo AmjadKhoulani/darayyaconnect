@@ -28,30 +28,20 @@ export default function MenuGrid({ serviceStates }: MenuGridProps) {
                 </Link>
             </div>
 
-            {/* Service Status - Full Width */}
+            {/* City Reports - Replaces old Status Link */}
             <div className="col-span-2">
-                <Link to="/services-status" className="bg-white dark:bg-slate-800 p-4 rounded-[24px] border border-slate-100 dark:border-slate-700/50 shadow-sm active:scale-[0.98] transition-all flex items-center justify-between">
+                <Link to="/city-reports" className="bg-white dark:bg-slate-800 p-4 rounded-[24px] border border-slate-100 dark:border-slate-700/50 shadow-sm active:scale-[0.98] transition-all flex items-center justify-between group">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-xl flex items-center justify-center group-hover:bg-rose-100 transition-colors">
                             <AlertTriangle size={20} />
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">حالة الخدمات</h4>
-                            <div className="flex gap-1.5 flex-wrap">
-                                {serviceStates.length > 0 ? (
-                                    serviceStates.map((service) => (
-                                        <span
-                                            key={service.id}
-                                            className={`text-[9px] bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md border border-slate-100 dark:border-slate-600`}
-                                        >
-                                            {service.name}
-                                        </span>
-                                    ))
-                                ) : (
-                                    <span className="text-[9px] text-slate-400">جاري التحميل...</span>
-                                )}
-                            </div>
+                        <div className="flex flex-col gap-0.5">
+                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">بلاغات المدينة</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400">استعرض المشاكل والبلاغات في داريا</p>
                         </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-rose-100 dark:group-hover:bg-rose-900/40 group-hover:text-rose-500 transition-colors">
+                        <span className="text-xl rotate-180">➜</span>
                     </div>
                 </Link>
             </div>

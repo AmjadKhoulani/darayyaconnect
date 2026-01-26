@@ -66,6 +66,7 @@ import LiveTrackUser from './pages/LiveTrackUser';
 import Settings from './pages/Settings';
 import EditProfile from './pages/EditProfile';
 import About from './pages/About';
+import CityReports from './pages/CityReports';
 import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
 import { NotificationService } from './services/notification';
@@ -274,6 +275,7 @@ function AppContent() {
                 <Route path="/live-track" element={<LiveTrackUser />} />
                 <Route path="/gov-dashboard" element={<GovDashboard />} />
                 <Route path="/report-detail/:id" element={<ReportDetail />} />
+                <Route path="/city-reports" element={<CityReports />} />
                 <Route path="/about" element={<About />} />
             </Routes>
 
