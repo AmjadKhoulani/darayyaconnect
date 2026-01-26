@@ -17,7 +17,7 @@ class ReportController extends Controller
         $validated = $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
-            'category' => 'required|in:electricity,water,sanitation,safety',
+            'category' => 'required|in:electricity,water,sanitation,safety,communication,infrastructure,other',
             'severity' => 'required|integer|min:1|max:5',
             'description' => 'required|string|max:1000',
             'location_id' => 'nullable|exists:locations,id',
