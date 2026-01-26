@@ -25,7 +25,40 @@ class InfrastructureController extends Controller
         ]);
 
         try {
-            $routing = $this->mapTypeToCategoryAndDept($validated['type']);
+            // Auto-Assign Department based on Routing Rules
+            // 1. Check for specific infrastructure type rule
+            $deptId = null;
+            if ($validated['infrastructure_type'] ?? null) {
+                $rule = \Illuminate\Support\Facades\DB::table('department_routing_rules')
+                    ->where('infrastructure_type', $validated['infrastructure_type'])
+                    ->first();
+                if ($rule) $deptId = $rule->department_id;
+            }
+
+            // 2. Fallback to category rule
+            if (!$deptId) {
+                 // Use mapping for category
+                 $category = match ($validated['type']) {
+                    'water_leak', 'no_water', 'dirty_water' => 'water',
+                    'power_outage', 'wire_spark', 'transformer_issue' => 'electricity',
+                    'sewage_overflow', 'blocked_drain' => 'sanitation',
+                    'pothole', 'road_damage' => 'road',
+                    'garbage_pile', 'missed_pickup' => 'trash',
+                    'street_light_out' => 'lighting',
+                    'internet_down', 'phone_line_cut' => 'communication',
+                    default => 'other',
+                };
+
+                $rule = \Illuminate\Support\Facades\DB::table('department_routing_rules')
+                    ->where('category', $category)
+                    ->first();
+                if ($rule) $deptId = $rule->department_id;
+            }
+
+            $routing = [
+                'category' => $category ?? 'other',
+                'dept_id' => $deptId
+            ];
             
             $reportData = [
                 'user_id' => auth('sanctum')->user()?->id,

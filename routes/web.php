@@ -173,6 +173,9 @@ Route::middleware('auth')->group(function () {
     // Pharmacy Routes
     Route::post('/pharmacy/duty/toggle', [\App\Http\Controllers\PharmacyController::class, 'toggleDuty'])->name('pharmacy.duty.toggle');
 
+    Route::get('/departments', [App\Http\Controllers\Admin\DepartmentController::class, 'index'])->name('departments.index');
+    Route::post('/departments/rule', [App\Http\Controllers\Admin\DepartmentController::class, 'updateRule'])->name('departments.update-rule');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

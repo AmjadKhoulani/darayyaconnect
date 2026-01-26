@@ -1,5 +1,6 @@
 import { User } from '@/types';
 import { Link } from '@inertiajs/react';
+import { LayoutDashboard, Users, FileText, Settings, Menu, X, Map as MapIcon, Layers, Building2 } from 'lucide-react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
 export default function AdminLayout({
@@ -75,6 +76,13 @@ export default function AdminLayout({
                         icon="💧"
                     >
                         إدارة المياه
+                    </SidebarLink>
+                    <SidebarLink
+                        href={route('admin.departments.index')}
+                        active={route().current('admin.departments.*')}
+                        icon="🏢"
+                    >
+                        الجهات الحكومية
                     </SidebarLink>
                     <SidebarLink
                         href={route('admin.infrastructure.editor')}
@@ -213,10 +221,10 @@ function SidebarLink({
     return (
         <Link
             href={href}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition-all ${active
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                }`}
+            className={`flex items - center gap - 3 rounded - lg px - 3 py - 2.5 text - sm font - bold transition - all ${active
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                } `}
         >
             <span className="text-lg">{icon}</span>
             <span>{children}</span>

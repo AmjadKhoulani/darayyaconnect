@@ -93,6 +93,12 @@ export default function Show({ auth, report }: any) {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
+                                    <label className="text-xs font-bold text-slate-400 block mb-2">الجهة المسؤولة</label>
+                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${report.department ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}`}>
+                                        {report.department ? report.department.name : 'غير محدد'}
+                                    </span>
+                                </div>
+                                <div>
                                     <label className="text-xs font-bold text-slate-400 block mb-2">الفئة</label>
                                     <span className="font-bold text-slate-700">
                                         {{
