@@ -109,6 +109,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Reports List
         Route::resource('reports', \App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show']);
 
+        // Government Entities / Departments
+        Route::get('/departments', [App\Http\Controllers\Admin\DepartmentController::class, 'index'])->name('departments.index');
+        Route::post('/departments/rule', [App\Http\Controllers\Admin\DepartmentController::class, 'updateRule'])->name('departments.update-rule');
+
         // Moderation & Chat Filter
         Route::get('/moderation', [\App\Http\Controllers\Admin\ModerationController::class, 'index'])->name('moderation.index');
         Route::post('/moderation/approve/{type}/{id}', [\App\Http\Controllers\Admin\ModerationController::class, 'approve'])->name('moderation.approve');
@@ -172,9 +176,6 @@ Route::middleware('auth')->group(function () {
 
     // Pharmacy Routes
     Route::post('/pharmacy/duty/toggle', [\App\Http\Controllers\PharmacyController::class, 'toggleDuty'])->name('pharmacy.duty.toggle');
-
-    Route::get('/departments', [App\Http\Controllers\Admin\DepartmentController::class, 'index'])->name('departments.index');
-    Route::post('/departments/rule', [App\Http\Controllers\Admin\DepartmentController::class, 'updateRule'])->name('departments.update-rule');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
