@@ -184,7 +184,7 @@ function AppContent() {
             const intervalTime = activeSosId ? 30000 : 300000; // 30s during SOS, 5m regular
             const interval = setInterval(trackLocation, intervalTime);
 
-            const notifInterval = setInterval(checkNotifications, 10000); // Check every 10s
+            const notifInterval = setInterval(checkNotifications, 2000); // Check every 2s (Near Real-time)
 
             return () => {
                 clearInterval(interval);

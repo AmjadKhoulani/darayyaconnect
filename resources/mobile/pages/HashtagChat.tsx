@@ -85,7 +85,7 @@ export default function HashtagChat() {
         });
 
         // Polling every 3 seconds
-        pollingInterval.current = setInterval(fetchMessages, 3000);
+        pollingInterval.current = setInterval(fetchMessages, 1500);
 
         return () => {
             if (pollingInterval.current) clearInterval(pollingInterval.current);
