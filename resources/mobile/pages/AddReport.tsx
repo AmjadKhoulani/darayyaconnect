@@ -4,7 +4,7 @@ import { GeolocationService } from '../services/GeolocationService';
 import api from '../services/api';
 import { NotificationService } from '../services/notification';
 import { OfflineService, OfflineReport } from '../services/OfflineService';
-import { Construction, Trash2, Lightbulb, FileText, MapPin, Send, MessageSquare, AlertTriangle, ArrowRight, Camera, RefreshCw, WifiOff, X } from 'lucide-react';
+import { Construction, Trash2, Lightbulb, FileText, MapPin, Send, MessageSquare, AlertTriangle, ArrowRight, Camera, RefreshCw, WifiOff, X, CheckCircle } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -23,6 +23,8 @@ export default function AddReport() {
     const [linkedNodeId, setLinkedNodeId] = useState<number | null>(null);
     const [linkedLineId, setLinkedLineId] = useState<number | null>(null);
     const [linkedSerial, setLinkedSerial] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+    const [offlineSuccess, setOfflineSuccess] = useState(false);
 
     // Map Picker State
     const [showMapPicker, setShowMapPicker] = useState(false);
@@ -235,10 +237,9 @@ export default function AddReport() {
                 );
             } catch (notifError) {
                 console.error('Notification failed:', notifError);
-                // Continue execution - do not block
             }
 
-            navigate('/', { replace: true });
+            setSuccess(true); // Show success screen
 
         } catch (err: any) {
             // Check if it's a network error or offline mode
@@ -252,14 +253,15 @@ export default function AddReport() {
                     latitude: location?.lat,
                     longitude: location?.lng,
                     image: imageBase64 || undefined,
-                    infrastructure_node_id: linkedNodeId,
-                    infrastructure_line_id: linkedLineId
+                    infrastructure_node_id: linkedNodeId ?? undefined,
+                    infrastructure_line_id: linkedLineId ?? undefined
                 });
 
-                alert('⚠️ لا يوجد اتصال بالإنترنت.\nتم حفظ البلاغ في جهازك وسيتم إرساله تلقائياً عند عودة الاتصال.');
-                navigate('/', { replace: true });
+                setSuccess(true);
+                setOfflineSuccess(true);
             } else {
                 console.error('Report submission error:', err);
+                // ... (rest of error logic)
                 const serverMsg = err.response?.data?.message;
                 const validationErrors = err.response?.data?.errors;
 
@@ -285,6 +287,38 @@ export default function AddReport() {
             setLoading(false);
         }
     };
+
+    if (success) {
+        return (
+            <div className="min-h-screen bg-white dark:bg-slate-900 flex flex-col items-center justify-center p-6 text-center" dir="rtl">
+                <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                    <CheckCircle size={48} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
+                    {offlineSuccess ? 'تم حفظ البلاغ محلياً' : 'تم استلام بلاغك بنجاح!'}
+                </h1>
+                <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                    {offlineSuccess
+                        ? 'سيتم إرسال البلاغ تلقائياً بمجرد توفر اتصال بالإنترنت. يمكنك متابعة بلاغاتك من صفحة "بلاغاتي".'
+                        : 'شكراً لمساهمتك في تحسين داريا. سنقوم بمراجعة البلاغ واتخاذ الإجراءات اللازمة قريباً.'}
+                </p>
+                <div className="space-y-3 w-full max-w-xs">
+                    <button
+                        onClick={() => navigate('/my-reports')}
+                        className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                    >
+                        متابعة بلاغاتي
+                    </button>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold active:scale-95 transition-all"
+                    >
+                        العودة للرئيسية
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl">

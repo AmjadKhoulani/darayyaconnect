@@ -168,6 +168,7 @@ function AppContent() {
                 <Route path="/news" element={<News />} />
                 <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/my-reports" element={<MyReports />} />
                 <Route path="/polls" element={<Polls />} />
                 <Route path="/polls/:id" element={<PollDetail />} />
                 <Route path="/lost-found" element={<LostFound />} />
