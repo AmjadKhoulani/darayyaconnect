@@ -245,6 +245,23 @@ export default function MapEditor() {
             });
         } else {
             map.current.addSource(sourceId, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+            // Load Images if not loaded
+            const images = [
+                { id: 'icon_water_tank', url: '/mobile_assets/map-icons/water_tank.png' },
+                { id: 'icon_transformer', url: '/mobile_assets/map-icons/transformer.png' },
+                { id: 'icon_manhole', url: '/mobile_assets/map-icons/manhole.png' },
+                { id: 'icon_cabinet', url: '/mobile_assets/map-icons/cabinet.png' },
+            ];
+
+            images.forEach(img => {
+                if (!map.current!.hasImage(img.id)) {
+                    map.current!.loadImage(img.url, (error, image) => {
+                        if (error) console.error(error);
+                        if (image && !map.current!.hasImage(img.id)) map.current!.addImage(img.id, image);
+                    });
+                }
+            });
+
             // Add layers
             map.current.addLayer({
                 id: 'net-lines',
@@ -258,16 +275,24 @@ export default function MapEditor() {
                     'line-dasharray': ['case', ['==', ['get', 'is_published'], false], ['literal', [2, 2]], ['literal', [1, 0]]]
                 }
             });
+
             map.current.addLayer({
                 id: 'net-nodes',
-                type: 'circle',
+                type: 'symbol', // Changed to symbol
                 source: sourceId,
                 filter: ['==', '$type', 'Point'],
-                paint: {
-                    'circle-radius': 8,
-                    'circle-color': activeConfig.color,
-                    'circle-stroke-width': 2,
-                    'circle-stroke-color': '#fff'
+                layout: {
+                    'icon-image': [
+                        'match',
+                        ['get', 'type'],
+                        'water_tank', 'icon_water_tank',
+                        'transformer', 'icon_transformer',
+                        'manhole', 'icon_manhole',
+                        'cabinet', 'icon_cabinet',
+                        'marker-15' // Fallback
+                    ],
+                    'icon-size': 0.15, // Scale down the large AI images
+                    'icon-allow-overlap': true
                 }
             });
         }
