@@ -95,26 +95,39 @@ class ChatController extends Controller
 
     public function storeChannel(Request $request)
     {
-        try {
-            if (!$request->user()->isAdmin()) {
-                return response()->json(['message' => 'Unauthorized: User is not admin ("' . $request->user()->role . '")'], 403);
-            }
-
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255|unique:chat_channels,slug',
-                'description' => 'nullable|string',
-                'icon' => 'nullable|string'
-            ]);
-
-            $channel = ChatChannel::create($request->all());
-
-            return response()->json($channel, 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Server Error: ' . $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ], 500);
+        // Remove try-catch to allow proper validation/server error handling
+        if (!$request->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'icon' => 'nullable|string'
+        ]);
+
+        // Generate Slug
+        $slug = \Illuminate\Support\Str::slug($request->name);
+        
+        // Fallback for Arabic/Empty slugs
+        if (empty($slug)) {
+            $slug = 'channel-' . uniqid();
+        }
+
+        // Ensure Uniqueness
+        $originalSlug = $slug;
+        $count = 1;
+        while (\App\Models\ChatChannel::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count++;
+        }
+
+        $channel = ChatChannel::create([
+            'name' => $request->name,
+            'slug' => $slug,
+            'description' => $request->description,
+            'icon' => $request->icon ?? 'Hash'
+        ]);
+
+        return response()->json($channel, 201);
     }
 }
