@@ -49,7 +49,7 @@ export default function AdminLayout({
                         المستخدمين
                     </SidebarLink>
                     <SidebarLink
-                        href={route('admin.reports.heatmap')}
+                        href={route('admin.reports.index')}
                         active={route().current('admin.reports.*')}
                         icon="📨"
                     >

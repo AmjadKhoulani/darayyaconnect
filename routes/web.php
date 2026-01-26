@@ -105,6 +105,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/reports/heatmap', function () {
             return Inertia::render('Admin/ReportsHeatmap');
         })->name('reports.heatmap');
+        
+        // Reports List
+        Route::resource('reports', \App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show']);
 
         // Moderation & Chat Filter
         Route::get('/moderation', [\App\Http\Controllers\Admin\ModerationController::class, 'index'])->name('moderation.index');

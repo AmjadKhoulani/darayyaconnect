@@ -50,10 +50,10 @@ class AnalyticsController extends Controller
             $reports = $query->get();
 
             $features = $reports->map(function ($report) {
-                // Calculate weight based on type
-                $weight = match ($report->type) {
-                    'water', 'electricity' => 1.0,
-                    'sewage', 'road' => 0.7,
+                // Calculate weight based on category
+                $weight = match ($report->category) {
+                    'water', 'electricity', 'infrastructure' => 1.0,
+                    'sewage', 'road', 'sanitation' => 0.7,
                     default => 0.3,
                 };
 
