@@ -82,8 +82,8 @@ class ChatController extends Controller
                 ->whereNotIn('id', $mutedUserIds)
                 ->get();
 
-            // TEMPORARY DISABLE: Notification system is causing crashes
-            // Notification::send($usersToNotify, new ChatMessageReceived($message->load('user:id,name'), $channel));
+            // Send Notifications to users who haven't muted this channel (Now Enabled)
+            Notification::send($usersToNotify, new ChatMessageReceived($message->load('user:id,name'), $channel));
 
             return response()->json($message->load('user:id,name'), 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
