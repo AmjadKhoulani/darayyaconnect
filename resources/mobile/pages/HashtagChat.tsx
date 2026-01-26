@@ -73,24 +73,52 @@ export default function HashtagChat() {
         }
     }, [activeChannelId]);
 
+    const [initialLoad, setInitialLoad] = useState(true);
+
+    const scrollToBottom = (instant = false) => {
+        if (scrollRef.current) {
+            const scroll = () => {
+                scrollRef.current!.scrollTop = scrollRef.current!.scrollHeight;
+            };
+            if (instant) {
+                scroll();
+            } else {
+                requestAnimationFrame(() => setTimeout(scroll, 100)); // Double safeguard for layout
+            }
+        }
+    };
+
     useEffect(() => {
         setLoading(true);
+        setInitialLoad(true);
+
+        // Fetch immediately
         fetchMessages().then(() => {
             setLoading(false);
-            setTimeout(() => {
-                if (scrollRef.current) {
-                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-                }
-            }, 100);
+            setInitialLoad(false);
+            scrollToBottom(false);
         });
 
-        // Polling every 3 seconds
-        pollingInterval.current = setInterval(fetchMessages, 1500);
+        // Polling every 1.5 seconds
+        pollingInterval.current = setInterval(async () => {
+            // We don't want to overwrite messages if user is scrolling up, 
+            // but for this simple chat, let's just append or replace.
+            // Replacing causes jitter. Ideally we diff.
+            // For now, let's just fetch.
+            await fetchMessages();
+        }, 1500);
 
         return () => {
             if (pollingInterval.current) clearInterval(pollingInterval.current);
         };
-    }, [activeChannelId, fetchMessages]);
+    }, [activeChannelId]);
+
+    // Force scroll on new messages if near bottom or loading
+    useEffect(() => {
+        if (initialLoad) {
+            scrollToBottom(true);
+        }
+    }, [messages, initialLoad]);
 
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
