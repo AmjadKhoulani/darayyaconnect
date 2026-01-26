@@ -4,6 +4,7 @@ import { ArrowRight, Hash, Send, Users, MoreVertical, Plus, Image as ImageIcon, 
 import api from '../services/api';
 import { NotificationService } from '../services/notification';
 import { Geolocation } from '@capacitor/geolocation';
+import Avatar from '../components/Avatar';
 
 interface ChatMessage {
     id: number;
@@ -269,9 +270,7 @@ export default function HashtagChat() {
                     )}
                     {currentUser && (
                         <div className="p-4 bg-slate-200 dark:bg-slate-900/50 flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-indigo-500 border-2 border-white dark:border-slate-700 flex items-center justify-center text-white font-bold">
-                                {currentUser.name.charAt(0)}
-                            </div>
+                            <Avatar user={currentUser} size="md" />
                             <div className="flex-1 text-right truncate">
                                 <p className="text-xs font-black text-slate-800 dark:text-slate-100 truncate">{currentUser.name}</p>
                                 <p className="text-[10px] text-emerald-500 font-bold uppercase">متصل</p>
@@ -337,9 +336,7 @@ export default function HashtagChat() {
                                     {isSwiping && swipeDiff > 50 && <div className="absolute left-[-40px] top-1/2 -translate-y-1/2 text-indigo-500 animate-pulse"><ArrowRight size={24} className="rotate-180" /></div>}
 
                                     <div className="flex flex-col items-center justify-end pb-1">
-                                        <div className={`w-8 h-8 rounded-full flex-shrink-0 overflow-hidden shadow-sm border-2 flex items-center justify-center bg-slate-200 dark:bg-slate-700 font-bold text-xs ${isMe ? 'border-indigo-200 dark:border-indigo-900 text-indigo-700' : 'border-white dark:border-slate-700 text-slate-600'}`}>
-                                            {message.user.name.charAt(0)}
-                                        </div>
+                                        <Avatar user={message.user} size="sm" />
                                     </div>
 
                                     <div className={`flex flex-col max-w-[85%] ${isMe ? 'items-end' : 'items-start'}`}>
@@ -355,8 +352,8 @@ export default function HashtagChat() {
                                         )}
 
                                         <div className={`relative px-4 py-2 shadow-sm text-sm font-medium leading-snug break-words ${isLocation
-                                                ? 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-2xl w-56'
-                                                : (isMe ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700/50')
+                                            ? 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-2xl w-56'
+                                            : (isMe ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700/50')
                                             }`}>
                                             {isLocation ? (
                                                 <div onClick={() => handleOpenMap(message.body, message.user.name)} className="cursor-pointer">
