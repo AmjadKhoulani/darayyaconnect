@@ -55,7 +55,21 @@ export default function LostFoundDetail() {
         );
     }
 
-    if (!item) return null;
+    if (!item) {
+        return (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+                <AlertTriangle size={48} className="text-slate-400 mb-4" />
+                <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">عذراً، لم يتم العثور على العنصر</h3>
+                <p className="text-sm text-slate-500 mb-6">ربما تم حذفه أو الرابط غير صحيح</p>
+                <button
+                    onClick={() => navigate('/lost-found')}
+                    className="px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm"
+                >
+                    العودة للقائمة
+                </button>
+            </div>
+        );
+    }
 
     const category = categories[item.category as keyof typeof categories];
     const isLost = item.type === 'lost';
