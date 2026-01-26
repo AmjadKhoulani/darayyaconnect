@@ -51,24 +51,28 @@ class AdminUserController extends Controller
         return response()->json(\App\Models\Department::all());
     }
 
-    public function activeLocations()
+    public function activeLocations(Request $request)
     {
-        // Fetch users active active recently OR having an active SOS
-        $users = User::query()
-            ->where(function ($q) {
-                // Case 1: Active in last 15 mins AND has location
-                $q->whereNotNull('latitude')
-                  ->whereNotNull('longitude')
-                  ->where('last_active_at', '>=', now()->subMinutes(15));
-            })
-            ->orWhereHas('sosAlerts', function ($q) {
-                // Case 2: Has an ACTIVE SOS alert
+        $search = $request->search;
+        $usersQuery = User::query();
+
+        if ($search) {
+            // Search Mode: Find any user with location matching name
+            $usersQuery->where('name', 'like', "%{$search}%")
+                  ->whereNotNull('latitude')
+                  ->whereNotNull('longitude');
+        } else {
+            // Default Mode: Only Active SOS
+            $usersQuery->whereHas('sosAlerts', function ($q) {
                 $q->where('status', 'active');
-            })
+            });
+        }
+
+        $users = $usersQuery
             ->with(['sosAlerts' => function ($q) {
                 $q->where('status', 'active')->latest()->limit(1);
             }])
-            ->select('id', 'name', 'latitude', 'longitude', 'last_active_at', 'role')
+            ->select('id', 'name', 'latitude', 'longitude', 'last_active_at', 'role', 'profile_photo_path')
             ->get()
             ->map(function ($user) {
                 $sos = $user->sosAlerts->first();
