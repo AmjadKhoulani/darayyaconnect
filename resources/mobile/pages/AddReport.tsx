@@ -169,8 +169,19 @@ export default function AddReport() {
         fetchLocation();
     }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const [showConfirmation, setShowConfirmation] = useState(false);
+
+    const handleSubmitClick = (e: React.FormEvent) => {
+        e.preventDefault(); // Prevent default form submission
+        if (!title || !description || !location) {
+            alert('يرجى تعبئة جميع الحقول المطلوبة وتحديد الموقع');
+            return;
+        }
+        setShowConfirmation(true);
+    };
+
+    const confirmAndSubmit = async () => {
+        setShowConfirmation(false);
         setLoading(true);
 
         // Convert image to Base64 for offline storage or API
@@ -301,7 +312,7 @@ export default function AddReport() {
             </div>
 
             <main className="px-5 -mt-8 relative z-20 space-y-5">
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmitClick} className="space-y-6">
                     {/* Report Type Selection */}
                     <div>
                         <label className="flex items-center gap-2 text-sm font-black text-slate-800 dark:text-slate-100 mb-3 px-1">
@@ -504,6 +515,38 @@ export default function AddReport() {
                         >
                             تأكيد الموقع
                         </button>
+                    </div>
+                </div>
+            )}
+            {/* Confirmation Modal */}
+            {showConfirmation && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-scale-in">
+                        <div className="bg-amber-50 dark:bg-amber-900/20 p-6 flex flex-col items-center text-center border-b border-amber-100 dark:border-amber-800/30">
+                            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-800/40 rounded-full flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
+                                <AlertTriangle size={32} />
+                            </div>
+                            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">تنبيه هام</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                أنت مسؤول قانونياً وأخلاقياً عن صحة هذا البلاغ.
+                                <br />
+                                سيتم التواصل معك من قبل الجهات المختصة لمتابعة التفاصيل.
+                            </p>
+                        </div>
+                        <div className="p-4 flex gap-3">
+                            <button
+                                onClick={() => setShowConfirmation(false)}
+                                className="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                            >
+                                تراجع
+                            </button>
+                            <button
+                                onClick={confirmAndSubmit}
+                                className="flex-1 py-3 rounded-xl font-bold bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 transition"
+                            >
+                                أنا مسؤول وأوافق
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

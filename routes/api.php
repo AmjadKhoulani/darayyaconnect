@@ -86,6 +86,7 @@ Route::middleware('auth:sanctum')->post('/user/location', [\App\Http\Controllers
 // Infrastructure API
 Route::get('/infrastructure', [App\Http\Controllers\Api\InfrastructureController::class, 'index']);
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/infrastructure/my-reports', [InfrastructureController::class, 'myReports']);
     });
 
 // Crowdsourced Status Layer (Outside Auth for easy map access or same level as infrastructure)

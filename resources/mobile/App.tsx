@@ -33,6 +33,7 @@ import ServiceLog from './pages/ServiceLog';
 import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import Notifications from './pages/Notifications';
+import MyReports from './pages/MyReports';
 import Polls from './pages/Polls';
 import PollDetail from './pages/PollDetail';
 import LostFound from './pages/LostFound';

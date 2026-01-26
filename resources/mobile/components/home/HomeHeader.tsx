@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, LogIn, AlertCircle } from 'lucide-react';
+import { Bell, LogIn, AlertCircle, User } from 'lucide-react';
 import { useTheme } from '../../components/ThemeContext';
 import EmergencyModal from '../EmergencyModal';
 
@@ -40,6 +40,14 @@ export default function HomeHeader({ user, unreadCount }: HomeHeaderProps) {
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                             <AlertCircle size={20} className="animate-pulse" />
                             <span>طوارئ SOS</span>
+                        </button>
+
+                        <button
+                            onClick={() => navigate('/my-reports')}
+                            className="w-10 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 active:scale-95 transition-all border border-slate-200 dark:border-slate-800 shadow-card"
+                            title="بلاغاتي"
+                        >
+                            <User size={20} />
                         </button>
 
                         <button

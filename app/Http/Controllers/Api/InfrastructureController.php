@@ -128,6 +128,16 @@ class InfrastructureController extends Controller
         ]);
     }
 
+    public function myReports(Request $request)
+    {
+        $reports = Report::where('user_id', $request->user()->id)
+            ->with(['infrastructureNode', 'infrastructureLine'])
+            ->latest()
+            ->get();
+
+        return response()->json($reports);
+    }
+
     public function storeLine(Request $request)
     {
         \Log::info('Store line request', $request->all());
