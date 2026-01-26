@@ -21,5 +21,6 @@ class AiStudy extends Model
         'recommendations' => 'array',
         'technical_details' => 'array',
         'is_published' => 'boolean',
+        'is_featured' => 'boolean',
     ];
 }

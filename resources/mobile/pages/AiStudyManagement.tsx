@@ -35,6 +35,24 @@ export default function AiStudyManagement() {
         }
     };
 
+    const handleToggleFeatured = async (study: any) => {
+        try {
+            await api.post(`/admin/manage/ai-studies/${study.id}`, {
+                ...study,
+                is_featured: !study.is_featured,
+                // Ensure array fields are sent back correctly if API expects them
+                scenario: study.scenario || [],
+                economics: study.economics || [],
+                social: study.social || [],
+                implementation: study.implementation || [],
+            });
+            fetchStudies();
+        } catch (err) {
+            console.error(err);
+            alert('فشل التعديل');
+        }
+    };
+
     if (loading) return <SkeletonLoader type="list" />;
 
     return (
@@ -75,9 +93,17 @@ export default function AiStudyManagement() {
                             </p>
 
                             <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                <span className={`text-[10px] font-black px-3 py-1 rounded-full ${study.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                                    {study.is_published ? 'منشور' : 'مسودة'}
-                                </span>
+                                <div className="flex gap-2">
+                                    <span className={`text-[10px] font-black px-3 py-1 rounded-full ${study.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                                        {study.is_published ? 'منشور' : 'مسودة'}
+                                    </span>
+                                    <button
+                                        onClick={() => handleToggleFeatured(study)}
+                                        className={`text-[10px] font-bold px-3 py-1 rounded-full border transition-colors ${study.is_featured ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-white text-slate-400 border-slate-200'}`}
+                                    >
+                                        {study.is_featured ? '⭐ مميز' : '☆ عادي'}
+                                    </button>
+                                </div>
                                 <div className="flex items-center gap-2">
                                     <Globe size={12} className="text-slate-300" />
                                     <TrendingUp size={12} className="text-slate-300" />

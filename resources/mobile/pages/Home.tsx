@@ -20,17 +20,18 @@ export default function Home() {
     const [discussions, setDiscussions] = useState<any[]>([]);
     const [serviceStates, setServiceStates] = useState<any[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [loading, setLoading] = useState(false);
+    const [featuredSlides, setFeaturedSlides] = useState<any[]>([]);
 
     // Fetch dashboard data
     const fetchDashboardData = useCallback(async () => {
         try {
-            const [statsRes, newsRes, discussionsRes, servicesRes, notificationsRes] = await Promise.all([
+            const [statsRes, newsRes, discussionsRes, servicesRes, notificationsRes, featuredRes] = await Promise.all([
                 api.get('/dashboard/stats'),
                 api.get('/dashboard/news'),
                 api.get('/dashboard/discussions'),
                 api.get('/service-states').catch(() => ({ data: [] })),
-                api.get('/notifications/unread-count').catch(() => ({ data: { count: 0 } }))
+                api.get('/notifications/unread-count').catch(() => ({ data: { count: 0 } })),
+                api.get('/ai-studies/featured').catch(() => ({ data: [] }))
             ]);
 
             setCityStats(statsRes.data);
@@ -38,6 +39,18 @@ export default function Home() {
             setDiscussions(discussionsRes.data);
             setServiceStates(servicesRes.data || []);
             setUnreadCount(notificationsRes.data.count || 0);
+
+            // Transform Featured Studies to Slides
+            if (featuredRes.data && featuredRes.data.length > 0) {
+                const slides = featuredRes.data.map((study: any) => ({
+                    id: study.id,
+                    title: study.title, // Title of the study
+                    highlight: study.category, // e.g. "Environment"
+                    subtitle: study.summary, // Description
+                    type: 'study'
+                }));
+                setFeaturedSlides(slides);
+            }
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
         }
@@ -77,7 +90,7 @@ export default function Home() {
                         <div className="absolute top-[-50%] left-[-20%] w-[150px] h-[150px] bg-white/10 rounded-full blur-3xl animate-float-slow"></div>
 
                         <div className="relative z-10 w-full">
-                            <HelloCarousel />
+                            <HelloCarousel slides={featuredSlides} />
                         </div>
                     </div>
 

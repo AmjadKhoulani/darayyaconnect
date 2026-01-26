@@ -35,4 +35,15 @@ class AiStudyController extends Controller
         $study = AiStudy::where('is_published', true)->findOrFail($id);
         return response()->json($study);
     }
+
+    public function featured()
+    {
+        return response()->json(
+            AiStudy::where('is_published', true)
+                ->where('is_featured', true)
+                ->latest()
+                ->take(5)
+                ->get()
+        );
+    }
 }
