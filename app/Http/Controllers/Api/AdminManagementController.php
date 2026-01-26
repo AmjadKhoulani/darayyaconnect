@@ -109,7 +109,7 @@ class AdminManagementController extends Controller
             'implementation' => 'required|array',
             'risks' => 'nullable|array',
             'recommendations' => 'nullable|array',
-            'technicalDetails' => 'nullable|array',
+            'technical_details' => 'nullable|array',
         ]);
 
         $study = AiStudy::create($validated);
@@ -136,7 +136,7 @@ class AdminManagementController extends Controller
             'implementation' => 'required|array',
             'risks' => 'nullable|array',
             'recommendations' => 'nullable|array',
-            'technicalDetails' => 'nullable|array',
+            'technical_details' => 'nullable|array',
         ]);
 
         $study->update($validated);
