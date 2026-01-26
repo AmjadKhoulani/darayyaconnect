@@ -253,53 +253,52 @@ export default function InfrastructureIndex({ auth, points }: any) {
                     });
                 });
 
-            // 4. Public Reports Layer
+            // 4. Public Reports Layer (HTML Markers for animation)
+            const reportMarkers: maplibregl.Marker[] = [];
             fetch('/api/infrastructure/public-reports')
                 .then((res) => res.json())
                 .then((data) => {
                     if (!map.current) return;
-                    map.current.addSource('public-reports-source', {
-                        type: 'geojson',
-                        data: data,
-                    });
 
-                    map.current.addLayer({
-                        id: 'public-reports-layer',
-                        type: 'symbol',
-                        source: 'public-reports-source',
-                        layout: {
-                            'visibility': activeLayers.includes('citizen-reports') ? 'visible' : 'none',
-                            'text-field': [
-                                'match',
-                                ['get', 'category'],
-                                'water', '💧',
-                                'electricity', '⚡',
-                                'lighting', '💡',
-                                'sanitation', '🗑️',
-                                'trash', '🗑️',
-                                'road', '🚧',
-                                'communication', '📡',
-                                '⚠️'
-                            ],
-                            'text-size': 20,
-                            'text-allow-overlap': true,
+                    data.features.forEach((feat: any) => {
+                        const props = feat.properties;
+                        const el = document.createElement('div');
+                        el.className = `status-bubble ${props.status === 'urgent' ? 'critical' : ''}`;
+                        el.innerHTML = getEmojiForCategory(props.category);
+                        el.style.animationDelay = `${Math.random() * -4}s`;
+
+                        el.onclick = () => {
+                            alert(`بلاغ: ${props.category}\nالحالة: ${props.status}\nالوصف: ${props.title}`);
+                        };
+
+                        const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+                            .setLngLat(feat.geometry.coordinates)
+                            .addTo(map.current!);
+
+                        reportMarkers.push(marker);
+
+                        // Sync visibility
+                        if (!activeLayers.includes('citizen-reports')) {
+                            el.style.display = 'none';
                         }
-                    });
-
-                    map.current.on('click', 'public-reports-layer', (e) => {
-                        const feature = e.features![0];
-                        const props = feature.properties as any;
-                        alert(`بلاغ: ${props.category}\nالحالة: ${props.status}\nالوصف: ${props.title}`);
                     });
                 });
 
             // 3. Points of Interest (Markers/Icons)
+            const poiMarkers: maplibregl.Marker[] = [];
             points.forEach((point: Point) => {
                 const el = document.createElement('div');
-                el.className = 'marker-icon';
-                el.innerHTML = `<div class="bg-white p-1 rounded-full shadow-md border-2 border-emerald-500 cursor-pointer hover:scale-110 transition-transform">${getEmojiForType(point.type)}</div>`;
+                const isIssue = point.status !== 'active';
+                el.className = isIssue ? `status-bubble ${point.status === 'damaged' ? 'critical' : 'warning'}` : 'marker-icon';
 
-                const marker = new maplibregl.Marker({ element: el })
+                if (isIssue) {
+                    el.innerHTML = point.status === 'maintenance' ? '🏗️' : getEmojiForType(point.type);
+                    el.style.animationDelay = `${Math.random() * -4}s`;
+                } else {
+                    el.innerHTML = `<div class="bg-white p-1 rounded-full shadow-md border-2 border-emerald-500 cursor-pointer hover:scale-110 transition-transform">${getEmojiForType(point.type)}</div>`;
+                }
+
+                const marker = new maplibregl.Marker({ element: el, anchor: isIssue ? 'bottom' : 'center' })
                     .setLngLat([point.longitude, point.latitude])
                     .addTo(map.current!);
 
@@ -307,11 +306,20 @@ export default function InfrastructureIndex({ auth, points }: any) {
                     setSelectedAsset(point);
                     setIsSidebarOpen(true);
                 });
+
+                poiMarkers.push(marker);
             });
         });
 
         return () => map.current?.remove();
     }, []);
+
+    const getEmojiForCategory = (cat: string) => {
+        const map: Record<string, string> = {
+            water: '💧', electricity: '⚡', lighting: '💡', sanitation: '🗑️', trash: '🗑️', road: '🚧', communication: '📡'
+        };
+        return map[cat] || '⚠️';
+    };
 
     // Effect to sync layer visibility
     useEffect(() => {
@@ -345,6 +353,14 @@ export default function InfrastructureIndex({ auth, points }: any) {
                 activeLayers.includes('citizen-reports') ? 'visible' : 'none',
             );
         }
+
+        // Toggle HTML markers for citizen reports
+        const reportedBubbles = document.querySelectorAll('.status-bubble');
+        reportedBubbles.forEach((el: any) => {
+            if (el.innerHTML.match(/[💧⚡💡🗑️🚧📡⚠️]/)) { // Identify report bubbles
+                el.style.display = activeLayers.includes('citizen-reports') ? 'flex' : 'none';
+            }
+        });
     }, [activeLayers]);
 
     const toggleLayer = (layer: string) => {

@@ -576,6 +576,7 @@ export default function Map() {
                 const el = document.createElement('div');
                 el.className = `status-bubble ${isDamaged ? 'critical' : 'warning'}`;
                 el.innerHTML = isDamaged ? '💥' : '🏗️';
+                el.style.animationDelay = `${Math.random() * -4}s`;
 
                 el.onclick = (e) => {
                     e.stopPropagation();
@@ -583,9 +584,9 @@ export default function Map() {
                     setSelectedInfra({ ...node, lng: node.longitude, lat: node.latitude, sector });
                 };
 
-                const marker = new maplibregl.Marker({ element: el, anchor: 'bottom-left' })
+                const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
                     .setLngLat([parseFloat(node.longitude), parseFloat(node.latitude)])
-                    .setOffset([5, -20]) // Float above the normal icon
+                    .setOffset([0, -15]) // Float above the node
                     .addTo(map.current!);
 
                 statusMarkersRef.current.push(marker);
@@ -601,17 +602,17 @@ export default function Map() {
             features.forEach((feat: any) => {
                 if (feat.properties.status === 'cutoff' && feat.geometry.type === 'Point') {
                     const el = document.createElement('div');
-                    el.className = 'status-bubble pb-1 pt-1'; // Extra padding for icons
+                    el.className = 'status-bubble pb-1 pt-1';
                     el.innerHTML = type === 'electricity' ? '⚡' : '💧';
-                    el.style.borderColor = '#ef4444'; // Red border for cutoffs
-                    el.style.animationDelay = `${Math.random() * 2}s`; // Staggered float
+                    el.style.borderColor = '#ef4444';
+                    el.style.animationDelay = `${Math.random() * -4}s`; // Real staggered bobbing
 
                     el.onclick = (e) => {
                         e.stopPropagation();
                         map.current?.flyTo({ center: feat.geometry.coordinates, zoom: 16 });
                     };
 
-                    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom-left' })
+                    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' }) // Anchor bottom for tail
                         .setLngLat(feat.geometry.coordinates)
                         .addTo(map.current!);
 
