@@ -350,7 +350,8 @@ class InfrastructureController extends Controller
     public function publicReports()
     {
         $reports = Report::whereIn('status', ['pending', 'in_progress'])
-            ->select('id', 'category', 'description', 'latitude', 'longitude', 'status', 'created_at')
+            ->with('department')
+            ->select('id', 'category', 'description', 'latitude', 'longitude', 'status', 'created_at', 'department_id')
             ->latest()
             ->limit(500)
             ->get();
@@ -371,6 +372,7 @@ class InfrastructureController extends Controller
                     'status' => $report->status,
                     'title' => substr($report->description, 0, 50) . (strlen($report->description) > 50 ? '...' : ''),
                     'created_at' => $report->created_at ? $report->created_at->diffForHumans() : '',
+                    'department' => $report->department ? $report->department->name : 'غير محدد',
                 ]
             ];
         });

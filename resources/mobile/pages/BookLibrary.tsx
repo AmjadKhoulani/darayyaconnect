@@ -46,7 +46,7 @@ export default function BookLibrary() {
     }, [fetchBooks]);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
+        <div className="min-h-screen bg-slate-100 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
             <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
                 <header className="bg-gradient-to-br from-teal-600 to-emerald-700 text-white sticky top-0 z-30 shadow-xl overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
