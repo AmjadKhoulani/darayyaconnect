@@ -184,7 +184,7 @@ export default function HashtagChat() {
     const isAdmin = currentUser?.role === 'admin';
 
     return (
-        <div className="fixed inset-0 w-full h-[100dvh] bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden overscroll-none" dir="rtl">
+        <div className="flex h-[100dvh] bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden overscroll-none" dir="rtl">
             {/* Sidebar */}
             <aside className={`fixed inset-y-0 right-0 z-40 w-64 bg-slate-100 dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 transition-transform duration-300 transform ${showChannels ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 md:relative`}>
                 <div className="flex flex-col h-full">
