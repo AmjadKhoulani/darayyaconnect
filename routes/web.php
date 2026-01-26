@@ -56,15 +56,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Water Management
         Route::get('/infrastructure/water', [InfrastructureManagerController::class, 'waterManager'])->name('infrastructure.water');
 
-        // User Management (Map must be before resource)
         Route::get('/users/map', [\App\Http\Controllers\Admin\UserController::class, 'map'])->name('users.map');
-        Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'store', 'show']);
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show']);
+
+        // Government Entities / Departments
+        Route::get('/departments', [App\Http\Controllers\Admin\DepartmentController::class, 'index'])->name('departments.index');
+        Route::post('/departments', [App\Http\Controllers\Admin\DepartmentController::class, 'store'])->name('departments.store');
+        Route::post('/departments/rule', [App\Http\Controllers\Admin\DepartmentController::class, 'updateRule'])->name('departments.update-rule');
 
         // Admin infrastructure updates
         Route::patch('/infrastructure/{id}/status', [InfrastructureManagerController::class, 'updateStatus'])->name('infrastructure.update-status');
 
-
-        // Infrastructure Editor
         // Infrastructure Editors (Per Sector)
         Route::get('/infrastructure/water/editor', [InfrastructureManagerController::class, 'editor'])->defaults('sector', 'water')->name('infrastructure.water.editor');
         Route::get('/infrastructure/electricity/editor', [InfrastructureManagerController::class, 'editor'])->defaults('sector', 'electricity')->name('infrastructure.electricity.editor');
@@ -101,6 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/volunteering', [\App\Http\Controllers\Admin\VolunteeringController::class, 'store'])->name('volunteering.store');
         Route::put('/volunteering/{id}', [\App\Http\Controllers\Admin\VolunteeringController::class, 'update'])->name('volunteering.update');
         Route::delete('/volunteering/{id}', [\App\Http\Controllers\Admin\VolunteeringController::class, 'destroy'])->name('volunteering.destroy');
+        
         // Reports Heatmap
         Route::get('/reports/heatmap', function () {
             return Inertia::render('Admin/ReportsHeatmap');
@@ -108,10 +111,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // Reports List
         Route::resource('reports', \App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show']);
-
-        // Government Entities / Departments
-        Route::get('/departments', [App\Http\Controllers\Admin\DepartmentController::class, 'index'])->name('departments.index');
-        Route::post('/departments/rule', [App\Http\Controllers\Admin\DepartmentController::class, 'updateRule'])->name('departments.update-rule');
 
         // Moderation & Chat Filter
         Route::get('/moderation', [\App\Http\Controllers\Admin\ModerationController::class, 'index'])->name('moderation.index');

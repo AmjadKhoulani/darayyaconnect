@@ -2,15 +2,27 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, useForm } from '@inertiajs/react';
 
 export default function Index({ auth, departments, rules }: any) {
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, reset } = useForm({
         category: 'water',
         infrastructure_type: '',
         department_id: departments[0]?.id || ''
     });
 
+    const { data: deptData, setData: setDeptData, post: postDept, processing: processingDept, reset: resetDept } = useForm({
+        name: '',
+        description: ''
+    });
+
     const submitRule = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('admin.departments.update-rule'));
+    };
+
+    const submitDept = (e: React.FormEvent) => {
+        e.preventDefault();
+        postDept(route('admin.departments.store'), {
+            onSuccess: () => resetDept()
+        });
     };
 
     return (
@@ -22,6 +34,41 @@ export default function Index({ auth, departments, rules }: any) {
 
             <div className="py-12" dir="rtl">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+                    {/* Add Department Form */}
+                    <div className="bg-white p-6 rounded-lg shadow border border-slate-200">
+                        <h3 className="text-lg font-bold mb-4">🏢 إضافة جهة (منصة) حكومية جديدة</h3>
+                        <form onSubmit={submitDept} className="flex gap-4 items-end">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">اسم الجهة</label>
+                                <input
+                                    type="text"
+                                    className="border-gray-300 rounded-md shadow-sm w-full"
+                                    value={deptData.name}
+                                    onChange={e => setDeptData('name', e.target.value)}
+                                    placeholder="مثلاً: قسم الكهرباء، دائرة المياه..."
+                                    required
+                                />
+                            </div>
+                            <div className="flex-[2]">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">وصف المرفق</label>
+                                <input
+                                    type="text"
+                                    className="border-gray-300 rounded-md shadow-sm w-full"
+                                    value={deptData.description}
+                                    onChange={e => setDeptData('description', e.target.value)}
+                                    placeholder="وصف مختصر للمهام (اختياري)"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={processingDept}
+                                className="bg-slate-900 text-white px-6 py-2 rounded-md font-bold hover:bg-slate-800"
+                            >
+                                إضافة الجهة
+                            </button>
+                        </form>
+                    </div>
 
                     {/* Add Rule Form */}
                     <div className="bg-white p-6 rounded-lg shadow border border-slate-200">

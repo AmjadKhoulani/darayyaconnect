@@ -25,6 +25,7 @@ interface Props {
         last_page: number;
         total: number;
     };
+    departments: { id: number; name: string }[];
     filters: {
         search?: string;
         role?: string;
@@ -32,9 +33,10 @@ interface Props {
     };
 }
 
-export default function UsersIndex({ auth, users, filters }: Props) {
+export default function UsersIndex({ auth, users, filters, departments }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Search Handler
     const handleSearch = (e: React.FormEvent) => {
@@ -108,6 +110,12 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                     </form>
 
                     <div className="flex w-full items-center gap-2 overflow-x-auto md:w-auto">
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="flex items-center gap-2 whitespace-nowrap rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700"
+                        >
+                            <span>➕</span> إنشاء حساب مسؤول
+                        </button>
                         <Link
                             href={route('admin.users.map')}
                             className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100"
@@ -178,26 +186,25 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span
-                                                className={`rounded px-2 py-1 text-xs font-bold ${
-                                                    user.role === 'admin'
-                                                        ? 'bg-rose-100 text-rose-700'
+                                                className={`rounded px-2 py-1 text-xs font-bold ${user.role === 'admin'
+                                                    ? 'bg-rose-100 text-rose-700'
+                                                    : user.role ===
+                                                        'official'
+                                                        ? 'bg-blue-100 text-blue-700'
                                                         : user.role ===
-                                                            'official'
-                                                          ? 'bg-blue-100 text-blue-700'
-                                                          : user.role ===
-                                                              'institution'
+                                                            'institution'
                                                             ? 'bg-purple-100 text-purple-700'
                                                             : 'bg-slate-100 text-slate-700'
-                                                } `}
+                                                    } `}
                                             >
                                                 {user.role === 'admin'
                                                     ? 'مدير عام'
                                                     : user.role === 'official'
-                                                      ? 'مسؤول'
-                                                      : user.role ===
-                                                          'institution'
-                                                        ? 'مؤسسة'
-                                                        : 'مواطن'}
+                                                        ? 'مسؤول'
+                                                        : user.role ===
+                                                            'institution'
+                                                            ? 'مؤسسة'
+                                                            : 'مواطن'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
@@ -205,11 +212,10 @@ export default function UsersIndex({ auth, users, filters }: Props) {
                                                 onClick={() =>
                                                     toggleVerification(user)
                                                 }
-                                                className={`flex items-center gap-1 rounded border px-2 py-1 text-xs font-bold transition ${
-                                                    user.is_verified_official
-                                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-red-200 hover:bg-red-50 hover:text-red-600'
-                                                        : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700'
-                                                } `}
+                                                className={`flex items-center gap-1 rounded border px-2 py-1 text-xs font-bold transition ${user.is_verified_official
+                                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+                                                    : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700'
+                                                    } `}
                                                 title={
                                                     user.is_verified_official
                                                         ? 'انقر لإلغاء التوثيق'
@@ -271,17 +277,144 @@ export default function UsersIndex({ auth, users, filters }: Props) {
 
             <UserEditModal
                 user={editingUser}
+                departments={departments}
                 onClose={() => setEditingUser(null)}
+            />
+
+            <UserCreateModal
+                show={showCreateModal}
+                departments={departments}
+                onClose={() => setShowCreateModal(false)}
             />
         </AdminLayout>
     );
 }
 
+function UserCreateModal({
+    show,
+    departments,
+    onClose,
+}: {
+    show: boolean;
+    departments: { id: number; name: string }[];
+    onClose: () => void;
+}) {
+    const { data, setData, post, processing, reset, errors } = useForm({
+        name: '',
+        email: '',
+        password: '',
+        role: 'official',
+        department_id: '',
+    });
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('admin.users.store'), {
+            onSuccess: () => {
+                onClose();
+                reset();
+            },
+        });
+    };
+
+    return (
+        <Modal show={show} onClose={onClose}>
+            <form onSubmit={submit} className="p-6" dir="rtl">
+                <h2 className="mb-4 text-xl font-bold text-slate-900 border-b pb-2">
+                    🆕 إنشاء حساب مسؤول جديد
+                </h2>
+
+                <div className="space-y-4">
+                    <div>
+                        <InputLabel value="الاسم الكامل" />
+                        <input
+                            type="text"
+                            className="w-full rounded-lg border-slate-300"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            required
+                        />
+                        {errors.name && <div className="mt-1 text-xs text-red-600">{errors.name}</div>}
+                    </div>
+
+                    <div>
+                        <InputLabel value="البريد الإلكتروني" />
+                        <input
+                            type="email"
+                            className="w-full rounded-lg border-slate-300 text-left"
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            required
+                        />
+                        {errors.email && <div className="mt-1 text-xs text-red-600">{errors.email}</div>}
+                    </div>
+
+                    <div>
+                        <InputLabel value="كلمة المرور" />
+                        <input
+                            type="password"
+                            className="w-full rounded-lg border-slate-300"
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            required
+                            minLength={8}
+                        />
+                        {errors.password && <div className="mt-1 text-xs text-red-600">{errors.password}</div>}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <InputLabel value="نوع الحساب" />
+                            <select
+                                className="w-full rounded-lg border-slate-300"
+                                value={data.role}
+                                onChange={(e) => setData('role', e.target.value as any)}
+                            >
+                                <option value="official">مسؤول حكومي</option>
+                                <option value="institution">مؤسسة خاصة</option>
+                                <option value="admin">مدير نظام</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <InputLabel value="الجهة التابع لها" />
+                            <select
+                                className="w-full rounded-lg border-slate-300"
+                                value={data.department_id}
+                                onChange={(e) => setData('department_id', e.target.value)}
+                            >
+                                <option value="">بدون جهة محددة</option>
+                                {departments.map((dept) => (
+                                    <option key={dept.id} value={dept.id}>
+                                        {dept.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-8 flex justify-end gap-3 border-t pt-4">
+                    <SecondaryButton onClick={onClose}>إلغاء</SecondaryButton>
+                    <PrimaryButton
+                        disabled={processing}
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                        إنشاء الحساب
+                    </PrimaryButton>
+                </div>
+            </form>
+        </Modal>
+    );
+}
+
 function UserEditModal({
     user,
+    departments,
     onClose,
 }: {
     user: User | null;
+    departments: { id: number; name: string }[];
     onClose: () => void;
 }) {
     if (!user) return null;
@@ -304,33 +437,49 @@ function UserEditModal({
 
     return (
         <Modal show={!!user} onClose={onClose}>
-            <form onSubmit={submit} className="p-6">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                    تعديل بيانات: {user.name}
+            <form onSubmit={submit} className="p-6" dir="rtl">
+                <h2 className="mb-4 text-lg font-bold text-slate-900 border-b pb-2">
+                    ✏️ تعديل بيانات: {user.name}
                 </h2>
 
                 <div className="space-y-4">
-                    <div>
-                        <InputLabel value="الدور (Role)" />
-                        <select
-                            className="w-full rounded-lg border-slate-300"
-                            value={data.role}
-                            onChange={(e) =>
-                                setData('role', e.target.value as any)
-                            }
-                        >
-                            <option value="user">مواطن (User)</option>
-                            <option value="official">
-                                مسؤول حكومي (Official)
-                            </option>
-                            <option value="institution">
-                                مؤسسة (Institution)
-                            </option>
-                            <option value="admin">مدير (Admin)</option>
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <InputLabel value="الدور (Role)" />
+                            <select
+                                className="w-full rounded-lg border-slate-300"
+                                value={data.role}
+                                onChange={(e) =>
+                                    setData('role', e.target.value as any)
+                                }
+                            >
+                                <option value="user">مواطن</option>
+                                <option value="official">مسؤول حكومي</option>
+                                <option value="institution">مؤسسة</option>
+                                <option value="admin">مدير نظام</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <InputLabel value="الجهة الحكومية" />
+                            <select
+                                className="w-full rounded-lg border-slate-300"
+                                value={data.department_id}
+                                onChange={(e) =>
+                                    setData('department_id', e.target.value)
+                                }
+                            >
+                                <option value="">لا يوجد</option>
+                                {departments.map((dept) => (
+                                    <option key={dept.id} value={dept.id}>
+                                        {dept.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100 mt-2">
                         <input
                             type="checkbox"
                             id="verified"
@@ -347,12 +496,12 @@ function UserEditModal({
                             htmlFor="verified"
                             className="text-sm font-bold text-slate-700"
                         >
-                            حساب موثق رسمياً
+                            حساب موثق رسمياً ✅
                         </label>
                     </div>
                 </div>
 
-                <div className="mt-6 flex justify-end gap-3">
+                <div className="mt-8 flex justify-end gap-3 border-t pt-4">
                     <SecondaryButton onClick={onClose}>إلغاء</SecondaryButton>
                     <PrimaryButton
                         disabled={processing}

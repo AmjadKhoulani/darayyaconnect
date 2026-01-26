@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, LogIn, AlertCircle, User } from 'lucide-react';
+import { Bell, LogIn, AlertCircle, User, FileText } from 'lucide-react';
 import { useTheme } from '../../components/ThemeContext';
 import EmergencyModal from '../EmergencyModal';
 

@@ -23,6 +23,23 @@ class DepartmentController extends Controller
         ]);
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string'
+        ]);
+
+        DB::table('departments')->insert([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return back()->with('success', 'تم إضافة الجهة بنجاح');
+    }
+
     public function updateRule(Request $request)
     {
         // Simple update or create rule

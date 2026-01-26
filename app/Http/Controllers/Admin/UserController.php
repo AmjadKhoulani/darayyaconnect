@@ -45,7 +45,33 @@ class UserController extends Controller
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
             'filters' => $request->only(['search', 'role', 'status']),
+            'departments' => \Illuminate\Support\Facades\DB::table('departments')->get(),
         ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => ['required', Rule::in(['admin', 'official', 'institution', 'user'])],
+            'department_id' => 'nullable|exists:departments,id',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+            'department_id' => $request->department_id,
+            'is_verified_official' => in_array($request->role, ['official', 'institution']),
+        ]);
+
+        return back()->with('success', 'تم إنشاء الحساب بنجاح');
     }
 
     /**
