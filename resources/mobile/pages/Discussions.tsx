@@ -58,7 +58,7 @@ export default function Discussions() {
         fetchDiscussions();
     }, [fetchDiscussions]);
 
-    const { isRefreshing, pullMoveY, handlers } = usePullToRefresh(fetchDiscussions);
+    const { isRefreshing, containerRef, indicatorRef, handlers } = usePullToRefresh(fetchDiscussions);
 
 
     const handleVote = async (id: number, e: any) => {
@@ -84,18 +84,12 @@ export default function Discussions() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
-            <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
+            <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
 
                 {/* Header */}
                 <header className="bg-white dark:bg-slate-900 pb-14 pt-8 z-40 relative transition-colors duration-300">
                     <div className="flex items-center justify-between px-5">
                         <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate(-1)}
-                                className="w-12 h-12 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-800 active:scale-90 shadow-sm"
-                            >
-                                <ArrowRight size={22} className="rotate-180" />
-                            </button>
                             <div>
                                 <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">النقاشات</h1>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">صوتك مسموع في داريا</p>
