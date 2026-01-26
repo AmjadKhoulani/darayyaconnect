@@ -79,6 +79,7 @@ Route::post('/portal/projects/{id}/vote', [EngagementController::class, 'votePro
 
 // Mobile App Sync Routes
 Route::get('/ai-studies', [\App\Http\Controllers\Api\AiStudyController::class, 'index']);
+Route::get('/ai-studies/featured', [\App\Http\Controllers\Api\AiStudyController::class, 'featured']);
 Route::get('/ai-studies/{id}', [\App\Http\Controllers\Api\AiStudyController::class, 'show']);
 
 Route::middleware('auth:sanctum')->post('/user/location', [\App\Http\Controllers\Api\UserController::class, 'updateLocation']);
