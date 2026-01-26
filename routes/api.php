@@ -82,6 +82,7 @@ Route::get('/ai-studies', [\App\Http\Controllers\Api\AiStudyController::class, '
 Route::get('/ai-studies/{id}', [\App\Http\Controllers\Api\AiStudyController::class, 'show']);
 
 Route::middleware('auth:sanctum')->post('/user/location', [\App\Http\Controllers\Api\UserController::class, 'updateLocation']);
+Route::middleware('auth:sanctum')->post('/user/profile', [\App\Http\Controllers\Api\UserController::class, 'updateProfile']);
 
 // Specialized Infrastructure Route
 
