@@ -185,6 +185,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/moderation/{type}/{id}/approve', [App\Http\Controllers\Api\AdminModerationController::class, 'approve']);
     Route::post('/admin/moderation/{type}/{id}/reject', [App\Http\Controllers\Api\AdminModerationController::class, 'reject']);
     Route::get('/admin/users', [App\Http\Controllers\Api\AdminUserController::class, 'index']);
+    Route::get('/admin/users/locations', [App\Http\Controllers\Api\AdminUserController::class, 'activeLocations']);
     Route::post('/admin/users/{user}/update', [App\Http\Controllers\Api\AdminUserController::class, 'update']);
     Route::get('/admin/departments', [App\Http\Controllers\Api\AdminUserController::class, 'departments']);
 

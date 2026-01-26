@@ -50,4 +50,15 @@ class AdminUserController extends Controller
     {
         return response()->json(\App\Models\Department::all());
     }
+
+    public function activeLocations()
+    {
+        $users = User::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('last_active_at', '>=', now()->subMinutes(15))
+            ->select('id', 'name', 'latitude', 'longitude', 'last_active_at', 'role')
+            ->get();
+
+        return response()->json($users);
+    }
 }
