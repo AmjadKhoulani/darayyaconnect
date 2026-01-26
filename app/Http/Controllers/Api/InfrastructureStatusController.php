@@ -12,82 +12,96 @@ use Illuminate\Support\Facades\DB;
 class InfrastructureStatusController extends Controller
 {
     /**
-     * Get the crowdsourced heatmap data.
-     * Groups daily reports by neighborhood to determine service status.
+     * Get the crowdsourced heatmap data (Dynamic Spatial Clustering).
+     * Groups users into 100m blocks (approx 0.001 deg) to form "Population Blocks".
+     * If a block has enough reports (>= 2 for testing, 10 for prod), it shows status.
      */
     public function getHeatmapData(Request $request)
     {
         $serviceType = $request->query('type', 'electricity'); // 'electricity' or 'water'
         $date = $request->query('date') ? Carbon::parse($request->query('date')) : Carbon::today();
 
-        // 1. Aggregate Reports by Neighborhood
-        $stats = ServiceLog::where('service_type', $serviceType)
-            ->whereDate('log_date', $date)
-            ->select('neighborhood', DB::raw('count(*) as total'), DB::raw('sum(case when status = "available" then 1 else 0 end) as available_count'))
-            ->groupBy('neighborhood')
-            ->having('total', '>=', 1) // Show even with 1 report for now, threshold can be increased
+        // 1. Identify Population Blocks
+        // Group verified residents by spatial grid (3 decimal places ~= 111m)
+        $blocks = \App\Models\User::where('is_resident', true)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->select(
+                DB::raw('ROUND(latitude, 3) as lat_block'),
+                DB::raw('ROUND(longitude, 3) as lng_block'),
+                DB::raw('count(*) as population')
+            )
+            ->groupBy('lat_block', 'lng_block')
+            ->having('population', '>=', 2) // Threshold: 10 houses (set to 2 for testing)
             ->get();
 
-        // 2. Fetch Neighborhood Geometries
-        // We assume InfrastructurePoint has entries with type="neighborhood_zone" and name matching the user's neighborhood string
-        $neighborhoodNames = $stats->pluck('neighborhood')->toArray();
-        $zones = InfrastructurePoint::whereIn('name', $neighborhoodNames)
-            ->where('type', 'neighborhood_zone')
-            ->get()
-            ->keyBy('name');
-
-        // 3. Build GeoJSON
         $features = [];
 
-        foreach ($stats as $stat) {
-            $score = ($stat->total > 0) ? ($stat->available_count / $stat->total) * 100 : 0;
+        foreach ($blocks as $block) {
+            // center of the block
+            $lat = $block->lat_block;
+            $lng = $block->lng_block;
+
+            // 2. Get Reports within this spatial block for today
+            // We search for logs from users whose location rounds to this block
+            // Note: Ideally ServiceLog should snapshot the user's location at time of report, 
+            // but for now we join with User table or assume User location is static home.
+            // A more robust way: ServiceLog should store lat/lng. 
+            // Assuming ServiceLog has user_id, let's query logs where user is in this block.
             
-            // Determine Status
-            if ($score >= 60) {
-                $status = 'available'; // Green
-            } elseif ($score <= 40) {
-                $status = 'cutoff';    // Red
-            } else {
-                $status = 'unstable';  // Amber
-            }
+            $reportStats = DB::table('service_logs')
+                ->join('users', 'service_logs.user_id', '=', 'users.id')
+                ->where('service_logs.service_type', $serviceType)
+                ->whereDate('service_logs.log_date', $date)
+                ->whereRaw('ROUND(users.latitude, 3) = ?', [$lat])
+                ->whereRaw('ROUND(users.longitude, 3) = ?', [$lng])
+                ->select(
+                    DB::raw('count(*) as total_reports'),
+                    DB::raw('sum(case when service_logs.status = "available" then 1 else 0 end) as available_count')
+                )
+                ->first();
 
-            // Find Geometry
-            $zone = $zones->get($stat->neighborhood);
-            $geometry = null;
-            $center = null;
+            $totalReports = $reportStats->total_reports ?? 0;
+            $availableCount = $reportStats->available_count ?? 0;
 
-            if ($zone && $zone->geometry) {
-                // Use the polygon geometry
-                $geometry = $zone->geometry;
-                
-                // Calculate rough center for the icon point (simplified centroid)
-                // Assuming geometry is { type: "Polygon", coordinates: [[[x,y], ...]] }
-                if (isset($geometry['coordinates'][0])) {
-                    $coords = $geometry['coordinates'][0];
-                    $sumLat = 0; $sumLng = 0; $count = count($coords);
-                    foreach ($coords as $point) {
-                        $sumLng += $point[0];
-                        $sumLat += $point[1];
-                    }
-                    $center = [$sumLng / $count, $sumLat / $count];
+            // Default status is "stable" (no news is good news?) or "unknown".
+            // If we have reports, we calculate score.
+            $status = 'unknown';
+            $score = 0;
+
+            if ($totalReports > 0) {
+                $score = ($availableCount / $totalReports) * 100;
+                if ($score >= 60) {
+                    $status = 'available'; // Green
+                } elseif ($score <= 40) {
+                    $status = 'cutoff';    // Red
+                } else {
+                    $status = 'unstable';  // Amber
                 }
             } else {
-                // Fallback: If no zone defined, skip or perhaps use an average of user locations (complex query)
-                // For now, only show matched neighborhoods
+                // No reports today. 
+                // Strategy: If it's a population block, maybe assume available? 
+                // User requirement: "When they report no electricity, it shows sign".
+                // So default is nothing/invisible or 'available'.
+                // Let's only return features if there are reports OR if we want to show population density heat (heatmap layer handles density).
+                // User specifically wants "Cutoff Signs". So we only care if status is cutoff/unstable.
                 continue; 
             }
 
             $features[] = [
                 'type' => 'Feature',
-                'geometry' => $geometry,
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [(float)$lng, (float)$lat]
+                ],
                 'properties' => [
-                    'neighborhood' => $stat->neighborhood,
-                    'total_reports' => $stat->total,
-                    'available_count' => $stat->available_count,
+                    'lat_block' => $lat,
+                    'lng_block' => $lng,
+                    'population' => $block->population,
+                    'total_reports' => $totalReports,
                     'score' => round($score, 1),
                     'status' => $status,
-                    'service_type' => $serviceType,
-                    'center' => $center
+                    'service_type' => $serviceType
                 ]
             ];
         }
@@ -96,7 +110,8 @@ class InfrastructureStatusController extends Controller
             'type' => 'FeatureCollection',
             'properties' => [
                 'generated_at' => now()->toIso8601String(),
-                'service_type' => $serviceType
+                'service_type' => $serviceType,
+                'threshold' => 2 // 10
             ],
             'features' => $features
         ]);
