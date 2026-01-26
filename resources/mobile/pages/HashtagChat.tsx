@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Hash, Send, Users, MoreVertical, Plus, Image as ImageIcon, Smile, Bell, BellOff, X, Settings } from 'lucide-react';
+import { ArrowRight, Hash, Send, Users, MoreVertical, Plus, Image as ImageIcon, Smile, Bell, BellOff, X, MapPin, Navigation } from 'lucide-react';
 import api from '../services/api';
 import { NotificationService } from '../services/notification';
+import { Geolocation } from '@capacitor/geolocation';
 
 interface ChatMessage {
     id: number;
@@ -12,7 +13,7 @@ interface ChatMessage {
     created_at: string;
     type: string;
     reply_to_id?: number | null;
-    reactions?: Record<string, number>; // Local only for now
+    reactions?: Record<string, number>;
 }
 
 interface Channel {
@@ -83,7 +84,7 @@ export default function HashtagChat() {
             if (instant) {
                 scroll();
             } else {
-                requestAnimationFrame(() => setTimeout(scroll, 100)); // Double safeguard for layout
+                requestAnimationFrame(() => setTimeout(scroll, 100));
             }
         }
     };
@@ -92,19 +93,13 @@ export default function HashtagChat() {
         setLoading(true);
         setInitialLoad(true);
 
-        // Fetch immediately
         fetchMessages().then(() => {
             setLoading(false);
             setInitialLoad(false);
             scrollToBottom(false);
         });
 
-        // Polling every 1.5 seconds
         pollingInterval.current = setInterval(async () => {
-            // We don't want to overwrite messages if user is scrolling up, 
-            // but for this simple chat, let's just append or replace.
-            // Replacing causes jitter. Ideally we diff.
-            // For now, let's just fetch.
             await fetchMessages();
         }, 1500);
 
@@ -113,33 +108,31 @@ export default function HashtagChat() {
         };
     }, [activeChannelId]);
 
-    // Force scroll on new messages if near bottom or loading
     useEffect(() => {
         if (initialLoad) {
             scrollToBottom(true);
         }
     }, [messages, initialLoad]);
 
-    const handleSendMessage = async () => {
-        if (!newMessage.trim()) return;
+    const handleSendMessage = async (type = 'text', content = '') => {
+        const bodyToSend = content || newMessage;
+        if (!bodyToSend.trim()) return;
 
         const tempId = Date.now();
         const optimisticMsg: any = {
             id: tempId,
             user_id: currentUser?.id || 0,
             user: { id: currentUser?.id || 0, name: currentUser?.name || 'أنت' },
-            body: newMessage,
+            body: bodyToSend,
             created_at: new Date().toISOString(),
-            type: 'text',
+            type: type,
             reply_to_id: replyingTo?.id
         };
 
-        // Optimistic UI update
         setMessages(prev => [...prev, optimisticMsg]);
         setNewMessage('');
         setReplyingTo(null);
 
-        // Scroll to bottom
         setTimeout(() => {
             if (scrollRef.current) {
                 scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -149,17 +142,38 @@ export default function HashtagChat() {
         try {
             await api.post(`/chat/${activeChannelId}`, {
                 body: optimisticMsg.body,
-                reply_to_id: optimisticMsg.reply_to_id
+                reply_to_id: optimisticMsg.reply_to_id,
+                type: type // NOTE: Backend needs to support this field in fillable
             });
-            fetchMessages(); // Sync real ID
+            fetchMessages();
         } catch (error) {
             console.error('Failed to send message', error);
-            // Revert on failure (simple version: just refetch)
             fetchMessages();
         }
     };
 
-    // --- Touch & Swipe Handlers (Same as before) ---
+    const handleShareLocation = async () => {
+        try {
+            const pos = await Geolocation.getCurrentPosition();
+            const { latitude, longitude } = pos.coords;
+            const locationString = `${latitude},${longitude}`;
+            await handleSendMessage('location', locationString);
+        } catch (e) {
+            alert('تعذر الحصول على موقعك. تأكد من تفعيل GPS.');
+        }
+    };
+
+    const handleOpenMap = (coords: string, userName: string) => {
+        // Navigate to a new Live Tracking Page or Google Maps
+        // For internal tracking:
+        const [lat, lng] = coords.split(',');
+        // For now, simpler Google Maps link, but user asked for "Open full map with moving dot".
+        // Use the AdminUserMap logic but specific to this user?
+        // Let's assume we build a `LiveTrackUser.tsx` page.
+        navigate(`/live-track?lat=${lat}&lng=${lng}&name=${userName}`);
+    };
+
+    // --- Touch & Swipe Handlers ---
     const handleTouchStart = (e: React.TouchEvent, messageId: number) => {
         setTouchStartX(e.touches[0].clientX);
         setSwipingCardId(messageId);
@@ -178,7 +192,7 @@ export default function HashtagChat() {
         clearTimeout(longPressTimer.current);
         if (touchStartX === null) return;
         const diff = touchStartX - e.changedTouches[0].clientX;
-        if (diff > 100) setReplyingTo(message); // Swipe Left
+        if (diff > 100) setReplyingTo(message);
         setTouchStartX(null);
         setTouchCurrentX(null);
         setSwipingCardId(null);
@@ -285,9 +299,6 @@ export default function HashtagChat() {
                             </div>
                         </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-600 rounded-xl"><Users size={20} /></button>
-                    </div>
                 </header>
 
                 {/* Messages */}
@@ -312,6 +323,7 @@ export default function HashtagChat() {
                             const isSwiping = swipingCardId === message.id && touchCurrentX !== null && touchStartX !== null;
                             const swipeDiff = isSwiping ? touchCurrentX! - touchStartX! : 0;
                             const swipeStyle = isSwiping ? { transform: `translateX(${swipeDiff * 0.5}px)`, transition: 'none' } : { transition: 'transform 0.2s ease-out' };
+                            const isLocation = message.type === 'location';
 
                             return (
                                 <div
@@ -342,11 +354,36 @@ export default function HashtagChat() {
                                             </div>
                                         )}
 
-                                        <div className={`relative px-4 py-2 shadow-sm text-sm font-medium leading-snug break-words ${isMe ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700/50'}`}>
-                                            {message.body}
-                                            <span className={`text-[9px] block text-left mt-1 opacity-70 ${isMe ? 'text-indigo-100' : 'text-slate-400'}`}>
-                                                {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
+                                        <div className={`relative px-4 py-2 shadow-sm text-sm font-medium leading-snug break-words ${isLocation
+                                                ? 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-2xl w-56'
+                                                : (isMe ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700/50')
+                                            }`}>
+                                            {isLocation ? (
+                                                <div onClick={() => handleOpenMap(message.body, message.user.name)} className="cursor-pointer">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600">
+                                                            <MapPin size={16} />
+                                                        </div>
+                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-200">مشاركة موقع مباشر</span>
+                                                    </div>
+                                                    <div className="h-24 bg-slate-200 dark:bg-slate-700 rounded-xl relative overflow-hidden flex items-center justify-center group mb-2">
+                                                        {/* Mini Map Placeholder pattern */}
+                                                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
+                                                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-[10px] font-bold shadow-sm flex items-center gap-1">
+                                                            <Navigation size={12} className="text-indigo-500" />
+                                                            اضغط للتتبع
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[10px] text-slate-400 text-center">يتم تحديث الموقع مباشرة</div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {message.body}
+                                                    <span className={`text-[9px] block text-left mt-1 opacity-70 ${isMe ? 'text-indigo-100' : 'text-slate-400'}`}>
+                                                        {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -368,6 +405,13 @@ export default function HashtagChat() {
                     )}
 
                     <div className="p-3 flex items-end gap-2 max-w-4xl mx-auto w-full">
+                        <button
+                            onClick={handleShareLocation}
+                            className="w-11 h-11 rounded-full flex items-center justify-center transition-all bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 active:scale-95 border border-emerald-100 dark:border-emerald-800/50"
+                        >
+                            <MapPin size={20} />
+                        </button>
+
                         <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-[24px] flex items-end border border-transparent focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all max-h-[140px] overflow-hidden">
                             <textarea
                                 rows={1}
@@ -380,7 +424,7 @@ export default function HashtagChat() {
                             />
                             <button className="p-3 text-slate-400 hover:text-amber-500 transition-colors"><Smile size={20} /></button>
                         </div>
-                        <button onClick={handleSendMessage} disabled={!newMessage.trim()} className={`w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-md flex-shrink-0 ${newMessage.trim() ? 'bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}><Send size={20} className="rtl:rotate-180 ml-0.5" /></button>
+                        <button onClick={() => handleSendMessage()} disabled={!newMessage.trim()} className={`w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-md flex-shrink-0 ${newMessage.trim() ? 'bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}><Send size={20} className="rtl:rotate-180 ml-0.5" /></button>
                     </div>
                 </div>
             </main>
