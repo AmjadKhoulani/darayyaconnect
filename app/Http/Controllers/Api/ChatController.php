@@ -95,19 +95,26 @@ class ChatController extends Controller
 
     public function storeChannel(Request $request)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        try {
+            if (!$request->user()->isAdmin()) {
+                return response()->json(['message' => 'Unauthorized: User is not admin ("' . $request->user()->role . '")'], 403);
+            }
+
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'slug' => 'required|string|max:255|unique:chat_channels,slug',
+                'description' => 'nullable|string',
+                'icon' => 'nullable|string'
+            ]);
+
+            $channel = ChatChannel::create($request->all());
+
+            return response()->json($channel, 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Server Error: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
         }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:chat_channels,slug',
-            'description' => 'nullable|string',
-            'icon' => 'nullable|string'
-        ]);
-
-        $channel = ChatChannel::create($request->all());
-
-        return response()->json($channel, 201);
     }
 }
