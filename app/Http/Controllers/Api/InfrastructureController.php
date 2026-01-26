@@ -28,7 +28,7 @@ class InfrastructureController extends Controller
             $routing = $this->mapTypeToCategoryAndDept($validated['type']);
             
             $reportData = [
-                'user_id' => $request->user()?->id,
+                'user_id' => auth('sanctum')->user()?->id,
                 'category' => $routing['category'],
                 'department_id' => $routing['dept_id'],
                 'department_assigned' => $routing['dept_id'] ? true : false,

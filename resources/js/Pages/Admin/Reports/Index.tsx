@@ -58,7 +58,15 @@ export default function Index({ auth, reports }: any) {
                                                             report.category === 'sanitation' ? 'bg-orange-100 text-orange-700' :
                                                                 'bg-slate-100 text-slate-700'
                                                         }`}>
-                                                        {report.category}
+                                                        {{
+                                                            'water': 'مياه',
+                                                            'electricity': 'كهرباء',
+                                                            'sanitation': 'نظافة / صرف صحي',
+                                                            'infrastructure': 'بنية تحتية',
+                                                            'lighting': 'إنارة',
+                                                            'communication': 'اتصالات',
+                                                            'other': 'أخرى'
+                                                        }[report.category as string] || report.category}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">

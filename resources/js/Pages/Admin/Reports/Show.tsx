@@ -94,7 +94,17 @@ export default function Show({ auth, report }: any) {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-bold text-slate-400 block mb-2">الفئة</label>
-                                    <span className="font-bold text-slate-700">{report.category}</span>
+                                    <span className="font-bold text-slate-700">
+                                        {{
+                                            'water': 'مياه',
+                                            'electricity': 'كهرباء',
+                                            'sanitation': 'نظافة / صرف صحي',
+                                            'infrastructure': 'بنية تحتية',
+                                            'lighting': 'إنارة',
+                                            'communication': 'اتصالات',
+                                            'other': 'أخرى'
+                                        }[report.category as string] || report.category}
+                                    </span>
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-400 block mb-2">تاريخ البلاغ</label>
