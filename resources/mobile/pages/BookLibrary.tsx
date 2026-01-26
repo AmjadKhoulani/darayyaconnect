@@ -68,6 +68,12 @@ export default function BookLibrary() {
                                 </div>
                             </div>
                             <button
+                                onClick={() => navigate('/books/manage')}
+                                className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 active:scale-95 transition-transform"
+                            >
+                                <span className="text-xl">👤</span>
+                            </button>
+                            <button
                                 onClick={() => navigate('/books/add')}
                                 className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 active:scale-95 transition-transform"
                             >

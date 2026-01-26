@@ -43,6 +43,7 @@ import GeneratorMap from './pages/GeneratorMap';
 import GeneratorDetail from './pages/GeneratorDetail';
 import RateGenerator from './pages/RateGenerator';
 import BookLibrary from './pages/BookLibrary';
+import BookManagement from './pages/BookManagement';
 import BookDetail from './pages/BookDetail';
 import AddBook from './pages/AddBook';
 import AwarenessCampaigns from './pages/AwarenessCampaigns';
@@ -253,6 +254,8 @@ function AppContent() {
                 <Route path="/generators/:id/rate" element={<RateGenerator />} />
                 <Route path="/books" element={<BookLibrary />} />
                 <Route path="/books/add" element={<AddBook />} />
+                <Route path="/books/add" element={<AddBook />} />
+                <Route path="/books/manage" element={<BookManagement />} />
                 <Route path="/books/:id" element={<BookDetail />} />
                 <Route path="/awareness" element={<AwarenessCampaigns />} />
                 <Route path="/awareness/detail/:id" element={<AwarenessDetail />} />

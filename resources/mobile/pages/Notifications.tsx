@@ -53,37 +53,43 @@ export default function Notifications() {
                         <p className="font-bold">لا توجد إشعارات حالياً</p>
                     </div>
                 ) : (
-                    notifications.map((notif) => (
-                        <div
-                            key={notif.id}
-                            className={`bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/50 relative overflow-hidden ${!notif.read_at ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
-                        >
-                            {!notif.read_at && (
-                                <div className="absolute top-4 left-4 w-2 h-2 rounded-full bg-blue-500"></div>
-                            )}
-                            <div className="flex gap-3">
-                                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
-                                    <Bell size={20} className="text-slate-600 dark:text-slate-300" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-1">
-                                        {notif.data?.type === 'chat_message'
-                                            ? `رسالة جديدة في #${notif.data.channel_name}`
-                                            : (notif.data?.title || 'إشعار جديد')}
-                                    </h3>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
-                                        {notif.data?.type === 'chat_message'
-                                            ? `${notif.data.sender_name}: ${notif.data.message_snippet}`
-                                            : (notif.data?.message || notif.data?.body || '...')}
-                                    </p>
-                                    <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                                        <Calendar size={10} />
-                                        <span>{new Date(notif.created_at).toLocaleString('ar-SY')}</span>
-                                    </div>
-                                </div>
+                ): (
+                        notifications.filter(n => n.data?.type !== 'chat_message').map((notif) => (
+                <div
+                    key={notif.id}
+                    onClick={() => {
+                        // Mark as read locally or relies on the fetch mark-as-read
+                        if (notif.data?.type === 'book_request' || notif.data?.type === 'book_approved') {
+                            navigate('/books/manage');
+                        } else if (notif.data?.type === 'report_update') {
+                            navigate(`/my-reports`);
+                        }
+                        // Generic fallback can be added if needed
+                    }}
+                    className={`bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/50 relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer ${!notif.read_at ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                >
+                    {!notif.read_at && (
+                        <div className="absolute top-4 left-4 w-2 h-2 rounded-full bg-blue-500"></div>
+                    )}
+                    <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                            <Bell size={20} className="text-slate-600 dark:text-slate-300" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-1">
+                                {notif.data?.title || 'إشعار جديد'}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
+                                {notif.data?.message || notif.data?.body || '...'}
+                            </p>
+                            <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                                <Calendar size={10} />
+                                <span>{new Date(notif.created_at).toLocaleString('ar-SY')}</span>
                             </div>
                         </div>
-                    ))
+                    </div>
+                </div>
+                ))
                 )}
             </div>
         </div>
