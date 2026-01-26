@@ -10,6 +10,7 @@ import HelloCarousel from '../components/home/HelloCarousel';
 import ActionBanner from '../components/home/ActionBanner';
 import MenuGrid from '../components/home/MenuGrid';
 import TabContent from '../components/home/TabContent';
+import StatusWidget from '../components/home/StatusWidget';
 
 export default function Home() {
     const [user, setUser] = useState<any>(null);
@@ -65,32 +66,34 @@ export default function Home() {
 
                 <HomeHeader user={user} unreadCount={unreadCount} />
 
-                <main className="px-5 space-y-8 max-w-md mx-auto pt-4">
-                    {/* Hero Banner - Premium Design */}
-                    <div className="relative overflow-hidden rounded-[32px] p-8 shadow-premium group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-700 dark:from-emerald-600 dark:to-teal-800 transition-all duration-500 group-hover:scale-105"></div>
+                <main className="px-4 space-y-6 max-w-md mx-auto pt-2">
+                    {/* 1. Live Status Ticker - Critical Info First */}
+                    <StatusWidget serviceStates={serviceStates} />
+
+                    {/* 2. Hero Banner - Welcome & Brand */}
+                    <div className="relative overflow-hidden rounded-[32px] p-6 shadow-premium group min-h-[140px] flex items-center mb-2">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-teal-800 dark:from-emerald-700 dark:to-teal-900 transition-all duration-500 group-hover:scale-105"></div>
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
-                        <div className="absolute top-[-50%] left-[-20%] w-[200px] h-[200px] bg-white/10 rounded-full blur-3xl animate-float-slow"></div>
+                        <div className="absolute top-[-50%] left-[-20%] w-[150px] h-[150px] bg-white/10 rounded-full blur-3xl animate-float-slow"></div>
 
                         <div className="relative z-10 w-full">
                             <HelloCarousel />
                         </div>
                     </div>
 
+                    {/* 3. Primary Actions Grid (Map & Directory) */}
+                    <MenuGrid serviceStates={serviceStates} />
 
-                    {user && <ActionBanner />}
+                    {/* 4. Community Pulse (Tabs) - Promoted Higher */}
+                    <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between px-1">
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <span className="w-1.5 h-5 bg-indigo-500 rounded-full"></span>
+                                نبض المدينة
+                            </h3>
+                        </div>
 
-                    <div className="py-2">
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 px-1 flex items-center gap-2">
-                            <span className="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
-                            الخدمات السريعة
-                        </h3>
-                        <MenuGrid serviceStates={serviceStates} />
-                    </div>
-
-                    {/* Tabs Section - Segmented Control Style */}
-                    <div className="space-y-6">
-                        <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl flex relative">
+                        <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-xl flex relative">
                             {[
                                 { key: 'news', label: '📰 الأخبار' },
                                 { key: 'community', label: '💬 المجتمع' },
@@ -99,13 +102,13 @@ export default function Home() {
                                 <button
                                     key={tab.key}
                                     onClick={() => setActiveTab(tab.key as any)}
-                                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all relative z-10 ${activeTab === tab.key
+                                    className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all relative z-10 ${activeTab === tab.key
                                         ? 'text-slate-800 dark:text-slate-100 shadow-sm'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
                                 >
                                     {activeTab === tab.key && (
-                                        <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-xl shadow-sm -z-10 animate-in fade-in zoom-in-95 duration-200"></div>
+                                        <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-lg shadow-sm -z-10 animate-in fade-in zoom-in-95 duration-200"></div>
                                     )}
                                     {tab.label}
                                 </button>
@@ -117,22 +120,24 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Volunteering Banner */}
+                    {/* 5. Reporting Action (Contextual) */}
+                    {user && <ActionBanner />}
+
+                    {/* 6. Volunteering Banner (Footer) */}
                     <Link
                         to="/volunteering"
-                        className="block relative overflow-hidden rounded-[32px] group active:scale-[0.98] transition-all shadow-premium mb-8"
+                        className="block relative overflow-hidden rounded-[24px] group active:scale-[0.98] transition-all shadow-sm border border-violet-100 dark:border-violet-900/50 mt-4"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-700 dark:to-indigo-700"></div>
-                        <div className="relative p-8 flex items-center justify-between">
+                        <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-700 dark:to-indigo-700 opacity-90"></div>
+                        <div className="relative p-6 flex items-center justify-between">
                             <div>
-                                <span className="inline-block bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full border border-white/20 mb-3 shadow-sm">
+                                <span className="inline-block bg-white/20 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded-full border border-white/20 mb-2 shadow-sm">
                                     ✨ ساهم معنا
                                 </span>
-                                <h3 className="font-black text-white text-2xl mb-2 drop-shadow-sm">فرص التطوع</h3>
-                                <p className="text-indigo-100 text-xs font-medium">كن جزءاً من التغيير الإيجابي في المدينة</p>
+                                <h3 className="font-bold text-white text-lg drop-shadow-sm">فرص التطوع</h3>
                             </div>
-                            <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white shadow-inner border border-white/10 group-hover:scale-110 transition-transform">
-                                <Heart size={32} className="fill-white/20 text-white" />
+                            <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-white shadow-inner border border-white/10 group-hover:scale-110 transition-transform">
+                                <Heart size={24} className="fill-white/20 text-white" />
                             </div>
                         </div>
                     </Link>
