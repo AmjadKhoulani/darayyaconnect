@@ -136,7 +136,7 @@ export default function Studies() {
         }
     }, []);
 
-    const { isRefreshing, pullMoveY, handlers } = usePullToRefresh(fetchStudies);
+    const { isRefreshing, containerRef, indicatorRef, handlers } = usePullToRefresh(fetchStudies);
 
     useEffect(() => {
         fetchStudies();
@@ -144,7 +144,7 @@ export default function Studies() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 transition-colors duration-300" dir="rtl" {...handlers}>
-            <PullToRefreshContainer isRefreshing={isRefreshing} pullMoveY={pullMoveY}>
+            <PullToRefreshContainer isRefreshing={isRefreshing} containerRef={containerRef} indicatorRef={indicatorRef}>
                 {/* Header with Search */}
                 <header className="bg-white dark:bg-slate-900 pb-12 pt-6 z-30 relative transition-colors duration-300">
                     <div className="px-5 flex items-center justify-between mb-4">
@@ -152,9 +152,6 @@ export default function Studies() {
                             <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">مركز المعرفة 💡</h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">رؤى ملهمة لمستقبل مدينتنا</p>
                         </div>
-                        <button className="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition active:scale-95 shadow-sm">
-                            <Search size={20} />
-                        </button>
                     </div>
 
                     {/* Custom Tab Switcher */}
