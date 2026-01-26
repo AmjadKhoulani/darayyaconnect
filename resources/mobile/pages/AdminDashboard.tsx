@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Users, MessageSquare, ArrowRight, Map, Activity, Heart, Building2, Bot, Zap, BookOpen, Send } from 'lucide-react';
+import { Shield, Users, MessageSquare, ArrowRight, Map, Activity, Heart, Building2, Bot, Zap, BookOpen, Send, Crosshair } from 'lucide-react';
 import api from '../services/api';
 import SkeletonLoader from '../components/SkeletonLoader';
 
