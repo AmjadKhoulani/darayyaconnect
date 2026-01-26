@@ -501,8 +501,8 @@ export default function MapEditor() {
                         <button
                             onClick={() => startTool('select')}
                             className={`flex flex-col items-center gap-1 min-w-[70px] p-3 rounded-2xl border transition-all ${activeTool === 'select'
-                                    ? 'bg-slate-100 border-slate-300 text-slate-900'
-                                    : 'bg-white border-slate-100 text-slate-400'
+                                ? 'bg-slate-100 border-slate-300 text-slate-900'
+                                : 'bg-white border-slate-100 text-slate-400'
                                 }`}
                         >
                             <MousePointer2 size={24} />
@@ -517,8 +517,8 @@ export default function MapEditor() {
                                 key={t.type}
                                 onClick={() => startTool('point', t.type)}
                                 className={`flex flex-col items-center gap-1 min-w-[70px] p-3 rounded-2xl border transition-all ${activeTool === 'point' && selectedSubType === t.type
-                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-600 shadow-sm'
-                                        : 'bg-white border-slate-100 text-slate-600'
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-600 shadow-sm'
+                                    : 'bg-white border-slate-100 text-slate-600'
                                     }`}
                             >
                                 <span className="text-xl">{t.icon}</span>
@@ -534,8 +534,8 @@ export default function MapEditor() {
                                 key={t.type}
                                 onClick={() => startTool('line', t.type)}
                                 className={`flex flex-col items-center gap-1 min-w-[70px] p-3 rounded-2xl border transition-all ${activeTool === 'line' && selectedSubType === t.type
-                                        ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                                        : 'bg-white border-slate-100 text-slate-600'
+                                    ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                                    : 'bg-white border-slate-100 text-slate-600'
                                     }`}
                             >
                                 <span className="text-xl">{t.icon}</span>
@@ -554,10 +554,7 @@ export default function MapEditor() {
         </div>
     );
 }
-electricity: '#eab308',
-    sewage: '#78350f',
-        phone: '#10b981'
-};
+
 
 const NODE_TYPES = [
     { value: 'water_tank', label: 'خزان مياه', sector: 'water', icon: '🏰' },
