@@ -185,6 +185,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat-debug', function () {
         return Inertia::render('ChatDebug');
     })->name('chat.debug');
+
+    // Web-Session Authenticated Chat Routes (Bypass Sanctum for Debugging)
+    Route::prefix('debug-api')->group(function() {
+        Route::get('/chat-channels', [App\Http\Controllers\Api\ChatController::class, 'channels']);
+        Route::post('/chat-channels', [App\Http\Controllers\Api\ChatController::class, 'storeChannel']);
+        Route::get('/chat/{channel}', [App\Http\Controllers\Api\ChatController::class, 'index']);
+        Route::post('/chat/{channel}', [App\Http\Controllers\Api\ChatController::class, 'store']);
+    });
 });
 
 require __DIR__.'/auth.php';

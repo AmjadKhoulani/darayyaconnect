@@ -17,7 +17,7 @@ export default function ChatDebug({ auth }: { auth: any }) {
 
     const fetchChannels = async () => {
         try {
-            const res = await axios.get('/api/chat-channels');
+            const res = await axios.get('/debug-api/chat-channels');
             setChannels(res.data.channels || []);
             setError('');
         } catch (err: any) {
@@ -27,7 +27,7 @@ export default function ChatDebug({ auth }: { auth: any }) {
 
     const fetchMessages = async (slug: string) => {
         try {
-            const res = await axios.get(`/api/chat/${slug}`);
+            const res = await axios.get(`/debug-api/chat/${slug}`);
             setMessages(res.data);
             setError('');
         } catch (err: any) {
@@ -38,7 +38,7 @@ export default function ChatDebug({ auth }: { auth: any }) {
     const createChannel = async () => {
         try {
             setStatus('Creating channel...');
-            await axios.post('/api/chat-channels', {
+            await axios.post('/debug-api/chat-channels', {
                 name: 'Debug Channel ' + Date.now(),
                 description: 'Created via Web Debug',
                 icon: 'Bug'
@@ -55,7 +55,7 @@ export default function ChatDebug({ auth }: { auth: any }) {
         if (!activeChannel) return;
         try {
             setStatus('Sending message...');
-            await axios.post(`/api/chat/${activeChannel.slug}`, {
+            await axios.post(`/debug-api/chat/${activeChannel.slug}`, {
                 body: newMessage,
                 type: 'text'
             });
