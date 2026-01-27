@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Info, CheckCircle2, Clock, AlertCircle, Building2, User } from 'lucide-react';
+import { ChevronLeft, Info, CheckCircle2, Clock, AlertCircle, Building2, User, MapPin } from 'lucide-react';
 import api from '../services/api';
 import SkeletonLoader from '../components/SkeletonLoader';
 
@@ -52,6 +52,23 @@ export default function GovDashboard() {
                         <div className="text-2xl font-black">{data?.stats?.resolved || 0}</div>
                         <div className="text-[9px] text-indigo-300 font-bold uppercase">تم الحل</div>
                     </div>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                    <button
+                        onClick={() => navigate('/gov/inventory')}
+                        className="flex-1 bg-white/10 active:bg-white/20 p-4 rounded-2xl flex items-center justify-center gap-2 border border-white/10 transition-colors"
+                    >
+                        <Building2 size={20} className="text-white" />
+                        <span className="text-white font-bold text-xs">سجل البنية التحتية</span>
+                    </button>
+                    <button
+                        onClick={() => navigate('/admin/map-editor')}
+                        className="flex-1 bg-white/10 active:bg-white/20 p-4 rounded-2xl flex items-center justify-center gap-2 border border-white/10 transition-colors"
+                    >
+                        <MapPin size={20} className="text-white" />
+                        <span className="text-white font-bold text-xs">خريطة الخدمات</span>
+                    </button>
                 </div>
             </header>
 

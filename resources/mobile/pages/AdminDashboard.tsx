@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Users, MessageSquare, ArrowRight, Map, Activity, Heart, Building2, Bot, Zap, BookOpen, Send, Crosshair } from 'lucide-react';
+import { Shield, Users, MessageSquare, ArrowRight, Map, Activity, Heart, Building2, Bot, Zap, BookOpen, Send, Crosshair, LayoutList } from 'lucide-react';
 import api from '../services/api';
 import SkeletonLoader from '../components/SkeletonLoader';
 
@@ -37,6 +37,7 @@ export default function AdminDashboard() {
         { title: 'دليل المدينة', icon: <BookOpen className="text-blue-500" />, path: '/admin/directory' },
         { title: 'محرر الخريطة', icon: <Map className="text-emerald-500" />, path: '/admin/map-editor' },
         { title: 'التتبع المباشر', icon: <Crosshair className="text-red-500" />, path: '/admin/user-map' },
+        { title: 'سجل البنية التحتية', icon: <LayoutList className="text-teal-500" />, path: '/gov/inventory' },
     ];
 
     return (

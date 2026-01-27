@@ -133,27 +133,58 @@ class InfrastructureController extends Controller
 
     public function index(Request $request)
     {
-        \Log::info('Infrastructure index requested', [
-            'user_id' => $request->user()?->id,
-            'role' => $request->user()?->role
-        ]);
+        // \Log::info('Infrastructure index requested', [
+        //     'user_id' => $request->user()?->id,
+        //     'role' => $request->user()?->role
+        // ]);
 
         $queryLines = InfrastructureLine::query();
         $queryNodes = InfrastructureNode::query();
 
-        // If not admin or official, only show published items
-        if (!$request->user() || !in_array($request->user()->role, ['admin', 'official'])) {
+        $user = $request->user();
+
+        // Admin sees everything
+        if ($user && $user->role === 'admin') {
+            // No filter
+        } 
+        // Official sees ALL Published + THEIR Unpublished
+        elseif ($user && $user->role === 'official' && $user->department) {
+            $slug = $user->department->slug; // Assume slug exists and matches map
+            // Map slug to types
+            $deptMap = [
+                'water' => ['water_tank', 'pump', 'valve', 'water_pipe_main', 'water_pipe_distribution'],
+                'electricity' => ['transformer', 'pole', 'generator', 'power_cable_underground', 'power_line_overhead'],
+                'municipality' => ['manhole', 'sewage_pipe', 'pothole', 'garbage_pile'], // municipality usually handles sanitation too
+                'telecom' => ['exchange', 'cabinet', 'telecom_cable']
+            ];
+            
+            // Normalize slug if needed (e.g. sanitation -> municipality?)
+            // For now assuming strict match or fallback
+            $allowedTypes = $deptMap[$slug] ?? [];
+
+            if (empty($allowedTypes)) {
+                // If unknown department, fallback to only published
+                $queryLines->where('is_published', true);
+                $queryNodes->where('is_published', true);
+            } else {
+                $queryLines->where(function($q) use ($allowedTypes) {
+                    $q->where('is_published', true)
+                      ->orWhereIn('type', $allowedTypes);
+                });
+                $queryNodes->where(function($q) use ($allowedTypes) {
+                    $q->where('is_published', true)
+                      ->orWhereIn('type', $allowedTypes);
+                });
+            }
+        } 
+        // Public sees only Published
+        else {
             $queryLines->where('is_published', true);
             $queryNodes->where('is_published', true);
         }
 
         $lines = $queryLines->get();
         $nodes = $queryNodes->get();
-
-        \Log::info('Infrastructure index returning', [
-            'lines_count' => $lines->count(),
-            'nodes_count' => $nodes->count()
-        ]);
 
         return response()->json([
             'lines' => $lines,
