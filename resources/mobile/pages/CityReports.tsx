@@ -37,13 +37,19 @@ export default function CityReports() {
         ? reports
         : reports.filter(r => r.category === filter);
 
-    const getIcon = (category: string) => {
-        switch (category) {
-            case 'electricity': return '⚡';
-            case 'water': return '💧';
-            case 'sanitation': return '🚽';
-            case 'road': return '🚧';
-            default: return '⚠️';
+    const getIcon = (report: any) => {
+        if (report.category === 'electricity') {
+            if (report.status === 'resolved') {
+                return <img src="/icons/elektricity-on.png" alt="On" className="w-8 h-8 object-contain" />;
+            }
+            return <img src="/icons/elektricity-off.png" alt="Off" className="w-8 h-8 object-contain" />;
+        }
+
+        switch (report.category) {
+            case 'water': return <span className="text-2xl">💧</span>;
+            case 'sanitation': return <span className="text-2xl">🚽</span>;
+            case 'road': return <span className="text-2xl">🚧</span>;
+            default: return <span className="text-2xl">⚠️</span>;
         }
     };
 
@@ -116,13 +122,13 @@ export default function CityReports() {
                         filteredReports.map((report) => (
                             <div key={report.id} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700/50">
                                 <div className="flex justify-between items-start mb-2">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${getColor(report.category)}`}>
-                                        {getIcon(report.category)}
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getColor(report.category)}`}>
+                                        {getIcon(report)}
                                     </div>
                                     <div className="flex flex-col items-end gap-1">
                                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${report.status === 'resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                                report.status === 'in_progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                    'bg-amber-50 text-amber-700 border-amber-100'
+                                            report.status === 'in_progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                'bg-amber-50 text-amber-700 border-amber-100'
                                             }`}>
                                             {getStatusText(report.status)}
                                         </span>
