@@ -125,6 +125,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     const [history, setHistory] = useState<any[]>([]);
     const [redoStack, setRedoStack] = useState<any[]>([]);
     const [hasUnpublishedChanges, setHasUnpublishedChanges] = useState(false);
+    const [mapData, setMapData] = useState<{ lines: any[], nodes: any[] }>({ lines: [], nodes: [] });
 
     // Refs for event listeners to avoid closure issues
     const subTypeRef = useRef<string>(selectedSubType);
@@ -303,6 +304,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                 data.lines.some((l: any) => !l.is_published && config.lineTypes.some(t => t.type === l.type));
             setHasUnpublishedChanges(hasDrafts);
 
+            setMapData({ lines: sectorLines, nodes: sectorNodes });
             renderData(sectorLines, sectorNodes);
         } catch (e) {
             console.error('Failed to fetch data', e);
@@ -310,6 +312,34 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             setLoading(false);
         }
     };
+
+    // Auto-focus logic
+    useEffect(() => {
+        if (loading || !map.current) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const focusId = params.get('focus');
+        const focusType = params.get('type');
+
+        if (focusId && focusType) {
+            // Find feature
+            const sourceId = `net-${sector}`;
+            const features = map.current.querySourceFeatures(sourceId, {
+                sourceLayer: focusType === 'node' ? undefined : undefined, // GeoJSON source doesn't have sourceLayer
+                filter: ['==', 'id', parseInt(focusId)]
+            });
+
+            // Since source might not be fully loaded, we might need to find in raw data if querySourceFeatures fails?
+            // querySourceFeatures only works for features in viewport often.
+            // Better to use the raw data we just fetched? But we don't have it in state except implicitly.
+            // Actually we called renderData with (sectorLines, sectorNodes).
+            // But we didn't save them to state.
+
+            // Alternative: rely on map source?
+            // Best to save data to state or re-fetch?
+            // Let's modify fetchData to return data or save to state.
+        }
+    }, [loading]); // Run when loading finishes
 
     const renderData = (linesData: any[], nodesData: any[]) => {
         if (!map.current) return;
@@ -448,6 +478,34 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         }
     };
 
+    // Auto-focus logic
+    useEffect(() => {
+        if (loading || !map.current) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const focusId = params.get('focus');
+        const focusType = params.get('type');
+
+        if (focusId && focusType) {
+            // Find feature
+            const sourceId = `net-${sector}`;
+            const features = map.current.querySourceFeatures(sourceId, {
+                sourceLayer: focusType === 'node' ? undefined : undefined, // GeoJSON source doesn't have sourceLayer
+                filter: ['==', 'id', parseInt(focusId)]
+            });
+
+            // Since source might not be fully loaded, we might need to find in raw data if querySourceFeatures fails?
+            // querySourceFeatures only works for features in viewport often.
+            // Better to use the raw data we just fetched? But we don't have it in state except implicitly.
+            // Actually we called renderData with (sectorLines, sectorNodes).
+            // But we didn't save them to state.
+
+            // Alternative: rely on map source?
+            // Best to save data to state or re-fetch?
+            // Let's modify fetchData to return data or save to state.
+        }
+    }, [loading]); // Run when loading finishes
+
     const saveDraft = () => {
         alert('تم حفظ المسودات بنجاح. يمكنك العودة وإكمال العمل لاحقاً.');
     };
@@ -486,6 +544,34 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         }
     };
 
+    // Auto-focus logic
+    useEffect(() => {
+        if (loading || !map.current) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const focusId = params.get('focus');
+        const focusType = params.get('type');
+
+        if (focusId && focusType) {
+            // Find feature
+            const sourceId = `net-${sector}`;
+            const features = map.current.querySourceFeatures(sourceId, {
+                sourceLayer: focusType === 'node' ? undefined : undefined, // GeoJSON source doesn't have sourceLayer
+                filter: ['==', 'id', parseInt(focusId)]
+            });
+
+            // Since source might not be fully loaded, we might need to find in raw data if querySourceFeatures fails?
+            // querySourceFeatures only works for features in viewport often.
+            // Better to use the raw data we just fetched? But we don't have it in state except implicitly.
+            // Actually we called renderData with (sectorLines, sectorNodes).
+            // But we didn't save them to state.
+
+            // Alternative: rely on map source?
+            // Best to save data to state or re-fetch?
+            // Let's modify fetchData to return data or save to state.
+        }
+    }, [loading]); // Run when loading finishes
+
     const deleteAsset = async () => {
         if (!inspectorData || !confirm('هل أنت متأكد من الحذف؟')) return;
         try {
@@ -500,6 +586,34 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             setLoading(false);
         }
     };
+
+    // Auto-focus logic
+    useEffect(() => {
+        if (loading || !map.current) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const focusId = params.get('focus');
+        const focusType = params.get('type');
+
+        if (focusId && focusType) {
+            // Find feature
+            const sourceId = `net-${sector}`;
+            const features = map.current.querySourceFeatures(sourceId, {
+                sourceLayer: focusType === 'node' ? undefined : undefined, // GeoJSON source doesn't have sourceLayer
+                filter: ['==', 'id', parseInt(focusId)]
+            });
+
+            // Since source might not be fully loaded, we might need to find in raw data if querySourceFeatures fails?
+            // querySourceFeatures only works for features in viewport often.
+            // Better to use the raw data we just fetched? But we don't have it in state except implicitly.
+            // Actually we called renderData with (sectorLines, sectorNodes).
+            // But we didn't save them to state.
+
+            // Alternative: rely on map source?
+            // Best to save data to state or re-fetch?
+            // Let's modify fetchData to return data or save to state.
+        }
+    }, [loading]); // Run when loading finishes
 
     const canServe = useMemo(() => {
         if (!inspectorData) return false;

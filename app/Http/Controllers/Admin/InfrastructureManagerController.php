@@ -81,4 +81,20 @@ class InfrastructureManagerController extends Controller
             'nodes' => $queryNodes->latest()->get()
         ]);
     }
+
+    public function show($type, $id)
+    {
+        if ($type === 'node') {
+            $asset = \App\Models\InfrastructureNode::findOrFail($id);
+        } elseif ($type === 'line') {
+            $asset = \App\Models\InfrastructureLine::findOrFail($id);
+        } else {
+            abort(404);
+        }
+
+        return Inertia::render('Admin/Infrastructure/Show', [
+            'asset' => $asset,
+            'type' => $type
+        ]);
+    }
 }
