@@ -13,33 +13,35 @@ export default function TabContent({ activeTab, newsItems }: TabContentProps) {
         <div className="min-h-[200px]">
             {activeTab === 'news' && (
                 <div className="space-y-4">
-                    {/* Placeholder content until api/dashboard/news is fully populated with real dynamic content */}
-                    {[
-                        { title: 'اجتماع دوري لمناقشة خطة الكهرباء', body: 'يدعو المجلس كافة المواطنين لحضور اللقاء المفتوح اليوم مساءً...', color: 'bg-blue-500', icon: 'م', iconBg: 'bg-blue-50', iconColor: 'text-blue-600', time: 'منذ ساعتين', source: 'مجلس المدينة' },
-                        { title: 'تعديل ساعات التقنين', body: 'تم اعتماد برنامج 3 وصل مقابل 3 قطع اعتباراً من الغد...', color: 'bg-amber-500', icon: '⚡', iconBg: 'bg-amber-50', iconColor: 'text-amber-600', time: 'أمس', source: 'الكهرباء' }
-                    ].map((item, i) => (
-                        <div
-                            key={i}
-                            className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/60 dark:border-slate-700/50 shadow-sm relative overflow-hidden group active:scale-[0.99] transition-transform [contain:layout_style]"
-                        >
-                            <div className={`absolute top-0 right-0 w-1.5 h-full ${item.color}`}></div>
-                            <div className="flex gap-4">
-                                <div className={`w-11 h-11 ${item.iconBg} dark:bg-slate-900 rounded-xl flex items-center justify-center ${item.iconColor} font-bold text-sm shrink-0 border border-slate-100 dark:border-slate-800 shadow-inner-soft`}>
-                                    {item.icon}
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{item.source}</span>
-                                        <span className="text-[10px] text-slate-400 dark:text-slate-500">• {item.time}</span>
+                    {newsItems.length > 0 ? (
+                        newsItems.map((item, i) => (
+                            <div
+                                key={item.id || i}
+                                className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/60 dark:border-slate-700/50 shadow-sm relative overflow-hidden group active:scale-[0.99] transition-transform [contain:layout_style]"
+                            >
+                                <div className={`absolute top-0 right-0 w-1.5 h-full ${item.category === 'emergency' ? 'bg-red-500' : 'bg-emerald-500'}`}></div>
+                                <div className="flex gap-4">
+                                    <div className={`w-11 h-11 ${item.category === 'emergency' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'} dark:bg-slate-900 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border border-slate-100 dark:border-slate-800 shadow-inner-soft`}>
+                                        {item.category === 'emergency' ? '🚨' : '📰'}
                                     </div>
-                                    <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-2 leading-tight">{item.title}</h3>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
-                                        {item.body}
-                                    </p>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{item.author || 'مجلس المدينة'}</span>
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500">• {item.created_at}</span>
+                                        </div>
+                                        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-2 leading-tight">{item.title}</h3>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
+                                            {item.excerpt || item.body}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                            <p>لا يوجد أخبار حالياً</p>
                         </div>
-                    ))}
+                    )}
                 </div>
             )}
 

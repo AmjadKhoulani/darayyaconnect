@@ -4,7 +4,7 @@ import { GeolocationService } from '../services/GeolocationService';
 import api from '../services/api';
 import { NotificationService } from '../services/notification';
 import { OfflineService, OfflineReport } from '../services/OfflineService';
-import { Construction, Trash2, Lightbulb, FileText, MapPin, Send, MessageSquare, AlertTriangle, ArrowRight, Camera, RefreshCw, WifiOff, X, CheckCircle } from 'lucide-react';
+import { Construction, Trash2, Zap, FileText, MapPin, Send, MessageSquare, AlertTriangle, ArrowRight, Camera, RefreshCw, WifiOff, X, CheckCircle, Droplets, Waves } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -12,7 +12,6 @@ export default function AddReport() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [type, setType] = useState('infrastructure');
-    const [severity, setSeverity] = useState(3);
     const [location, setLocation] = useState<any>(null);
     const [image, setImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -139,10 +138,12 @@ export default function AddReport() {
     };
 
     const reportTypes = [
-        { id: 'infrastructure', label: 'بنية تحتية', icon: <Construction size={24} />, color: 'bg-orange-50 text-orange-600 border-orange-100' },
+        { id: 'infrastructure', label: 'بنية تحتية (عامة)', icon: <Construction size={24} />, color: 'bg-orange-50 text-orange-600 border-orange-100' },
+        { id: 'electricity', label: 'كهرباء', icon: <Zap size={24} />, color: 'bg-amber-50 text-amber-600 border-amber-100' },
+        { id: 'water', label: 'مياه', icon: <Droplets size={24} />, color: 'bg-blue-50 text-blue-600 border-blue-100' },
+        { id: 'sewage', label: 'صرف صحي', icon: <Waves size={24} />, color: 'bg-slate-50 text-slate-600 border-slate-100' },
         { id: 'trash', label: 'نظافة', icon: <Trash2 size={24} />, color: 'bg-red-50 text-red-600 border-red-100' },
-        { id: 'lighting', label: 'إنارة', icon: <Lightbulb size={24} />, color: 'bg-amber-50 text-amber-600 border-amber-100' },
-        { id: 'other', label: 'أخرى', icon: <FileText size={24} />, color: 'bg-blue-50 text-blue-600 border-blue-100' },
+        { id: 'other', label: 'أخرى', icon: <FileText size={24} />, color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
     ];
 
     const fetchLocation = async () => {
@@ -205,9 +206,9 @@ export default function AddReport() {
             const formData = new FormData();
             formData.append('title', title);
             formData.append('description', description);
-            formData.append('type', type /* mapped to category in controller if needed, or update controller to match */);
-            formData.append('category', type === 'trash' ? 'sanitation' : (type === 'lighting' ? 'electricity' : 'safety')); // Mapping basic types to enum
-            formData.append('severity', severity.toString());
+            formData.append('type', type);
+            // formData.append('category', ...); // Deprecated, backend handles logic based on type.
+            // formData.append('severity', ...); // Removed.
 
             if (location) {
                 formData.append('latitude', location.lat.toString());
@@ -396,33 +397,6 @@ export default function AddReport() {
                                     placeholder="مثال: حفرة في الطريق الرئيسي"
                                     required
                                 />
-                            </div>
-
-                            {/* Severity Slider */}
-                            <div>
-                                <label className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-500 mb-2 px-1">
-                                    <span>درجة الخطورة ( {severity}/5 )</span>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${severity === 1 ? 'bg-green-100 text-green-700' :
-                                        severity === 2 ? 'bg-blue-100 text-blue-700' :
-                                            severity === 3 ? 'bg-yellow-100 text-yellow-700' :
-                                                severity === 4 ? 'bg-orange-100 text-orange-700' :
-                                                    'bg-red-100 text-red-700'
-                                        }`}>
-                                        {severity === 1 ? 'منخفضة' : severity === 2 ? 'عادية' : severity === 3 ? 'متوسطة' : severity === 4 ? 'عالية' : 'حرجة'}
-                                    </span>
-                                </label>
-                                <input
-                                    type="range"
-                                    min="1"
-                                    max="5"
-                                    value={severity}
-                                    onChange={(e) => setSeverity(parseInt(e.target.value))}
-                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-slate-900 dark:accent-indigo-500"
-                                />
-                                <div className="flex justify-between px-1 mt-1 text-[10px] text-slate-400">
-                                    <span>بسيط</span>
-                                    <span>عاجل</span>
-                                </div>
                             </div>
 
                             {/* Description Textarea */}

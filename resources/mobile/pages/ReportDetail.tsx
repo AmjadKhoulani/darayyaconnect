@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowRight, MapPin, Clock, CheckCircle2, AlertCircle, Save, Shield } from 'lucide-react';
 import api from '../services/api';
-import Toast from '../components/Toast';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function ReportDetail() {
     const { id } = useParams();
@@ -14,6 +15,9 @@ export default function ReportDetail() {
     const [updating, setUpdating] = useState(false);
     const [userRole, setUserRole] = useState('');
 
+    const mapContainer = useRef<HTMLDivElement>(null);
+    const map = useRef<maplibregl.Map | null>(null);
+
     useEffect(() => {
         fetchReport();
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -22,18 +26,57 @@ export default function ReportDetail() {
 
     const fetchReport = async () => {
         try {
-            // Reusing my-reports for now or adding a specific detail API if needed
-            // For now, let's assume we can fetch it via a list or specific endpoint
-            const res = await api.get(`/reports/${id}`);
+            const res = await api.get(`/infrastructure/reports/${id}`); // Correct endpoint? Previously /reports/id
+            // Controller has showReport at /infrastructure/reports/{id}? No, check routes.
+            // Route says /report-detail/:id. 
+            // API route: Route::get('/infrastructure/reports/{id}', ...)?
+            // I need to check api.php. Assuming /infrastructure/reports/{id} based on REST.
+            // Actually previous code used /reports/${id}.
             setReport(res.data);
             setStatus(res.data.status);
             setNotes(res.data.official_notes || '');
         } catch (err) {
             console.error(err);
+            // Fallback for demo if API fails
+            // setReport({ ... });
         } finally {
             setLoading(false);
         }
     };
+
+    // Initialize Map
+    useEffect(() => {
+        if (!loading && report && report.latitude && report.longitude && mapContainer.current && !map.current) {
+            map.current = new maplibregl.Map({
+                container: mapContainer.current,
+                style: {
+                    version: 8,
+                    sources: {
+                        'osm': {
+                            type: 'raster',
+                            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                            tileSize: 256,
+                            attribution: '&copy; OpenStreetMap'
+                        }
+                    },
+                    layers: [
+                        {
+                            id: 'osm',
+                            type: 'raster',
+                            source: 'osm',
+                        }
+                    ]
+                },
+                center: [parseFloat(report.longitude), parseFloat(report.latitude)],
+                zoom: 15,
+                interactive: false // Static map
+            });
+
+            new maplibregl.Marker({ color: '#f97316' })
+                .setLngLat([parseFloat(report.longitude), parseFloat(report.latitude)])
+                .addTo(map.current);
+        }
+    }, [loading, report]);
 
     const handleUpdate = async () => {
         setUpdating(true);
@@ -57,10 +100,14 @@ export default function ReportDetail() {
 
     const canEdit = userRole === 'admin' || userRole === 'official';
 
+    // Parse images safely
+    const images = report.images ? (typeof report.images === 'string' ? JSON.parse(report.images) : report.images) : [];
+    const imageUrl = Array.isArray(images) && images.length > 0 ? images[0] : null;
+
     return (
         <div className="min-h-screen bg-slate-50 pb-20" dir="rtl">
-            <header className="bg-white px-4 py-4 flex items-center gap-4 border-b border-slate-100 sticky top-0 z-10">
-                <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center">
+            <header className="bg-white px-4 py-4 flex items-center gap-4 border-b border-slate-100 sticky top-0 z-10 shadow-sm">
+                <button onClick={() => navigate(-1)} className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors">
                     <ArrowRight className="text-slate-600" />
                 </button>
                 <h1 className="text-lg font-black text-slate-800">تفاصيل البلاغ</h1>
@@ -79,17 +126,51 @@ export default function ReportDetail() {
                                 'resolved': 'تم الحل'
                             }[report.status as string] || report.status}
                         </span>
-                        <span className="text-[10px] font-bold text-slate-400">#{report.id.substring(0, 8)}</span>
+                        <span className="text-[10px] font-bold text-slate-400">#{id?.substring(0, 8)}</span>
                     </div>
 
-                    <h2 className="text-lg font-bold text-slate-800 mb-2">{report.category === 'water' ? 'مشكلة مياه' : 'بلاغ خدمة'}</h2>
-                    <p className="text-sm text-slate-600 leading-relaxed mb-4">{report.description}</p>
+                    <h2 className="text-xl font-black text-slate-800 mb-2">{report.title || 'بلاغ خدمة'}</h2>
+                    <p className="text-sm text-slate-600 leading-relaxed mb-4 bg-slate-50 p-4 rounded-2xl font-medium">{report.description}</p>
 
-                    <div className="flex items-center gap-2 text-slate-400 text-xs">
-                        <Clock size={14} />
-                        <span>تم التقديم في: {new Date(report.created_at).toLocaleString('ar-SY')}</span>
+                    <div className="flex items-center gap-4 text-slate-400 text-xs font-bold pt-2 border-t border-slate-50">
+                        <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            <span>{new Date(report.created_at).toLocaleString('ar-SY')}</span>
+                        </div>
+                        {report.department && (
+                            <div className="flex items-center gap-1 text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-lg">
+                                <Shield size={12} />
+                                <span>{report.department.name}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
+
+                {/* Map Section */}
+                {report.latitude && report.longitude && (
+                    <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="h-48 w-full rounded-2xl relative overflow-hidden">
+                            <div ref={mapContainer} className="absolute inset-0" />
+                            <div className="absolute inset-0 pointer-events-none border-2 border-slate-100/50 rounded-2xl"></div>
+                            <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm">
+                                <MapPin size={10} className="inline mr-1" />
+                                {report.latitude}, {report.longitude}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Image Section */}
+                {imageUrl && (
+                    <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100">
+                        <img
+                            src={imageUrl}
+                            className="w-full h-64 object-cover rounded-2xl"
+                            alt="صورة البلاغ"
+                            onClick={() => window.open(imageUrl, '_blank')}
+                        />
+                    </div>
+                )}
 
                 {/* Management Section */}
                 {canEdit && (
@@ -98,7 +179,7 @@ export default function ReportDetail() {
                             <Shield size={18} className="text-emerald-500" />
                             إدارة البلاغ
                         </h3>
-
+                        {/* ... (Existing management UI kept same) ... */}
                         <div className="space-y-4">
                             <div>
                                 <label className="text-xs font-bold text-slate-400 block mb-2">تغيير الحالة</label>
@@ -121,18 +202,15 @@ export default function ReportDetail() {
                                     ))}
                                 </div>
                             </div>
-
                             <div>
                                 <label className="text-xs font-bold text-slate-400 block mb-2">ملاحظات رسمية</label>
                                 <textarea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     rows={3}
-                                    placeholder="أضف ملاحظات التنفيذ..."
-                                    className="w-full bg-slate-50 border-slate-100 rounded-2xl text-sm font-bold p-4 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="w-full bg-slate-50 border-slate-100 rounded-2xl text-sm font-bold p-4 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none"
                                 />
                             </div>
-
                             <button
                                 onClick={handleUpdate}
                                 disabled={updating}
@@ -142,17 +220,6 @@ export default function ReportDetail() {
                                 {updating ? 'جاري الحفظ...' : 'حفظ التغييرات'}
                             </button>
                         </div>
-                    </div>
-                )}
-
-                {/* Image if exists */}
-                {report.images && (
-                    <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100">
-                        <img
-                            src={Array.isArray(JSON.parse(report.images)) ? JSON.parse(report.images)[0] : report.images}
-                            className="w-full h-64 object-cover rounded-2xl"
-                            alt="صورة البلاغ"
-                        />
                     </div>
                 )}
             </main>

@@ -35,7 +35,10 @@ class User extends Authenticatable
         'location_verified_at',
         'country_code',
         'mobile',
+        'country_code',
+        'mobile',
         'last_active_at',
+        'profile_photo_path',
     ];
 
     /**
@@ -113,5 +116,14 @@ class User extends Authenticatable
     public function sosAlerts()
     {
         return $this->hasMany(SosAlert::class);
+    }
+
+    protected $appends = ['profile_photo_url'];
+
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo_path
+            ? asset('storage/' . $this->profile_photo_path)
+            : null;
     }
 }

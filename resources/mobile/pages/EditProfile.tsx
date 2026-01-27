@@ -1,10 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Camera, User, Mail, Phone, Lock, Save } from 'lucide-react';
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, User, Mail, Phone, Lock, Save, MapPin, ChevronLeft, AlertCircle } from 'lucide-react';
+import { ArrowRight, User, Mail, Phone, Lock, Save, MapPin, AlertCircle, Camera } from 'lucide-react';
 import api from '../services/api';
 
 export default function EditProfile() {

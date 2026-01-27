@@ -68,7 +68,11 @@ export default function MyReports() {
                         const StatusIcon = status.icon;
 
                         return (
-                            <div key={report.id} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/50">
+                            <div
+                                key={report.id}
+                                onClick={() => navigate(`/report-detail/${report.id}`)}
+                                className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/50 cursor-pointer active:scale-[0.98] transition-all"
+                            >
                                 <div className="flex justify-between items-start mb-3">
                                     <span className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ${status.color}`}>
                                         <StatusIcon size={12} />
