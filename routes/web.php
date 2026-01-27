@@ -75,6 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // General route for dynamic access if needed
         Route::get('/infrastructure/{sector}/editor', [InfrastructureManagerController::class, 'editor'])->name('infrastructure.sector.editor');
+        Route::get('/infrastructure/inventory', [InfrastructureManagerController::class, 'inventory'])->name('infrastructure.inventory');
 
         // Restore old route as redirect to prevent 404
         Route::get('/infrastructure/editor', function() {

@@ -61,6 +61,13 @@ export default function AdminLayout({
                     >
                         البلاغات
                     </SidebarLink>
+                    <SidebarLink
+                        href={route('infrastructure.inventory')}
+                        active={route().current('infrastructure.inventory')}
+                        icon="📋"
+                    >
+                        سجل البنية التحتية
+                    </SidebarLink>
                     {user.role === 'admin' && (
                         <>
                             <SidebarLink

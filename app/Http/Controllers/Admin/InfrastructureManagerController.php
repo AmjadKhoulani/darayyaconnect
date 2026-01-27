@@ -48,4 +48,37 @@ class InfrastructureManagerController extends Controller
             'sector' => $sector
         ]);
     }
+
+    public function inventory(Request $request)
+    {
+        $user = $request->user();
+        $queryLines = \App\Models\InfrastructureLine::query();
+        $queryNodes = \App\Models\InfrastructureNode::query();
+
+        // Official filtering logic
+        if ($user->role === 'official' && $user->department) {
+            $slug = $user->department->slug;
+             $deptMap = [
+                'water' => ['water_tank', 'pump', 'valve', 'water_pipe_main', 'water_pipe_distribution'],
+                'electricity' => ['transformer', 'pole', 'generator', 'power_cable_underground', 'power_line_overhead'],
+                'municipality' => ['manhole', 'sewage_pipe', 'pothole', 'garbage_pile'],
+                'telecom' => ['exchange', 'cabinet', 'telecom_cable']
+            ];
+            $allowedTypes = $deptMap[$slug] ?? [];
+
+            if (!empty($allowedTypes)) {
+                $queryLines->where(function($q) use ($allowedTypes) {
+                    $q->where('is_published', true)->orWhereIn('type', $allowedTypes);
+                });
+                $queryNodes->where(function($q) use ($allowedTypes) {
+                    $q->where('is_published', true)->orWhereIn('type', $allowedTypes);
+                });
+            }
+        }
+
+        return Inertia::render('Admin/Infrastructure/Inventory', [
+            'lines' => $queryLines->latest()->get(),
+            'nodes' => $queryNodes->latest()->get()
+        ]);
+    }
 }
