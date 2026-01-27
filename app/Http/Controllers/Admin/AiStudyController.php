@@ -105,7 +105,7 @@ class AiStudyController extends Controller
 
             'risks' => 'array',
             'recommendations' => 'array',
-            'technicalDetails' => 'array',
+            'technical_details' => 'array',
         ]);
 
         AiStudy::create($validated);
@@ -163,7 +163,7 @@ class AiStudyController extends Controller
 
             'risks' => 'array',
             'recommendations' => 'array',
-            'technicalDetails' => 'array',
+            'technical_details' => 'array',
         ]);
 
         $aiStudy->update($validated);
