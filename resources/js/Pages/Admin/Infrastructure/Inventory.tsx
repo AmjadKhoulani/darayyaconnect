@@ -27,12 +27,18 @@ interface Asset {
 
 interface Props {
     auth: any;
-    assets: Asset[];
+    lines: any[];
+    nodes: any[];
 }
 
-export default function Inventory({ auth, assets }: Props) {
+export default function Inventory({ auth, lines, nodes }: Props) {
     const [search, setSearch] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
+
+    const assets = [
+        ...(Array.isArray(nodes) ? nodes : []).map((n: any) => ({ ...n, category: n.type, type: 'node' })),
+        ...(Array.isArray(lines) ? lines : []).map((l: any) => ({ ...l, category: l.type, type: 'line' }))
+    ].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
 
     const filteredAssets = assets.filter(asset => {
         const matchesSearch = asset.serial_number?.toLowerCase().includes(search.toLowerCase()) ||
