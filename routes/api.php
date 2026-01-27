@@ -47,6 +47,7 @@ Route::get('/infrastructure/vector-layers', [\App\Http\Controllers\Api\VectorLay
 Route::get('/infrastructure/layers', [InfrastructureController::class, 'getLayerPoints']);
 Route::get('/infrastructure/public-reports', [InfrastructureController::class, 'publicReports']);
 Route::post('/infrastructure/reports', [InfrastructureController::class, 'storeReport']);
+Route::get('/infrastructure/reports/{id}', [InfrastructureController::class, 'showReport']);
 
 // Portal
 Route::get('/portal/services', [PortalController::class, 'getServices']);

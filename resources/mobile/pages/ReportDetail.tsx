@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowRight, MapPin, Clock, CheckCircle2, AlertCircle, Save, Shield } from 'lucide-react';
 import api from '../services/api';
 import maplibregl from 'maplibre-gl';
@@ -18,28 +18,45 @@ export default function ReportDetail() {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
 
+    const locationState = useLocation().state as any;
+    // Enhanced Error State
+    const [debugError, setDebugError] = useState<string | null>(null);
+
     useEffect(() => {
+        // Optimistic Load from State
+        if (locationState?.report) {
+            setReport(locationState.report);
+            setStatus(locationState.report.status);
+            setLoading(false); // Show immediately
+        }
+
+        // Fetch fresh data
         fetchReport();
+
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         setUserRole(user.role || '');
     }, [id]);
 
     const fetchReport = async () => {
+        setDebugError(null);
         try {
-            const res = await api.get(`/infrastructure/reports/${id}`); // Correct endpoint? Previously /reports/id
-            // Controller has showReport at /infrastructure/reports/{id}? No, check routes.
-            // Route says /report-detail/:id. 
-            // API route: Route::get('/infrastructure/reports/{id}', ...)?
-            // I need to check api.php. Assuming /infrastructure/reports/{id} based on REST.
-            // Actually previous code used /reports/${id}.
+            // Explicitly constructing URL to show in debug if needed
+            const url = `/infrastructure/reports/${id}`;
+            const res = await api.get(url);
             setReport(res.data);
             setStatus(res.data.status);
             setNotes(res.data.official_notes || '');
-        } catch (err) {
+            setLoading(false);
+        } catch (err: any) {
             console.error(err);
-            // Fallback for demo if API fails
-            // setReport({ ... });
-        } finally {
+            // If we have state data, don't show full error, just toast?
+            // But we need images which are NOT in state.
+
+            const status = err.response?.status;
+            const url = err.config?.url;
+            const msg = err.response?.data?.message || err.message;
+
+            setDebugError(`خطأ ${status}: ${msg}\nURL: ${url}`);
             setLoading(false);
         }
     };
@@ -95,14 +112,51 @@ export default function ReportDetail() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center font-bold">جاري التحميل...</div>;
-    if (!report) return <div className="p-10 text-center font-bold text-rose-500">البلاغ غير موجود</div>;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+                <p className="font-bold text-slate-400 text-sm">جاري تحميل البيانات...</p>
+            </div>
+        </div>
+    );
+
+    if (!report) return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-slate-50 text-center" dir="rtl">
+            <div className="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center mb-6">
+                <AlertCircle size={40} className="text-rose-500" />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 mb-2">تعذر تحميل البلاغ</h3>
+            <p className="text-slate-500 mb-6 text-sm">قد يكون المحتوى محذوفاً أو الرابط غير صحيح.</p>
+
+            {debugError && (
+                <div className="w-full bg-slate-900 text-slate-300 p-4 rounded-xl text-left text-[10px] font-mono mb-6 overflow-x-auto whitespace-pre-wrap" dir="ltr">
+                    {debugError}
+                    <div className="mt-2 text-rose-400 border-t border-slate-700 pt-2">
+                        Admin Note: If status is 404, the route is missing on server. Run 'git pull' then 'php artisan route:clear'.
+                    </div>
+                </div>
+            )}
+
+            <button onClick={() => navigate(-1)} className="px-8 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-600 shadow-sm active:scale-95 transition-transform">
+                عودة
+            </button>
+        </div>
+    );
 
     const canEdit = userRole === 'admin' || userRole === 'official';
 
+    // Helper to get image URL
+    const getImageUrl = (path: string) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${api.defaults.baseURL?.replace('/api', '')}${path}`;
+    };
+
     // Parse images safely
     const images = report.images ? (typeof report.images === 'string' ? JSON.parse(report.images) : report.images) : [];
-    const imageUrl = Array.isArray(images) && images.length > 0 ? images[0] : null;
+    const rawImageUrl = Array.isArray(images) && images.length > 0 ? images[0] : null;
+    const imageUrl = getImageUrl(rawImageUrl);
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20" dir="rtl">
@@ -165,7 +219,7 @@ export default function ReportDetail() {
                     <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100">
                         <img
                             src={imageUrl}
-                            className="w-full h-64 object-cover rounded-2xl"
+                            className="w-full h-64 object-cover rounded-2xl shadow-sm"
                             alt="صورة البلاغ"
                             onClick={() => window.open(imageUrl, '_blank')}
                         />

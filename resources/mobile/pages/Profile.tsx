@@ -189,6 +189,21 @@ export default function Profile() {
                             </div>
                         </button>
 
+                        <button
+                            onClick={() => navigate('/my-reports')}
+                            className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-premium relative overflow-hidden group active:scale-[0.98] transition-all"
+                        >
+                            <div className="relative z-10 flex flex-col items-start h-full justify-between gap-4">
+                                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-800/50">
+                                    <Award size={20} className="text-blue-500 dark:text-blue-400" />
+                                </div>
+                                <div className="text-right">
+                                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-0.5">بلاغاتي</h4>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400">تتبع حالة بلاغاتك</p>
+                                </div>
+                            </div>
+                        </button>
+
                         {user.role === 'admin' && (
                             <button
                                 onClick={() => navigate('/admin-dashboard')}

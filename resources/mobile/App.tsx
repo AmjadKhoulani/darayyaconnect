@@ -83,7 +83,7 @@ import './styles/global.css';
 function AppContent() {
     const location = useLocation();
     const navigate = useNavigate();
-    const hideNavRoutes = ['/login', '/register', '/splash', '/skills', '/add-report', '/study', '/privacy-policy-mobile', '/hashtag'];
+    const hideNavRoutes = ['/login', '/register', '/splash', '/skills', '/add-report', '/study', '/privacy-policy-mobile', '/hashtag', '/discussions/'];
     const showBottomNav = !hideNavRoutes.some(path => location.pathname.includes(path));
     const showFab = showBottomNav;
 

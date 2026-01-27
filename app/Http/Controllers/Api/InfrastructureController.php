@@ -84,7 +84,8 @@ class InfrastructureController extends Controller
 
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('reports', 'public');
-                $reportData['images'] = json_encode([asset('storage/' . $path)]);
+                // Store relative path so frontend can prepend correct base URL
+                $reportData['images'] = json_encode(['/storage/' . $path]);
             }
 
             $report = Report::create($reportData);

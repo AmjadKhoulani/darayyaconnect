@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 * {
-    font-family: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Almarai', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
 

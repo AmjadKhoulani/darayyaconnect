@@ -33,7 +33,7 @@ body {
     overflow-x: hidden;
     color: #0f172a;
     /* Deeper slate for better legibility */
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Almarai', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .bg-page-gradient {

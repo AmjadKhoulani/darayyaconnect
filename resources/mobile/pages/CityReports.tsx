@@ -39,6 +39,13 @@ export default function CityReports() {
         fetchReports();
     }, []);
 
+    // Helper to get image URL
+    const getImageUrl = (path: string) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${api.defaults.baseURL?.replace('/api', '')}${path}`;
+    };
+
     // Initialize Map when viewMode is map
     useEffect(() => {
         if (viewMode === 'map' && mapContainer.current && !map.current && !loading) {
@@ -75,7 +82,7 @@ export default function CityReports() {
 
                     // Create DOM element for marker
                     const el = document.createElement('div');
-                    el.className = 'w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer';
+                    el.className = 'w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-110';
 
                     // Set color based on status or type
                     if (report.category === 'electricity') {
@@ -94,22 +101,45 @@ export default function CityReports() {
                         el.style.fontSize = '16px';
                     }
 
-                    // Popup
+                    // Parse Image
+                    let thumbUrl = null;
+                    if (report.images) {
+                        try {
+                            const imgs = typeof report.images === 'string' ? JSON.parse(report.images) : report.images;
+                            if (Array.isArray(imgs) && imgs.length > 0) {
+                                thumbUrl = getImageUrl(imgs[0]);
+                            }
+                        } catch (e) {
+                            console.error('Image parse error', e);
+                        }
+                    }
+
+                    // Popup HTML
                     const popupHTML = `
-                        <div class="text-right p-1" dir="rtl">
-                            <h3 class="font-bold text-sm mb-1 text-slate-900">${report.title || 'بلاغ'}</h3>
-                            <p class="text-xs text-slate-500 mb-2">${getStatusText(report.status)}</p>
-                            <button id="btn-${report.id}" class="bg-indigo-600 text-white text-[10px] px-3 py-1 rounded-lg font-bold w-full">التفاصيل</button>
+                        <div class="text-right w-48" dir="rtl">
+                            ${thumbUrl ?
+                            `<div class="w-full h-24 mb-2 rounded-lg overflow-hidden bg-slate-100">
+                                    <img src="${thumbUrl}" class="w-full h-full object-cover" onerror="this.style.display='none'"/>
+                                 </div>` : ''
+                        }
+                            <h3 class="font-black text-xs mb-1 text-slate-800 line-clamp-1">${report.title || 'بلاغ خدمة'}</h3>
+                            <div class="flex items-center gap-1 mb-2">
+                                <span class="bg-indigo-50 text-indigo-600 text-[9px] px-1.5 py-0.5 rounded font-bold">${report.category || 'عام'}</span>
+                                <span class="text-[9px] text-slate-500 font-bold">${getStatusText(report.status)}</span>
+                            </div>
+                            <button id="btn-${report.id}" class="bg-slate-900 text-white text-[10px] py-2 rounded-lg font-bold w-full shadow-md active:scale-95 transition-transform flex items-center justify-center gap-1">
+                                عرض التفاصيل
+                            </button>
                         </div>
                       `;
 
-                    const popup = new maplibregl.Popup({ offset: 25 })
+                    const popup = new maplibregl.Popup({ offset: 25, closeButton: false, className: 'custom-popup' })
                         .setHTML(popupHTML);
 
                     // Add click event for button inside popup
                     popup.on('open', () => {
                         document.getElementById(`btn-${report.id}`)?.addEventListener('click', () => {
-                            navigate(`/report-detail/${report.id}`);
+                            navigate(`/report-detail/${report.id}`, { state: { report } });
                         });
                     });
 
@@ -127,16 +157,13 @@ export default function CityReports() {
             }
         }
 
-        // Cleanup if component unmounts or view changes? 
-        // Better to keep map instance if switching back and forth?
-        // simple approach: destroy on unmount of effect if viewMode changes to list
         return () => {
             if (viewMode === 'list' && map.current) {
                 map.current.remove();
                 map.current = null;
             }
         };
-    }, [viewMode, loading, filter]); // Re-run if filter changes to update markers? simpler to remove and re-add
+    }, [viewMode, loading, filter]);
 
     const filteredReports = filter === 'all'
         ? reports
@@ -250,7 +277,7 @@ export default function CityReports() {
                             filteredReports.map((report) => (
                                 <div
                                     key={report.id}
-                                    onClick={() => navigate(`/report-detail/${report.id}`)}
+                                    onClick={() => navigate(`/report-detail/${report.id}`, { state: { report } })}
                                     className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700/50 cursor-pointer active:scale-[0.98] transition-all"
                                 >
                                     <div className="flex justify-between items-start mb-2">

@@ -16,7 +16,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['"IBM Plex Sans Arabic"', ...defaultTheme.fontFamily.sans],
+                sans: ['"Almarai"', ...defaultTheme.fontFamily.sans],
             },
             animation: {
                 blob: "blob 7s infinite",

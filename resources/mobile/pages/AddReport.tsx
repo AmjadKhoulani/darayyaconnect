@@ -354,8 +354,8 @@ export default function AddReport() {
             <main className="px-5 -mt-8 relative z-20 space-y-5">
                 <form onSubmit={handleSubmitClick} className="space-y-6">
                     {/* Report Type Selection */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-black text-slate-800 dark:text-slate-100 mb-3 px-1">
+                    <div className="mt-4">
+                        <label className="flex items-center gap-2 text-sm font-black text-white mb-3 px-1">
                             <div className="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
                             نوع البلاغ
                         </label>
