@@ -10,6 +10,8 @@ import {
     ShieldAlert,
     Wifi,
     Zap,
+    Moon,
+    Sun,
 } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -43,14 +45,27 @@ export default function InfrastructureIndex({ auth, points }: any) {
         'citizen-reports',
     ]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
         if (!mapContainer.current) return;
 
         // Initialize Map
+        // Initialize Map
         map.current = new maplibregl.Map({
             container: mapContainer.current,
-            style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+            style: {
+                version: 8,
+                sources: {
+                    osm: {
+                        type: 'raster',
+                        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        tileSize: 256,
+                        attribution: '&copy; OpenStreetMap',
+                    },
+                },
+                layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+            },
             center: [36.2366, 33.4593],
             zoom: 14,
             maxZoom: 18,
@@ -219,39 +234,45 @@ export default function InfrastructureIndex({ auth, points }: any) {
                 });
 
             // 3. Crowdsourced Status Layer (Heatmap/Zones)
-            fetch('/api/infrastructure/status-heatmap?type=electricity')
-                .then((res) => res.json())
-                .then((geoJson) => {
-                    if (!map.current) return;
-                    map.current.addSource('status-zones-source', {
-                        type: 'geojson',
-                        data: geoJson,
-                    });
-                    map.current.addLayer({
-                        id: 'status-zones-fill',
-                        type: 'fill',
-                        source: 'status-zones-source',
-                        layout: {
-                            visibility: activeLayers.includes('crowd-status')
-                                ? 'visible'
-                                : 'none',
-                        },
-                        paint: {
-                            'fill-color': [
-                                'match',
-                                ['get', 'status'],
-                                'available',
-                                '#10b981',
-                                'unstable',
-                                '#f59e0b',
-                                'cutoff',
-                                '#ef4444',
-                                '#94a3b8',
-                            ],
-                            'fill-opacity': 0.2,
-                        },
-                    });
-                });
+            ['electricity', 'water'].forEach((type) => {
+                fetch(`/api/infrastructure/status-heatmap?type=${type}`)
+                    .then((res) => res.json())
+                    .then((geoJson) => {
+                        if (!map.current) return;
+
+                        // Source
+                        map.current.addSource(`crowd-${type}-source`, {
+                            type: 'geojson',
+                            data: geoJson,
+                        });
+
+                        // Heatmap Only (No text numbers per user request)
+                        map.current.addLayer({
+                            id: `crowd-${type}-fill`,
+                            type: 'heatmap',
+                            source: `crowd-${type}-source`,
+                            layout: {
+                                visibility: activeLayers.includes('crowd-status') ? 'visible' : 'none',
+                            },
+                            paint: {
+                                'heatmap-weight': ['interpolate', ['linear'], ['get', 'score'], 0, 0, 100, 1],
+                                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 12, 1, 15, 3],
+                                'heatmap-color': [
+                                    'interpolate',
+                                    ['linear'],
+                                    ['heatmap-density'],
+                                    0, 'rgba(0,0,0,0)',
+                                    0.2, type === 'water' ? 'rgb(103,169,207)' : 'rgb(253,219,199)',
+                                    0.6, type === 'water' ? 'rgb(33,102,172)' : 'rgb(239,138,98)',
+                                    1, type === 'water' ? 'rgb(5,48,97)' : 'rgb(178,24,43)'
+                                ],
+                                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 12, 10, 15, 30],
+                                'heatmap-opacity': 0.6
+                            },
+                        });
+                    })
+                    .catch(err => console.error(err));
+            });
 
             // 4. Public Reports Layer (HTML Markers for animation)
             const reportMarkers: maplibregl.Marker[] = [];
@@ -349,13 +370,16 @@ export default function InfrastructureIndex({ auth, points }: any) {
             }
         });
 
-        if (map.current!.getLayer('status-zones-fill')) {
-            map.current!.setLayoutProperty(
-                'status-zones-fill',
-                'visibility',
-                activeLayers.includes('crowd-status') ? 'visible' : 'none',
-            );
-        }
+        // Update Heatmap layers visibility
+        ['electricity', 'water'].forEach(type => {
+            if (map.current!.getLayer(`crowd-${type}-fill`)) {
+                map.current!.setLayoutProperty(
+                    `crowd-${type}-fill`,
+                    'visibility',
+                    activeLayers.includes('crowd-status') ? 'visible' : 'none',
+                );
+            }
+        });
 
         if (map.current!.getLayer('public-reports-layer')) {
             map.current!.setLayoutProperty(
@@ -459,12 +483,20 @@ export default function InfrastructureIndex({ auth, points }: any) {
                                 />
                                 مستكشف المدينة
                             </h3>
-                            <button
-                                onClick={() => setIsSidebarOpen(false)}
-                                className="rounded-lg p-1 transition hover:bg-slate-200"
-                            >
-                                <EyeOff size={18} className="text-slate-400" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => setDarkMode(!darkMode)}
+                                    className={`rounded-lg p-1.5 transition ${darkMode ? 'bg-slate-800 text-yellow-400' : 'text-slate-400 hover:bg-slate-200'}`}
+                                >
+                                    {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                                </button>
+                                <button
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    className="rounded-lg p-1 transition hover:bg-slate-200"
+                                >
+                                    <EyeOff size={18} className="text-slate-400" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Scrollable Content */}
@@ -642,7 +674,7 @@ export default function InfrastructureIndex({ auth, points }: any) {
                 {/* 2. Map Viewport */}
                 <div
                     ref={mapContainer}
-                    className="h-full flex-1 shadow-inner"
+                    className={`h-full flex-1 shadow-inner transition-all duration-500 ${darkMode ? 'contrast-125 hue-rotate-180 invert' : ''}`}
                 />
 
                 {/* Floating Quick Stats (Bottom Left) */}
@@ -656,48 +688,7 @@ export default function InfrastructureIndex({ auth, points }: any) {
                 </div>
             </div>
 
-            {/* Content List Section Below Map */}
-            <div className="mx-auto max-w-7xl px-4 py-12">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <FacilityCard
-                        icon="⚡"
-                        title="محولات الكهرباء"
-                        count={
-                            points.filter((p: any) => p.type === 'transformer')
-                                .length
-                        }
-                        status="75%"
-                    />
-                    <FacilityCard
-                        icon="💧"
-                        title="آبار المياه"
-                        count={
-                            points.filter((p: any) => p.type === 'water_well')
-                                .length
-                        }
-                        status="92%"
-                    />
-                    <FacilityCard
-                        icon="🏥"
-                        title="النقاط الطبية"
-                        count={
-                            points.filter(
-                                (p: any) => p.type === 'health_center',
-                            ).length
-                        }
-                        status="100%"
-                    />
-                    <FacilityCard
-                        icon="🏛️"
-                        title="المباني الحكومية"
-                        count={
-                            points.filter((p: any) => p.type === 'government')
-                                .length
-                        }
-                        status="100%"
-                    />
-                </div>
-            </div>
+
         </PortalLayout>
     );
 }
