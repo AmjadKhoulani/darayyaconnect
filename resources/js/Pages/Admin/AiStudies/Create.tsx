@@ -16,6 +16,7 @@ export default function Create({ auth }: any) {
         gradient: 'from-blue-500 to-indigo-600',
         summary: '',
         is_published: true,
+        is_featured: false,
         scenario: {
             current: '',
             withProject: '',
@@ -161,11 +162,10 @@ export default function Create({ auth }: any) {
                                             key={tab.id}
                                             type="button"
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`whitespace-nowrap border-b-2 px-6 py-3 text-sm font-medium transition-colors ${
-                                                activeTab === tab.id
-                                                    ? 'border-indigo-600 text-indigo-600'
-                                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                            }`}
+                                            className={`whitespace-nowrap border-b-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
+                                                ? 'border-indigo-600 text-indigo-600'
+                                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                                }`}
                                         >
                                             {tab.label}
                                         </button>
@@ -313,6 +313,44 @@ export default function Create({ auth }: any) {
                                                         )
                                                     }
                                                 ></textarea>
+                                            </div>
+
+                                            <div className="md:col-span-2 border-t pt-4 mt-4">
+                                                <div className="flex items-center gap-6">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={data.is_published}
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    'is_published',
+                                                                    e.target.checked,
+                                                                )
+                                                            }
+                                                            className="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                        />
+                                                        <span className="text-sm font-medium text-gray-700">
+                                                            نشر الدراسة
+                                                        </span>
+                                                    </label>
+
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={data.is_featured}
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    'is_featured',
+                                                                    e.target.checked,
+                                                                )
+                                                            }
+                                                            className="rounded border-gray-300 text-emerald-600 shadow-sm focus:ring-emerald-500"
+                                                        />
+                                                        <span className="text-sm font-medium text-gray-700">
+                                                            ⭐ دراسة مميزة (تظهر في السلايدر)
+                                                        </span>
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     )}

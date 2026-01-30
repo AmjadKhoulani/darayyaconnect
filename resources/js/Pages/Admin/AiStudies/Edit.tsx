@@ -16,6 +16,7 @@ export default function Edit({ auth, study }: any) {
         gradient: study.gradient || '',
         summary: study.summary || '',
         is_published: study.is_published ?? true,
+        is_featured: study.is_featured ?? false,
         scenario: study.scenario || {
             current: '',
             withProject: '',
@@ -161,11 +162,10 @@ export default function Edit({ auth, study }: any) {
                                             key={tab.id}
                                             type="button"
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`whitespace-nowrap border-b-2 px-6 py-3 text-sm font-medium transition-colors ${
-                                                activeTab === tab.id
-                                                    ? 'border-indigo-600 text-indigo-600'
-                                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                            }`}
+                                            className={`whitespace-nowrap border-b-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
+                                                ? 'border-indigo-600 text-indigo-600'
+                                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                                }`}
                                         >
                                             {tab.label}
                                         </button>
@@ -296,47 +296,42 @@ export default function Edit({ auth, study }: any) {
                                                 />
                                             </div>
 
-                                            <div>
-                                                <div className="mt-8 flex items-center gap-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        id="is_published"
-                                                        className="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                                                        checked={
-                                                            data.is_published
-                                                        }
-                                                        onChange={(e) =>
-                                                            setData(
-                                                                'is_published',
-                                                                e.target
-                                                                    .checked,
-                                                            )
-                                                        }
-                                                    />
-                                                    <InputLabel
-                                                        htmlFor="is_published"
-                                                        value="نشر الدراسة (ظهورها للعامة)"
-                                                    />
-                                                </div>
-                                            </div>
+                                            <div className="md:col-span-2 border-t pt-4 mt-4">
+                                                <div className="flex items-center gap-6">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={data.is_published}
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    'is_published',
+                                                                    e.target.checked,
+                                                                )
+                                                            }
+                                                            className="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                        />
+                                                        <span className="text-sm font-medium text-gray-700">
+                                                            نشر الدراسة
+                                                        </span>
+                                                    </label>
 
-                                            <div className="md:col-span-2">
-                                                <InputLabel
-                                                    htmlFor="summary"
-                                                    value="ملخص الدراسة"
-                                                />
-                                                <textarea
-                                                    id="summary"
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                    rows={3}
-                                                    value={data.summary}
-                                                    onChange={(e) =>
-                                                        setData(
-                                                            'summary',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                ></textarea>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={data.is_featured}
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    'is_featured',
+                                                                    e.target.checked,
+                                                                )
+                                                            }
+                                                            className="rounded border-gray-300 text-emerald-600 shadow-sm focus:ring-emerald-500"
+                                                        />
+                                                        <span className="text-sm font-medium text-gray-700">
+                                                            ⭐ دراسة مميزة (تظهر في السلايدر)
+                                                        </span>
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -934,7 +929,7 @@ export default function Edit({ auth, study }: any) {
                         </div>
                     </div>
                 </div>
-            </div>
-        </AdminLayout>
+            </div >
+        </AdminLayout >
     );
 }
