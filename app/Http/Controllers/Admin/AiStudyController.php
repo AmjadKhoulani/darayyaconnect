@@ -205,17 +205,21 @@ class AiStudyController extends Controller
      */
     private function syncCarouselItem(AiStudy $study)
     {
+        // Extract gradient colors from Tailwind class (e.g., 'from-blue-500 to-indigo-600')
+        $gradientStyle = $this->convertGradientToStyle($study->gradient);
+        
         $carouselItem = \App\Models\CarouselItem::where('type', 'ai_study')
-            ->where('button_link', route('ai-studies.show', $study->id))
+            ->where('button_link', route('ai-studies'))
+            ->where('title', $study->title)
             ->first();
 
         $data = [
             'title' => $study->title,
             'description' => $study->summary,
             'image_type' => 'gradient',
-            'gradient' => $study->gradient,
+            'gradient' => $study->gradient, // Store the Tailwind class
             'button_text' => 'اقرأ المزيد',
-            'button_link' => route('ai-studies.show', $study->id),
+            'button_link' => route('ai-studies'), // Link to studies page
             'type' => 'ai_study',
             'order' => $study->display_order ?? 0,
             'is_active' => $study->is_published,
@@ -229,12 +233,31 @@ class AiStudyController extends Controller
     }
 
     /**
+     * Convert Tailwind gradient class to inline style
+     */
+    private function convertGradientToStyle($gradientClass)
+    {
+        // Map of Tailwind gradient classes to actual colors
+        $colorMap = [
+            'from-blue-500 to-indigo-600' => 'linear-gradient(to bottom right, #3b82f6, #4f46e5)',
+            'from-green-500 to-cyan-600' => 'linear-gradient(to bottom right, #10b981, #0891b2)',
+            'from-orange-500 to-pink-600' => 'linear-gradient(to bottom right, #f97316, #db2777)',
+            'from-red-500 to-orange-600' => 'linear-gradient(to bottom right, #ef4444, #ea580c)',
+            'from-purple-500 to-pink-600' => 'linear-gradient(to bottom right, #a855f7, #db2777)',
+            'from-teal-500 to-emerald-600' => 'linear-gradient(to bottom right, #14b8a6, #059669)',
+        ];
+
+        return $colorMap[$gradientClass] ?? 'linear-gradient(to bottom right, #3b82f6, #4f46e5)';
+    }
+
+    /**
      * Remove carousel item for study
      */
     private function removeCarouselItem(AiStudy $study)
     {
         \App\Models\CarouselItem::where('type', 'ai_study')
-            ->where('button_link', route('ai-studies.show', $study->id))
+            ->where('button_link', route('ai-studies'))
+            ->where('title', $study->title)
             ->delete();
     }
 }
