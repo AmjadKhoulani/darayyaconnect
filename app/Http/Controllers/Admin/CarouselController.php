@@ -29,9 +29,9 @@ class CarouselController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
             'image_type' => 'required|string|in:upload,gradient',
-            'gradient' => 'nullable|string|max:255',
+            'image' => 'nullable|image|max:2048',
+            'gradient' => 'required_if:image_type,gradient|nullable|string|max:255',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
             'type' => 'required|string|in:general,global,awareness,ai_study',
@@ -56,9 +56,9 @@ class CarouselController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
             'image_type' => 'required|string|in:upload,gradient',
-            'gradient' => 'nullable|string|max:255',
+            'image' => 'nullable|image|max:2048',
+            'gradient' => 'required_if:image_type,gradient|nullable|string|max:255',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
             'type' => 'required|string|in:general,global,awareness,ai_study',

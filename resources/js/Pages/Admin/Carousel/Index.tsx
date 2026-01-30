@@ -75,7 +75,9 @@ export default function Index({ auth, items }: any) {
 
     const handleDelete = (id: number) => {
         if (confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
-            destroy(route('admin.carousel.destroy', id));
+            destroy(route('admin.carousel.destroy', id), {
+                preserveScroll: true,
+            });
         }
     };
 
@@ -293,8 +295,8 @@ export default function Index({ auth, items }: any) {
                                                 type="button"
                                                 onClick={() => setData('gradient', gradient.value)}
                                                 className={`relative h-20 rounded-lg bg-gradient-to-br ${gradient.value} transition ${data.gradient === gradient.value
-                                                        ? 'ring-4 ring-emerald-500 ring-offset-2'
-                                                        : 'hover:scale-105'
+                                                    ? 'ring-4 ring-emerald-500 ring-offset-2'
+                                                    : 'hover:scale-105'
                                                     }`}
                                             >
                                                 <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white drop-shadow-lg">
@@ -304,7 +306,7 @@ export default function Index({ auth, items }: any) {
                                         ))}
                                     </div>
                                     {data.gradient && (
-                                        <div className="mt-4 p-4 rounded-lg bg-gradient-to-br ${data.gradient}">
+                                        <div className={`mt-4 p-4 rounded-lg bg-gradient-to-br ${data.gradient}`}>
                                             <p className="text-sm text-white font-bold drop-shadow">معاينة التدرج المحدد</p>
                                         </div>
                                     )}
