@@ -167,7 +167,7 @@ class AiStudyController extends Controller
             'technical_details' => 'array',
         ]);
 
-        $wasFeatur ed = $aiStudy->is_featured;
+        $wasFeatured = $aiStudy->is_featured;
         $aiStudy->update($validated);
         $isFeatured = $validated['is_featured'] ?? false;
 
