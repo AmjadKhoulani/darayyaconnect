@@ -328,34 +328,32 @@ export default function AiStudies({
 
                                 <div className="space-y-8 p-8">
                                     {/* Scenario Comparison */}
-                                    <section>
-                                        <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
-                                            <span>📊</span> مقارنة مفصلة
-                                            للسيناريوهات
-                                        </h3>
-                                        <div className="grid gap-4 md:grid-cols-2">
-                                            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                                                <h4 className="mb-2 flex items-center gap-2 font-bold text-rose-900">
-                                                    <span>❌</span> الوضع الحالي
-                                                </h4>
-                                                <p className="whitespace-pre-line text-sm leading-relaxed text-rose-800">
-                                                    {
-                                                        selectedStudy.scenario?.current || '-'
-                                                    }
-                                                </p>
+                                    {selectedStudy.scenario?.current && (
+                                        <section>
+                                            <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
+                                                <span>📊</span> مقارنة مفصلة
+                                                للسيناريوهات
+                                            </h3>
+                                            <div className="grid gap-4 md:grid-cols-2">
+                                                <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                                                    <h4 className="mb-2 flex items-center gap-2 font-bold text-rose-900">
+                                                        <span>❌</span> الوضع الحالي
+                                                    </h4>
+                                                    <p className="whitespace-pre-line text-sm leading-relaxed text-rose-800">
+                                                        {selectedStudy.scenario.current}
+                                                    </p>
+                                                </div>
+                                                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                                                    <h4 className="mb-2 flex items-center gap-2 font-bold text-emerald-900">
+                                                        <span>✅</span> مع المشروع
+                                                    </h4>
+                                                    <p className="whitespace-pre-line text-sm leading-relaxed text-emerald-800">
+                                                        {selectedStudy.scenario.withProject || 'غير محدد'}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                                                <h4 className="mb-2 flex items-center gap-2 font-bold text-emerald-900">
-                                                    <span>✅</span> مع المشروع
-                                                </h4>
-                                                <p className="whitespace-pre-line text-sm leading-relaxed text-emerald-800">
-                                                    {
-                                                        selectedStudy.scenario?.withProject || '-'
-                                                    }
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </section>
+                                        </section>
+                                    )}
 
                                     {/* Economics with Breakdown */}
                                     <section>
@@ -456,262 +454,280 @@ export default function AiStudies({
                                     </section>
 
                                     {/* Technical Details */}
-                                    <section>
-                                        <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
-                                            <span>🔧</span> التفاصيل التقنية
-                                        </h3>
-                                        <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-                                            <ul className="space-y-2">
-                                                {(selectedStudy.technicalDetails || [] || []).map(
-                                                    (detail, idx) => (
-                                                        <li
-                                                            key={idx}
-                                                            className="flex items-start gap-2 text-sm text-indigo-900"
-                                                        >
-                                                            <span className="shrink-0 text-indigo-600">
-                                                                ▸
-                                                            </span>
-                                                            <span className="whitespace-pre-line">
-                                                                {detail}
-                                                            </span>
-                                                        </li>
-                                                    ),
-                                                )}
-                                            </ul>
-                                        </div>
-                                    </section>
+                                    {(selectedStudy.technicalDetails || []).length > 0 && (
+                                        <section>
+                                            <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
+                                                <span>🔧</span> التفاصيل التقنية
+                                            </h3>
+                                            <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+                                                <ul className="space-y-2">
+                                                    {(selectedStudy.technicalDetails || [] || []).map(
+                                                        (detail, idx) => (
+                                                            <li
+                                                                key={idx}
+                                                                className="flex items-start gap-2 text-sm text-indigo-900"
+                                                            >
+                                                                <span className="shrink-0 text-indigo-600">
+                                                                    ▸
+                                                                </span>
+                                                                <span className="whitespace-pre-line">
+                                                                    {detail}
+                                                                </span>
+                                                            </li>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </section>
+                                    )}
 
                                     {/* Environmental Impact */}
-                                    <section>
-                                        <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
-                                            <span>🌍</span> الأثر البيئي
-                                        </h3>
-                                        <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
-                                            <ul className="space-y-2">
-                                                {selectedStudy.environmental
-                                                    ?.wasteReduction && (
-                                                        <li className="flex items-start gap-2 text-sm text-green-900">
-                                                            <span className="text-lg">
-                                                                ♻️
-                                                            </span>
-                                                            <span>
-                                                                <strong>
-                                                                    تقليل النفايات:
-                                                                </strong>{' '}
-                                                                {
-                                                                    selectedStudy
-                                                                        .environmental
-                                                                        ?.wasteReduction
-                                                                }
-                                                            </span>
-                                                        </li>
-                                                    )}
-                                                {selectedStudy.environmental
-                                                    ?.emissions && (
-                                                        <li className="flex items-start gap-2 text-sm text-green-900">
-                                                            <span className="text-lg">
-                                                                🌫️
-                                                            </span>
-                                                            <span>
-                                                                <strong>
-                                                                    خفض الانبعاثات:
-                                                                </strong>{' '}
-                                                                {
-                                                                    selectedStudy
-                                                                        .environmental
-                                                                        ?.emissions
-                                                                }
-                                                            </span>
-                                                        </li>
-                                                    )}
-                                                {selectedStudy.environmental
-                                                    ?.waterSaved && (
-                                                        <li className="flex items-start gap-2 text-sm text-green-900">
-                                                            <span className="text-lg">
-                                                                💧
-                                                            </span>
-                                                            <span>
-                                                                <strong>
-                                                                    توفير المياه:
-                                                                </strong>{' '}
-                                                                {
-                                                                    selectedStudy
-                                                                        .environmental
-                                                                        ?.waterSaved
-                                                                }
-                                                            </span>
-                                                        </li>
-                                                    )}
-                                                {selectedStudy.environmental
-                                                    ?.energySaved && (
-                                                        <li className="flex items-start gap-2 text-sm text-green-900">
-                                                            <span className="text-lg">
-                                                                ⚡
-                                                            </span>
-                                                            <span>
-                                                                <strong>
-                                                                    توفير الطاقة:
-                                                                </strong>{' '}
-                                                                {
-                                                                    selectedStudy
-                                                                        .environmental
-                                                                        ?.energySaved
-                                                                }
-                                                            </span>
-                                                        </li>
-                                                    )}
-                                            </ul>
-                                        </div>
-                                    </section>
+                                    {/* Environmental Impact */}
+                                    {(selectedStudy.environmental?.wasteReduction ||
+                                        selectedStudy.environmental?.emissions ||
+                                        selectedStudy.environmental?.waterSaved ||
+                                        selectedStudy.environmental?.energySaved) && (
+                                            <section>
+                                                <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
+                                                    <span>🌍</span> الأثر البيئي
+                                                </h3>
+                                                <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
+                                                    <ul className="space-y-2">
+                                                        {selectedStudy.environmental
+                                                            ?.wasteReduction && (
+                                                                <li className="flex items-start gap-2 text-sm text-green-900">
+                                                                    <span className="text-lg">
+                                                                        ♻️
+                                                                    </span>
+                                                                    <span>
+                                                                        <strong>
+                                                                            تقليل النفايات:
+                                                                        </strong>{' '}
+                                                                        {
+                                                                            selectedStudy
+                                                                                .environmental
+                                                                                ?.wasteReduction
+                                                                        }
+                                                                    </span>
+                                                                </li>
+                                                            )}
+                                                        {selectedStudy.environmental
+                                                            ?.emissions && (
+                                                                <li className="flex items-start gap-2 text-sm text-green-900">
+                                                                    <span className="text-lg">
+                                                                        🌫️
+                                                                    </span>
+                                                                    <span>
+                                                                        <strong>
+                                                                            خفض الانبعاثات:
+                                                                        </strong>{' '}
+                                                                        {
+                                                                            selectedStudy
+                                                                                .environmental
+                                                                                ?.emissions
+                                                                        }
+                                                                    </span>
+                                                                </li>
+                                                            )}
+                                                        {selectedStudy.environmental
+                                                            ?.waterSaved && (
+                                                                <li className="flex items-start gap-2 text-sm text-green-900">
+                                                                    <span className="text-lg">
+                                                                        💧
+                                                                    </span>
+                                                                    <span>
+                                                                        <strong>
+                                                                            توفير المياه:
+                                                                        </strong>{' '}
+                                                                        {
+                                                                            selectedStudy
+                                                                                .environmental
+                                                                                ?.waterSaved
+                                                                        }
+                                                                    </span>
+                                                                </li>
+                                                            )}
+                                                        {selectedStudy.environmental
+                                                            ?.energySaved && (
+                                                                <li className="flex items-start gap-2 text-sm text-green-900">
+                                                                    <span className="text-lg">
+                                                                        ⚡
+                                                                    </span>
+                                                                    <span>
+                                                                        <strong>
+                                                                            توفير الطاقة:
+                                                                        </strong>{' '}
+                                                                        {
+                                                                            selectedStudy
+                                                                                .environmental
+                                                                                ?.energySaved
+                                                                        }
+                                                                    </span>
+                                                                </li>
+                                                            )}
+                                                    </ul>
+                                                </div>
+                                            </section>
+                                        )}
 
                                     {/* Social Impact */}
-                                    <section>
-                                        <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
-                                            <span>👥</span> الأثر الاجتماعي
-                                        </h3>
-                                        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
-                                            <div className="grid gap-4 md:grid-cols-2">
-                                                <div>
-                                                    <div className="mb-1 text-xs text-blue-700">
-                                                        المستفيدون
+                                    {/* Social Impact */}
+                                    {(selectedStudy.social?.beneficiaries || selectedStudy.social?.impact) && (
+                                        <section>
+                                            <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
+                                                <span>👥</span> الأثر الاجتماعي
+                                            </h3>
+                                            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                                                <div className="grid gap-4 md:grid-cols-2">
+                                                    <div>
+                                                        <div className="mb-1 text-xs text-blue-700">
+                                                            المستفيدون
+                                                        </div>
+                                                        <div className="text-lg font-bold text-blue-900">
+                                                            {
+                                                                selectedStudy.social
+                                                                    ?.beneficiaries || '-'
+                                                            }
+                                                        </div>
                                                     </div>
-                                                    <div className="text-lg font-bold text-blue-900">
-                                                        {
-                                                            selectedStudy.social
-                                                                ?.beneficiaries || '-'
-                                                        }
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div className="mb-1 text-xs text-blue-700">
-                                                        التأثير
-                                                    </div>
-                                                    <div className="text-sm text-blue-900">
-                                                        {
-                                                            selectedStudy.social
-                                                                ?.impact || '-'
-                                                        }
+                                                    <div>
+                                                        <div className="mb-1 text-xs text-blue-700">
+                                                            التأثير
+                                                        </div>
+                                                        <div className="text-sm text-blue-900">
+                                                            {
+                                                                selectedStudy.social
+                                                                    ?.impact || '-'
+                                                            }
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </section>
+                                        </section>
+                                    )}
 
                                     {/* Implementation Timeline */}
-                                    <section>
-                                        <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
-                                            <span>📅</span> خطة التنفيذ المفصلة
-                                        </h3>
-                                        <div className="space-y-3">
-                                            <div className="flex items-start gap-4">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
-                                                    1
-                                                </div>
-                                                <div className="flex-1 rounded-xl bg-slate-50 p-4">
-                                                    <div className="mb-1 text-xs text-slate-600">
-                                                        المرحلة الأولى -
-                                                        التحضيرات
+                                    {/* Implementation Timeline */}
+                                    {(selectedStudy.implementation?.phase1) && (
+                                        <section>
+                                            <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
+                                                <span>📅</span> خطة التنفيذ المفصلة
+                                            </h3>
+                                            <div className="space-y-3">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
+                                                        1
                                                     </div>
-                                                    <div className="whitespace-pre-line text-sm text-slate-900">
-                                                        {
-                                                            selectedStudy
-                                                                .implementation
-                                                                ?.phase1 || '-'
-                                                        }
+                                                    <div className="flex-1 rounded-xl bg-slate-50 p-4">
+                                                        <div className="mb-1 text-xs text-slate-600">
+                                                            المرحلة الأولى -
+                                                            التحضيرات
+                                                        </div>
+                                                        <div className="whitespace-pre-line text-sm text-slate-900">
+                                                            {
+                                                                selectedStudy
+                                                                    .implementation
+                                                                    ?.phase1 || '-'
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-start gap-4">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
+                                                        2
+                                                    </div>
+                                                    <div className="flex-1 rounded-xl bg-slate-50 p-4">
+                                                        <div className="mb-1 text-xs text-slate-600">
+                                                            المرحلة الثانية -
+                                                            التنفيذ
+                                                        </div>
+                                                        <div className="whitespace-pre-line text-sm text-slate-900">
+                                                            {
+                                                                selectedStudy
+                                                                    .implementation
+                                                                    ?.phase2 || '-'
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-start gap-4">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
+                                                        3
+                                                    </div>
+                                                    <div className="flex-1 rounded-xl bg-slate-50 p-4">
+                                                        <div className="mb-1 text-xs text-slate-600">
+                                                            المرحلة الثالثة - التوسع
+                                                        </div>
+                                                        <div className="whitespace-pre-line text-sm text-slate-900">
+                                                            {
+                                                                selectedStudy
+                                                                    .implementation
+                                                                    ?.phase3 || '-'
+                                                            }
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-start gap-4">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
-                                                    2
-                                                </div>
-                                                <div className="flex-1 rounded-xl bg-slate-50 p-4">
-                                                    <div className="mb-1 text-xs text-slate-600">
-                                                        المرحلة الثانية -
-                                                        التنفيذ
-                                                    </div>
-                                                    <div className="whitespace-pre-line text-sm text-slate-900">
-                                                        {
-                                                            selectedStudy
-                                                                .implementation
-                                                                ?.phase2 || '-'
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start gap-4">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
-                                                    3
-                                                </div>
-                                                <div className="flex-1 rounded-xl bg-slate-50 p-4">
-                                                    <div className="mb-1 text-xs text-slate-600">
-                                                        المرحلة الثالثة - التوسع
-                                                    </div>
-                                                    <div className="whitespace-pre-line text-sm text-slate-900">
-                                                        {
-                                                            selectedStudy
-                                                                .implementation
-                                                                ?.phase3 || '-'
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
+                                        </section>
+                                    )}
 
                                     {/* Risks */}
-                                    <section>
-                                        <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
-                                            <span>⚠️</span> المخاطر الواقعية
-                                        </h3>
-                                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                                            <ul className="space-y-2">
-                                                {(selectedStudy.risks || [] || []).map(
-                                                    (risk, idx) => (
-                                                        <li
-                                                            key={idx}
-                                                            className="flex items-start gap-2 text-sm text-amber-900"
-                                                        >
-                                                            <span className="shrink-0 text-amber-600">
-                                                                ▸
-                                                            </span>
-                                                            <span className="whitespace-pre-line">
-                                                                {risk}
-                                                            </span>
-                                                        </li>
-                                                    ),
-                                                )}
-                                            </ul>
-                                        </div>
-                                    </section>
-
+                                    {/* Risks */}
+                                    {(selectedStudy.risks || []).length > 0 && (
+                                        <section>
+                                            <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
+                                                <span>⚠️</span> المخاطر الواقعية
+                                            </h3>
+                                            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                                                <ul className="space-y-2">
+                                                    {(selectedStudy.risks || [] || []).map(
+                                                        (risk, idx) => (
+                                                            <li
+                                                                key={idx}
+                                                                className="flex items-start gap-2 text-sm text-amber-900"
+                                                            >
+                                                                <span className="shrink-0 text-amber-600">
+                                                                    ▸
+                                                                </span>
+                                                                <span className="whitespace-pre-line">
+                                                                    {risk}
+                                                                </span>
+                                                            </li>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </section>
+                                    )}
                                     {/* Recommendations */}
-                                    <section>
-                                        <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
-                                            <span>💡</span> التوصيات العملية
-                                        </h3>
-                                        <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-                                            <ul className="space-y-2">
-                                                {(selectedStudy.recommendations || [] || []).map(
-                                                    (rec, idx) => (
-                                                        <li
-                                                            key={idx}
-                                                            className="flex items-start gap-2 text-sm text-indigo-900"
-                                                        >
-                                                            <span className="shrink-0 text-indigo-600">
-                                                                ✓
-                                                            </span>
-                                                            <span className="whitespace-pre-line">
-                                                                {rec}
-                                                            </span>
-                                                        </li>
-                                                    ),
-                                                )}
-                                            </ul>
-                                        </div>
-                                    </section>
+                                    {/* Recommendations */}
+                                    {(selectedStudy.recommendations || []).length > 0 && (
+                                        <section>
+                                            <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-900">
+                                                <span>💡</span> التوصيات العملية
+                                            </h3>
+                                            <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+                                                <ul className="space-y-2">
+                                                    {(selectedStudy.recommendations || [] || []).map(
+                                                        (rec, idx) => (
+                                                            <li
+                                                                key={idx}
+                                                                className="flex items-start gap-2 text-sm text-indigo-900"
+                                                            >
+                                                                <span className="shrink-0 text-indigo-600">
+                                                                    ✓
+                                                                </span>
+                                                                <span className="whitespace-pre-line">
+                                                                    {rec}
+                                                                </span>
+                                                            </li>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </section>
+                                    )}
 
-                                    {/* Footer */}
                                     <div className="flex items-center justify-between border-t border-slate-200 pt-6">
                                         <div className="text-xs text-slate-500">
                                             💡 دراسة مبنية على{' '}
@@ -730,11 +746,12 @@ export default function AiStudies({
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </PortalLayout>
+                            </div >
+                        </div >
+                    )
+                    }
+                </div >
+            </div >
+        </PortalLayout >
     );
 }
