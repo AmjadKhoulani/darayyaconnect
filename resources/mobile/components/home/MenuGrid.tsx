@@ -65,7 +65,7 @@ export default function MenuGrid({ serviceStates }: MenuGridProps) {
                         <Search size={20} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-amber-900 dark:text-amber-100 text-sm">المفقودات</h4>
+                        <h4 className="font-bold text-amber-900 dark:text-amber-100 text-sm">مركز المفقودات</h4>
                     </div>
                 </Link>
             </div>
@@ -77,7 +77,7 @@ export default function MenuGrid({ serviceStates }: MenuGridProps) {
                         <span className="text-lg">📚</span>
                     </div>
                     <div>
-                        <h4 className="font-bold text-cyan-900 dark:text-cyan-100 text-sm">المكتبة</h4>
+                        <h4 className="font-bold text-cyan-900 dark:text-cyan-100 text-sm">مكتبة المجتمع</h4>
                     </div>
                 </Link>
             </div>

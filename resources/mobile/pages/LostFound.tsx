@@ -80,7 +80,7 @@ export default function LostFound() {
                                     <ArrowRight size={20} />
                                 </button>
                                 <div>
-                                    <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100">المفقودات 🔍</h1>
+                                    <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100">مركز المفقودات 🔍</h1>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">ساعد في إعادة الأغراض لأصحابها</p>
                                 </div>
                             </div>

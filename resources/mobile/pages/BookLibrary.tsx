@@ -62,7 +62,7 @@ export default function BookLibrary() {
                                 <div>
                                     <h1 className="text-2xl font-black flex items-center gap-2">
                                         <BookOpen size={28} />
-                                        مكتبة تبادل الكتب
+                                        مكتبة المجتمع
                                     </h1>
                                     <p className="text-xs text-teal-100 font-medium mt-1">شارك واستعير مجاناً</p>
                                 </div>
