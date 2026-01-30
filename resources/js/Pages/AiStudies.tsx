@@ -150,16 +150,16 @@ export default function AiStudies({
                                     key={cat.id}
                                     onClick={() => handleCategoryChange(cat.id)}
                                     className={`flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold transition-all ${currentCategory === cat.id
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                                            : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                         }`}
                                 >
                                     <span className="text-xl">{cat.icon}</span>
                                     <span>{cat.name}</span>
                                     <span
                                         className={`rounded-full px-2 py-0.5 text-xs ${currentCategory === cat.id
-                                                ? 'bg-white/20'
-                                                : 'bg-slate-100'
+                                            ? 'bg-white/20'
+                                            : 'bg-slate-100'
                                             }`}
                                     >
                                         {cat.count}
@@ -340,8 +340,7 @@ export default function AiStudies({
                                                 </h4>
                                                 <p className="whitespace-pre-line text-sm leading-relaxed text-rose-800">
                                                     {
-                                                        selectedStudy.scenario
-                                                            .current
+                                                        selectedStudy.scenario?.current || '-'
                                                     }
                                                 </p>
                                             </div>
@@ -351,8 +350,7 @@ export default function AiStudies({
                                                 </h4>
                                                 <p className="whitespace-pre-line text-sm leading-relaxed text-emerald-800">
                                                     {
-                                                        selectedStudy.scenario
-                                                            .withProject
+                                                        selectedStudy.scenario?.withProject || '-'
                                                     }
                                                 </p>
                                             </div>
