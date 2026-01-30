@@ -168,18 +168,22 @@ class AiStudyController extends Controller
         ]);
 
         $wasFeatured = $aiStudy->is_featured;
+        \Log::info('AiStudy Update: ID=' . $aiStudy->id . ', Was featured: ' . ($wasFeatured ? 'YES' : 'NO'));
+        
         $aiStudy->update($validated);
         $isFeatured = $validated['is_featured'] ?? false;
+        
+        \Log::info('AiStudy Update: New featured status: ' . ($isFeatured ? 'YES' : 'NO'));
 
         // Handle carousel item creation/deletion based on featured status
         if ($isFeatured && !$wasFeatured) {
-            // Just became featured - create carousel item
+            \Log::info('AiStudy Update: Syncing new carousel item');
             $this->syncCarouselItem($aiStudy);
         } elseif (!$isFeatured && $wasFeatured) {
-            // No longer featured - remove carousel item
+            \Log::info('AiStudy Update: Removing carousel item');
             $this->removeCarouselItem($aiStudy);
         } elseif ($isFeatured) {
-            // Still featured - update carousel item
+            \Log::info('AiStudy Update: Updating existing carousel item');
             $this->syncCarouselItem($aiStudy);
         }
 
@@ -205,30 +209,36 @@ class AiStudyController extends Controller
      */
     private function syncCarouselItem(AiStudy $study)
     {
-        // Extract gradient colors from Tailwind class (e.g., 'from-blue-500 to-indigo-600')
-        $gradientStyle = $this->convertGradientToStyle($study->gradient);
-        
-        $carouselItem = \App\Models\CarouselItem::where('type', 'ai_study')
-            ->where('button_link', route('ai-studies'))
-            ->where('title', $study->title)
-            ->first();
+        try {
+            // Extract gradient colors from Tailwind class (e.g., 'from-blue-500 to-indigo-600')
+            $gradientStyle = $this->convertGradientToStyle($study->gradient);
+            
+            $carouselItem = \App\Models\CarouselItem::where('type', 'ai_study')
+                ->where('button_link', route('ai-studies'))
+                ->where('title', $study->title)
+                ->first();
 
-        $data = [
-            'title' => $study->title,
-            'description' => $study->summary,
-            'image_type' => 'gradient',
-            'gradient' => $study->gradient, // Store the Tailwind class
-            'button_text' => 'اقرأ المزيد',
-            'button_link' => route('ai-studies'), // Link to studies page
-            'type' => 'ai_study',
-            'order' => $study->display_order ?? 0,
-            'is_active' => $study->is_published,
-        ];
+            $data = [
+                'title' => $study->title,
+                'description' => $study->summary,
+                'image_type' => 'gradient',
+                'gradient' => $study->gradient, // Store the Tailwind class
+                'button_text' => 'اقرأ المزيد',
+                'button_link' => route('ai-studies'), // Link to studies page
+                'type' => 'ai_study',
+                'order' => $study->display_order ?? 0,
+                'is_active' => $study->is_published,
+            ];
 
-        if ($carouselItem) {
-            $carouselItem->update($data);
-        } else {
-            \App\Models\CarouselItem::create($data);
+            if ($carouselItem) {
+                \Log::info('SyncCarouselItem: Updating existing item ID ' . $carouselItem->id);
+                $carouselItem->update($data);
+            } else {
+                \Log::info('SyncCarouselItem: Creating new item');
+                \App\Models\CarouselItem::create($data);
+            }
+        } catch (\Exception $e) {
+            \Log::error('SyncCarouselItem Error: ' . $e->getMessage());
         }
     }
 
