@@ -103,10 +103,10 @@ export default function UserMap({
             filterRole === 'all'
                 ? null
                 : ([
-                      '==',
-                      ['get', 'role'],
-                      filterRole,
-                  ] as maplibregl.FilterSpecification);
+                    '==',
+                    ['get', 'role'],
+                    filterRole,
+                ] as maplibregl.FilterSpecification);
 
         map.current.setFilter('user-heatmap', filter);
         map.current.setFilter('user-point', filter);
@@ -178,15 +178,7 @@ export default function UserMap({
                 source: 'users',
                 maxzoom: 15,
                 paint: {
-                    'heatmap-weight': [
-                        'interpolate',
-                        ['linear'],
-                        ['get', 'intensity'],
-                        0,
-                        0,
-                        6,
-                        1,
-                    ],
+                    'heatmap-weight': 1,
                     'heatmap-intensity': [
                         'interpolate',
                         ['linear'],
@@ -335,20 +327,20 @@ export default function UserMap({
 
                             if (points.length > 0) {
                                 const nodesGeoJson: GeoJSON.FeatureCollection =
-                                    {
-                                        type: 'FeatureCollection',
-                                        features: points.map((p: any) => ({
-                                            type: 'Feature',
-                                            geometry: {
-                                                type: 'Point',
-                                                coordinates: [
-                                                    parseFloat(p.longitude),
-                                                    parseFloat(p.latitude),
-                                                ],
-                                            },
-                                            properties: { type: p.type },
-                                        })),
-                                    };
+                                {
+                                    type: 'FeatureCollection',
+                                    features: points.map((p: any) => ({
+                                        type: 'Feature',
+                                        geometry: {
+                                            type: 'Point',
+                                            coordinates: [
+                                                parseFloat(p.longitude),
+                                                parseFloat(p.latitude),
+                                            ],
+                                        },
+                                        properties: { type: p.type },
+                                    })),
+                                };
                                 map.current!.addSource(`infra-${type}-nodes`, {
                                     type: 'geojson',
                                     data: nodesGeoJson,
@@ -542,11 +534,10 @@ export default function UserMap({
                                 <button
                                     key={role.id}
                                     onClick={() => setFilterRole(role.id)}
-                                    className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
-                                        filterRole === role.id
+                                    className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${filterRole === role.id
                                             ? `bg-${role.color}-500 text-white border-${role.color}-600 shadow-md`
                                             : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-                                    }`}
+                                        }`}
                                 >
                                     {role.label}
                                 </button>
@@ -664,18 +655,16 @@ export default function UserMap({
 const LayerToggle = ({ active, onClick, icon, label, color }: any) => (
     <button
         onClick={onClick}
-        className={`group flex w-full items-center gap-3 rounded-xl border p-3 transition-all duration-200 ${
-            active
+        className={`group flex w-full items-center gap-3 rounded-xl border p-3 transition-all duration-200 ${active
                 ? `bg-${color}-50 border-${color}-200 shadow-inner`
                 : 'border-transparent bg-white hover:bg-slate-50'
-        }`}
+            }`}
     >
         <div
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                active
+            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${active
                     ? `bg-${color}-500 text-white shadow-md`
                     : 'bg-slate-100 text-slate-400 group-hover:text-slate-600'
-            }`}
+                }`}
         >
             {icon}
         </div>
@@ -686,19 +675,17 @@ const LayerToggle = ({ active, onClick, icon, label, color }: any) => (
                 {label}
             </span>
             <div
-                className={`mt-1.5 h-1 w-full rounded-full transition-all ${
-                    active
+                className={`mt-1.5 h-1 w-full rounded-full transition-all ${active
                         ? `bg-${color}-500 opacity-100`
                         : 'bg-slate-200 opacity-0'
-                }`}
+                    }`}
             ></div>
         </div>
         <div
-            className={`flex h-4 w-4 items-center justify-center rounded-full border-2 transition-all ${
-                active
+            className={`flex h-4 w-4 items-center justify-center rounded-full border-2 transition-all ${active
                     ? `border-${color}-500 bg-${color}-500`
                     : 'border-slate-300'
-            }`}
+                }`}
         >
             {active && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
         </div>
