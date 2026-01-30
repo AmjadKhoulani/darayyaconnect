@@ -1,6 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import { Moon, Sun } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef, useState } from 'react';
@@ -9,6 +10,7 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
     const [loading, setLoading] = useState(true);
+    const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
         if (!mapContainer.current) return;
@@ -164,7 +166,7 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                         <div className="relative h-[600px] p-6 text-gray-900 dark:text-gray-100">
                             <div
                                 ref={mapContainer}
-                                className="absolute inset-0 h-full w-full"
+                                className={`absolute inset-0 h-full w-full transition-all duration-500 ${darkMode ? 'contrast-125 hue-rotate-180 invert' : ''}`}
                             />
 
                             {loading && (
@@ -174,9 +176,22 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                             )}
 
                             <div className="absolute right-4 top-4 z-10 max-w-xs rounded-xl border border-slate-200 bg-white/90 p-4 shadow-lg backdrop-blur dark:border-slate-700 dark:bg-slate-800/90">
-                                <h3 className="mb-2 text-sm font-bold">
-                                    مؤشر الكثافة
-                                </h3>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-sm font-bold">
+                                        مؤشر الكثافة
+                                    </h3>
+                                    <button
+                                        onClick={() => setDarkMode(!darkMode)}
+                                        className={`rounded-lg p-1.5 transition-all ${darkMode ? 'bg-slate-700 text-yellow-400' : 'bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                                        title={darkMode ? 'الوضع النهاري' : 'الوضع الليلي'}
+                                    >
+                                        {darkMode ? (
+                                            <Sun size={14} />
+                                        ) : (
+                                            <Moon size={14} />
+                                        )}
+                                    </button>
+                                </div>
                                 <div className="mb-1 flex items-center gap-2">
                                     <div className="h-2 w-full rounded-full bg-gradient-to-r from-blue-200 via-orange-300 to-red-600"></div>
                                 </div>

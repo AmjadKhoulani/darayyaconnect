@@ -29,6 +29,8 @@ import {
     Hash,
     Settings,
     Activity,
+    Moon,
+    Sun,
 } from 'lucide-react';
 
 // Define Types
@@ -116,6 +118,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     const [activeTool, setActiveTool] = useState<'select' | 'line' | 'point'>('select');
     const [selectedSubType, setSelectedSubType] = useState<string>('');
     const [loading, setLoading] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
     const [inspectorData, setInspectorData] = useState<any | null>(null);
     const [assignedNeighborhood, setAssignedNeighborhood] = useState('');
     const [assetSerialNumber, setAssetSerialNumber] = useState('');
@@ -699,9 +702,18 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: config.color }}></div>
                                 <h3 className="font-bold text-slate-800">{config.label}</h3>
                             </div>
-                            <button onClick={() => startTool('select')} className={`p-1.5 rounded-lg ${activeTool === 'select' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:bg-slate-50'}`}>
-                                <MousePointer2 size={18} />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => setDarkMode(!darkMode)}
+                                    className={`p-1.5 rounded-lg transition-all ${darkMode ? 'bg-slate-700 text-yellow-400' : 'bg-slate-50 text-slate-400 hover:text-slate-600'}`}
+                                    title={darkMode ? 'الوضع النهاري' : 'الوضع الليلي'}
+                                >
+                                    {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                                </button>
+                                <button onClick={() => startTool('select')} className={`p-1.5 rounded-lg ${activeTool === 'select' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:bg-slate-50'}`} title="تحديد (Select)">
+                                    <MousePointer2 size={18} />
+                                </button>
+                            </div>
                         </div>
 
                         <div>
@@ -756,7 +768,7 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     )}
                 </div>
 
-                <div ref={mapContainer} className="relative h-full flex-1" />
+                <div ref={mapContainer} className={`relative h-full flex-1 transition-all duration-500 ${darkMode ? 'contrast-125 hue-rotate-180 invert' : ''}`} />
 
                 {inspectorData && (
                     <div className="animate-in slide-in-from-left-4 absolute left-4 bottom-4 z-10 w-80 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md p-5 shadow-2xl">
