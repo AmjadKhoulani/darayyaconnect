@@ -77,7 +77,7 @@ export default function Index({ auth, studies }: any) {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 font-mono text-sm text-slate-600">
-                                        {study.economics?.investment || '-'}
+                                        {study.economics && study.economics.investment ? study.economics.investment : '-'}
                                     </td>
                                     <td className="flex items-center gap-2 px-6 py-4">
                                         <Link
