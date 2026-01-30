@@ -138,15 +138,15 @@ class AiStudyController extends Controller
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
             
-            'scenario.current' => 'required|string',
-            'scenario.withProject' => 'required|string',
+            'scenario.current' => 'nullable|string',
+            'scenario.withProject' => 'nullable|string',
             
-            'economics.investment' => 'required|string',
+            'economics.investment' => 'nullable|string',
             'economics.investmentRange' => 'nullable|string',
-            'economics.revenue' => 'required|string',
+            'economics.revenue' => 'nullable|string',
             'economics.revenueRange' => 'nullable|string',
-            'economics.payback' => 'required|string',
-            'economics.jobs' => 'required|string',
+            'economics.payback' => 'nullable|string',
+            'economics.jobs' => 'nullable|string',
             'economics.jobsBreakdown' => 'nullable|string',
             'economics.costBreakdown' => 'array',
 
@@ -155,12 +155,12 @@ class AiStudyController extends Controller
             'environmental.waterSaved' => 'nullable|string',
             'environmental.energySaved' => 'nullable|string',
 
-            'social.beneficiaries' => 'required|string',
-            'social.impact' => 'required|string',
+            'social.beneficiaries' => 'nullable|string',
+            'social.impact' => 'nullable|string',
 
-            'implementation.phase1' => 'required|string',
-            'implementation.phase2' => 'required|string',
-            'implementation.phase3' => 'required|string',
+            'implementation.phase1' => 'nullable|string',
+            'implementation.phase2' => 'nullable|string',
+            'implementation.phase3' => 'nullable|string',
 
             'risks' => 'array',
             'recommendations' => 'array',
