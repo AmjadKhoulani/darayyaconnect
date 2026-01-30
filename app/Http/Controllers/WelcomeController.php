@@ -169,6 +169,8 @@ class WelcomeController extends Controller
                     'button_text' => $item->button_text,
                     'button_link' => $item->button_link,
                     'type' => $item->type,
+                    'image_type' => $item->image_type,
+                    'gradient' => $item->gradient,
                 ];
             });
 

@@ -119,7 +119,10 @@ export default function Welcome({
                                     {/* Background: Image or Gradient */}
                                     <div className="absolute inset-0 z-0">
                                         {item.image_type === 'gradient' && item.gradient ? (
-                                            <div className={`h-full w-full bg-gradient-to-br ${item.gradient}`}></div>
+                                            <div
+                                                className={`h-full w-full ${item.gradient.includes('from-') ? `bg-gradient-to-br ${item.gradient}` : ''}`}
+                                                style={!item.gradient.includes('from-') ? { background: item.gradient } : {}}
+                                            ></div>
                                         ) : item.image_path ? (
                                             <>
                                                 <img src={`/storage/${item.image_path}`} className="h-full w-full object-cover opacity-30" alt="" />
