@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\News;
+// use App\Models\News;
 use App\Models\Discussion;
 use App\Models\Report;
 use Illuminate\Http\Request;
@@ -25,20 +25,22 @@ class DashboardController extends Controller
 
     public function getRecentNews(Request $request)
     {
-        $news = News::with('user:id,name')
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'excerpt' => $item->excerpt ?? substr($item->content, 0, 100) . '...',
-                    'author' => $item->user->name ?? 'مجلس المدينة',
-                    'created_at' => $item->created_at->diffForHumans(),
-                    'category' => $item->category ?? 'news'
-                ];
-            });
+        // $news = News::with('user:id,name')
+        //     ->latest()
+        //     ->take(5)
+        //     ->get()
+        //     ->map(function ($item) {
+        //         return [
+        //             'id' => $item->id,
+        //             'title' => $item->title,
+        //             'excerpt' => $item->excerpt ?? substr($item->content, 0, 100) . '...',
+        //             'author' => $item->user->name ?? 'مجلس المدينة',
+        //             'created_at' => $item->created_at->diffForHumans(),
+        //             'category' => $item->category ?? 'news'
+        //         ];
+        //     });
+        
+        $news = [];
 
         return response()->json($news);
     }
