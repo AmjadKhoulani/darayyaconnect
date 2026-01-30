@@ -16,6 +16,8 @@ export default function Index({ auth, items }: any) {
         title: '',
         description: '',
         image: null as File | null,
+        image_type: 'upload' as 'upload' | 'gradient',
+        gradient: 'from-blue-500 to-indigo-600',
         button_text: '',
         button_link: '',
         type: 'general',
@@ -30,6 +32,8 @@ export default function Index({ auth, items }: any) {
                 title: item.title,
                 description: item.description || '',
                 image: null,
+                image_type: item.image_type || 'upload',
+                gradient: item.gradient || 'from-blue-500 to-indigo-600',
                 button_text: item.button_text || '',
                 button_link: item.button_link || '',
                 type: item.type,
@@ -229,20 +233,83 @@ export default function Index({ auth, items }: any) {
 
                         <div className="space-y-4">
                             <div>
-                                <InputLabel value="الصورة" />
-                                <div className="mt-1 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 p-6 transition hover:border-emerald-500">
-                                    {editingItem?.image_path && !data.image && (
-                                        <img src={`/storage/${editingItem.image_path}`} className="mb-4 h-32 w-full object-cover rounded-lg" />
-                                    )}
-                                    <input
-                                        type="file"
-                                        className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
-                                        onChange={(e) => setData('image', e.target.files ? e.target.files[0] : null)}
-                                    />
-                                    <p className="mt-2 text-[10px] text-slate-400">يفضل صورة بقياس 1200×600 بكسل</p>
+                                <InputLabel value="نوع الخلفية" />
+                                <div className="mt-2 flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="image_type"
+                                            value="upload"
+                                            checked={data.image_type === 'upload'}
+                                            onChange={(e) => setData('image_type', 'upload')}
+                                            className="text-emerald-600 focus:ring-emerald-500"
+                                        />
+                                        <span className="text-sm font-medium text-slate-700">📸 رفع صورة</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="image_type"
+                                            value="gradient"
+                                            checked={data.image_type === 'gradient'}
+                                            onChange={(e) => setData('image_type', 'gradient')}
+                                            className="text-emerald-600 focus:ring-emerald-500"
+                                        />
+                                        <span className="text-sm font-medium text-slate-700">🎨 خلفية متدرجة (Gradient)</span>
+                                    </label>
                                 </div>
-                                <InputError message={errors.image} className="mt-2" />
                             </div>
+
+                            {data.image_type === 'upload' ? (
+                                <div>
+                                    <InputLabel value="الصورة" />
+                                    <div className="mt-1 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 p-6 transition hover:border-emerald-500">
+                                        {editingItem?.image_path && !data.image && editingItem?.image_type === 'upload' && (
+                                            <img src={`/storage/${editingItem.image_path}`} className="mb-4 h-32 w-full object-cover rounded-lg" />
+                                        )}
+                                        <input
+                                            type="file"
+                                            className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                                            onChange={(e) => setData('image', e.target.files ? e.target.files[0] : null)}
+                                        />
+                                        <p className="mt-2 text-[10px] text-slate-400">يفضل صورة بقياس 1200×600 بكسل</p>
+                                    </div>
+                                    <InputError message={errors.image} className="mt-2" />
+                                </div>
+                            ) : (
+                                <div>
+                                    <InputLabel value="اختر تدرج الألوان (Gradient)" />
+                                    <div className="mt-2 grid grid-cols-3 gap-3">
+                                        {[
+                                            { name: 'أزرق → بنفسجي', value: 'from-blue-500 to-indigo-600' },
+                                            { name: 'أخضر → أزرق', value: 'from-green-500 to-cyan-600' },
+                                            { name: 'برتقالي → وردي', value: 'from-orange-500 to-pink-600' },
+                                            { name: 'أحمر → برتقالي', value: 'from-red-500 to-orange-600' },
+                                            { name: 'بنفسجي → وردي', value: 'from-purple-500 to-pink-600' },
+                                            { name: 'أخضر زيتوني → أخضر', value: 'from-teal-500 to-emerald-600' },
+                                        ].map((gradient) => (
+                                            <button
+                                                key={gradient.value}
+                                                type="button"
+                                                onClick={() => setData('gradient', gradient.value)}
+                                                className={`relative h-20 rounded-lg bg-gradient-to-br ${gradient.value} transition ${data.gradient === gradient.value
+                                                        ? 'ring-4 ring-emerald-500 ring-offset-2'
+                                                        : 'hover:scale-105'
+                                                    }`}
+                                            >
+                                                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white drop-shadow-lg">
+                                                    {gradient.name}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {data.gradient && (
+                                        <div className="mt-4 p-4 rounded-lg bg-gradient-to-br ${data.gradient}">
+                                            <p className="text-sm text-white font-bold drop-shadow">معاينة التدرج المحدد</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <div>
                                 <InputLabel htmlFor="button_text" value="نص الزر (اختياري)" />

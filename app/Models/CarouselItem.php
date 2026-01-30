@@ -10,6 +10,8 @@ class CarouselItem extends Model
         'title',
         'description',
         'image_path',
+        'image_type',
+        'gradient',
         'button_text',
         'button_link',
         'type',

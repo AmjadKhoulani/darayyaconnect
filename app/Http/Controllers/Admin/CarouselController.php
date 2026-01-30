@@ -30,6 +30,8 @@ class CarouselController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
+            'image_type' => 'required|string|in:upload,gradient',
+            'gradient' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
             'type' => 'required|string|in:general,global,awareness',
@@ -37,7 +39,7 @@ class CarouselController extends Controller
             'is_active' => 'required|boolean',
         ]);
 
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('image') && $validated['image_type'] === 'upload') {
             $validated['image_path'] = $request->file('image')->store('carousel', 'public');
         }
 
@@ -55,6 +57,8 @@ class CarouselController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
+            'image_type' => 'required|string|in:upload,gradient',
+            'gradient' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
             'type' => 'required|string|in:general,global,awareness',
@@ -62,7 +66,7 @@ class CarouselController extends Controller
             'is_active' => 'required|boolean',
         ]);
 
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('image') && $validated['image_type'] === 'upload') {
             if ($carouselItem->image_path) {
                 Storage::disk('public')->delete($carouselItem->image_path);
             }

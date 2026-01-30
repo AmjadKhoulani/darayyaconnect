@@ -116,12 +116,17 @@ export default function Welcome({
                                     key={item.id}
                                     className={`absolute inset-0 transition-all duration-1000 ease-in-out px-8 md:px-16 lg:px-20 py-12 flex items-center ${index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}
                                 >
-                                    {item.image && (
-                                        <div className="absolute inset-0 z-0">
-                                            <img src={item.image} className="h-full w-full object-cover opacity-30" alt="" />
-                                            <div className="absolute inset-0 bg-gradient-to-l from-slate-900 via-slate-900/50 to-transparent"></div>
-                                        </div>
-                                    )}
+                                    {/* Background: Image or Gradient */}
+                                    <div className="absolute inset-0 z-0">
+                                        {item.image_type === 'gradient' && item.gradient ? (
+                                            <div className={`h-full w-full bg-gradient-to-br ${item.gradient}`}></div>
+                                        ) : item.image_path ? (
+                                            <>
+                                                <img src={`/storage/${item.image_path}`} className="h-full w-full object-cover opacity-30" alt="" />
+                                                <div className="absolute inset-0 bg-gradient-to-l from-slate-900 via-slate-900/50 to-transparent"></div>
+                                            </>
+                                        ) : null}
+                                    </div>
 
                                     <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-right w-full lg:w-2/3">
                                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
