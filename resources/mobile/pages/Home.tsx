@@ -8,14 +8,16 @@ import { usePullToRefresh, PullToRefreshContainer } from '../hooks/usePullToRefr
 import HomeHeader from '../components/home/HomeHeader';
 import HelloCarousel from '../components/home/HelloCarousel';
 import ActionBanner from '../components/home/ActionBanner';
-import MenuGrid from '../components/home/MenuGrid';
+// Note: I will update the MenuGrid component file separately as it defines the grid.
+// But first let me update ServicesStatus grids.
 import TabContent from '../components/home/TabContent';
+import MenuGrid from '../components/home/MenuGrid';
 import StatusWidget from '../components/home/StatusWidget';
 
 export default function Home() {
     const [user, setUser] = useState<any>(null);
     const [activeTab, setActiveTab] = useState<'news' | 'community' | 'polls'>('news');
-    const [cityStats, setCityStats] = useState({ population: 78000, activeUsers: 0, reports: 0 });
+    const [cityStats, setCityStats] = useState({ population: 0, activeUsers: 0, reports: 0 });
     const [newsItems, setNewsItems] = useState<any[]>([]);
     const [discussions, setDiscussions] = useState<any[]>([]);
     const [serviceStates, setServiceStates] = useState<any[]>([]);
@@ -36,7 +38,11 @@ export default function Home() {
                 api.get('/ai-studies/featured').catch(() => ({ data: [] }))
             ]);
 
-            setCityStats(statsRes.data);
+            setCityStats({
+                population: statsRes.data.population || 78000, // Keep 78000 as a fallback if API returns 0, assuming real pop is ~78k
+                activeUsers: statsRes.data.citizens_count || 0,
+                reports: statsRes.data.reports_pending || 0
+            });
             setNewsItems(newsRes.data);
             setDiscussions(discussionsRes.data);
             setServiceStates(servicesRes.data || []);
@@ -83,7 +89,7 @@ export default function Home() {
 
                 <HomeHeader user={user} unreadCount={unreadCount} />
 
-                <main className="px-4 space-y-6 max-w-md mx-auto pt-2">
+                <main className="px-4 space-y-6 w-full max-w-5xl mx-auto pt-2">
                     {/* 1. Live Status Ticker - Critical Info First */}
                     <StatusWidget serviceStates={serviceStates} loading={loading} />
 

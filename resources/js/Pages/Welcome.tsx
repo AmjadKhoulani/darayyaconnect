@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 
 interface Props {
     auth: any;
@@ -25,6 +26,7 @@ interface Props {
         lostFound: any[];
         books: any[];
     };
+    carouselItems?: any[];
 }
 
 export default function Welcome({
@@ -36,7 +38,19 @@ export default function Welcome({
     featuredStudy,
     latestDiscussions,
     sections,
+    carouselItems = [],
 }: Props) {
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    useEffect(() => {
+        if (carouselItems.length > 1) {
+            const timer = setInterval(() => {
+                setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
+            }, 6000);
+            return () => clearInterval(timer);
+        }
+    }, [carouselItems.length]);
+
     return (
         <div
             className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-500 selection:text-white"
@@ -92,44 +106,100 @@ export default function Welcome({
             {/* Main Content Container */}
             <div className="mx-auto max-w-7xl px-6 pb-20 pt-28">
 
-                {/* 1. Stunning Hero Section */}
-                <div className="relative mb-16 overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 md:p-16 lg:p-20 shadow-2xl shadow-slate-900/30">
-                    <div className="absolute inset-0 opacity-20">
-                        <div className="absolute top-0 -left-4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-                        <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-                        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
-                    </div>
+                {/* 1. Stunning Hero Section / Carousel */}
+                <div className="relative mb-16 overflow-hidden rounded-[2.5rem] bg-slate-900 shadow-2xl shadow-slate-900/30 min-h-[500px] flex items-center">
 
-                    <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-right">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
-                            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Darayya Digital Portal 2026</span>
+                    {carouselItems.length > 0 ? (
+                        <>
+                            {carouselItems.map((item: any, index: number) => (
+                                <div
+                                    key={item.id}
+                                    className={`absolute inset-0 transition-all duration-1000 ease-in-out px-8 md:px-16 lg:px-20 py-12 flex items-center ${index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}
+                                >
+                                    {item.image && (
+                                        <div className="absolute inset-0 z-0">
+                                            <img src={item.image} className="h-full w-full object-cover opacity-30" alt="" />
+                                            <div className="absolute inset-0 bg-gradient-to-l from-slate-900 via-slate-900/50 to-transparent"></div>
+                                        </div>
+                                    )}
+
+                                    <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-right w-full lg:w-2/3">
+                                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
+                                            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                                                {item.type === 'global' ? 'تجارب عالمية' : item.type === 'awareness' ? 'توعية مجتمعية' : 'بوابة داريا الرقمية'}
+                                            </span>
+                                        </div>
+                                        <h1 className="mb-6 text-4xl font-black leading-[1.1] text-white md:text-5xl lg:text-7xl">
+                                            {item.title}
+                                        </h1>
+                                        <p className="mb-10 text-lg font-medium leading-relaxed text-slate-400 md:text-xl">
+                                            {item.description}
+                                        </p>
+
+                                        {item.button_text && (
+                                            <div className="flex flex-col gap-4 sm:flex-row">
+                                                <a
+                                                    href={item.button_link || '#'}
+                                                    className="flex items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-sm font-black text-slate-900 shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-400 hover:-translate-y-1 active:scale-95"
+                                                >
+                                                    {item.button_text} <span>←</span>
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Dots navigation */}
+                            <div className="absolute bottom-10 left-10 z-20 flex gap-2">
+                                {carouselItems.map((_: any, index: number) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setCurrentSlide(index)}
+                                        className={`h-2 transition-all duration-300 rounded-full ${index === currentSlide ? 'w-8 bg-emerald-500' : 'w-2 bg-white/20 hover:bg-white/40'}`}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        // Fallback static Hero if no items configured
+                        <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-right px-8 md:px-16 lg:px-20">
+                            <div className="absolute inset-0 opacity-20 overflow-hidden pointer-events-none">
+                                <div className="absolute top-0 -left-4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+                                <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+                            </div>
+
+                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
+                                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Darayya Digital Portal 2026</span>
+                            </div>
+                            <h1 className="mb-6 max-w-3xl text-4xl font-black leading-[1.1] text-white md:text-5xl lg:text-7xl">
+                                مستقبل <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">داريا</span> يصنعه مجتمعها الرقمي
+                            </h1>
+                            <p className="mb-10 max-w-2xl text-lg font-medium leading-relaxed text-slate-400 md:text-xl">
+                                المنصة الموحدة لإدارة خدمات المدينة، المبادرات المجتمعية، والدراسات الرقمية المتقدمة لتعزيز جودة الحياة.
+                            </p>
+
+                            <div className="flex flex-col gap-4 sm:flex-row">
+                                <Link
+                                    href={route('infrastructure.index')}
+                                    className="flex items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-sm font-black text-slate-900 shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-400 hover:-translate-y-1 active:scale-95"
+                                >
+                                    <span className="text-lg">🗺️</span> استكشف خريطة المدينة
+                                </Link>
+                                <Link
+                                    href={route('community.index')}
+                                    className="flex items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-8 py-4 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-slate-800 hover:-translate-y-1 active:scale-95"
+                                >
+                                    <span className="text-lg">💬</span> انضم لمجلس المجتمع
+                                </Link>
+                            </div>
                         </div>
-                        <h1 className="mb-6 max-w-3xl text-4xl font-black leading-[1.1] text-white md:text-5xl lg:text-7xl">
-                            مستقبل <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">داريا</span> يصنعه مجتمعها الرقمي
-                        </h1>
-                        <p className="mb-10 max-w-2xl text-lg font-medium leading-relaxed text-slate-400 md:text-xl">
-                            المنصة الموحدة لإدارة خدمات المدينة، المبادرات المجتمعية، والدراسات الرقمية المتقدمة لتعزيز جودة الحياة.
-                        </p>
+                    )}
 
-                        <div className="flex flex-col gap-4 sm:flex-row">
-                            <Link
-                                href={route('infrastructure.index')}
-                                className="flex items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-sm font-black text-slate-900 shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-400 hover:-translate-y-1 active:scale-95"
-                            >
-                                <span className="text-lg">🗺️</span> استكشف خريطة المدينة
-                            </Link>
-                            <Link
-                                href={route('community.index')}
-                                className="flex items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-8 py-4 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-slate-800 hover:-translate-y-1 active:scale-95"
-                            >
-                                <span className="text-lg">💬</span> انضم لمجلس المجتمع
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Floating Cards (Decorative for Desktop) */}
-                    <div className="absolute left-20 top-1/2 hidden -translate-y-1/2 lg:block">
+                    {/* Floating Cards (Decorative for Desktop) - Only show if not on a slide with a big image or just keep as global decoration */}
+                    <div className="absolute left-20 top-1/2 hidden -translate-y-1/2 lg:block z-20">
                         <div className="grid grid-cols-2 gap-4">
                             {[
                                 { label: 'مدارس', val: cityStats.schools, icon: '🏫', color: 'blue' },

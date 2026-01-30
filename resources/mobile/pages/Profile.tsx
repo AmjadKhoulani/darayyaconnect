@@ -88,7 +88,7 @@ export default function Profile() {
                     </button>
                 </header>
 
-                <main className="px-4 py-6 space-y-6">
+                <main className="px-4 py-6 space-y-6 max-w-3xl mx-auto w-full">
                     {/* ID Card Style */}
                     <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-premium relative overflow-hidden animate-fade-in-up">
                         <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 dark:bg-emerald-900/10 rounded-full -ml-10 -mt-10 opacity-50 blur-2xl animate-pulse-slow"></div>

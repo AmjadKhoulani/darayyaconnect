@@ -90,7 +90,7 @@ export default function Directory() {
                 </div>
             </div>
 
-            <main className="px-5 -mt-8 relative z-20 space-y-8">
+            <main className="px-5 -mt-8 relative z-20 space-y-8 max-w-5xl mx-auto w-full">
 
                 {/* Official Entities Section */}
                 <section className="space-y-4">
@@ -98,7 +98,7 @@ export default function Directory() {
                         <Building2 size={20} className="text-emerald-500" />
                         الجهات الرسمية
                     </h3>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {filteredEntities.map((entity, index) => {
                             const Icon = getIcon(entity.icon);
                             return (
@@ -129,7 +129,7 @@ export default function Directory() {
                         <Globe size={20} className="text-blue-500" />
                         شركات الإنترنت
                     </h3>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {filteredCompanies.map((company, index) => (
                             <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all">
                                 <div className="flex items-center justify-between mb-3">

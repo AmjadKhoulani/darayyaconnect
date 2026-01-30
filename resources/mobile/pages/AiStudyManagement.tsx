@@ -64,7 +64,7 @@ export default function AiStudyManagement() {
                     </button>
                     <h1 className="text-lg font-black text-slate-800">إدارة الدراسات الآلية</h1>
                 </div>
-                <button className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center">
+                <button onClick={() => navigate('/admin/ai-studies/create')} className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center">
                     <Plus size={24} />
                 </button>
             </header>
@@ -83,7 +83,7 @@ export default function AiStudyManagement() {
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button className="p-2 bg-slate-50 rounded-lg text-slate-400"><Edit2 size={16} /></button>
+                                    <button onClick={() => navigate(`/admin/ai-studies/${study.id}/edit`)} className="p-2 bg-slate-50 rounded-lg text-slate-400"><Edit2 size={16} /></button>
                                     <button onClick={() => handleDelete(study.id)} className="p-2 bg-rose-50 rounded-lg text-rose-400"><Trash2 size={16} /></button>
                                 </div>
                             </div>

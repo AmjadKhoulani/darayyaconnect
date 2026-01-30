@@ -39,7 +39,7 @@ export default function MyReports() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20" dir="rtl">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 max-w-7xl mx-auto w-full shadow-2xl shadow-slate-200 dark:shadow-none" dir="rtl">
             <header className="bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-10 px-4 py-4 flex items-center gap-3">
                 <button
                     onClick={() => navigate(-1)}
@@ -50,7 +50,7 @@ export default function MyReports() {
                 <h1 className="text-xl font-black text-slate-800 dark:text-white">بلاغاتي</h1>
             </header>
 
-            <div className="p-4 space-y-4">
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
                     <div className="flex justify-center py-10">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-white"></div>

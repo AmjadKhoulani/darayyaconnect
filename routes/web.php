@@ -116,6 +116,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Reports List
         Route::resource('reports', \App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show', 'update']);
 
+        // Carousel Management
+        Route::resource('carousel', \App\Http\Controllers\Admin\CarouselController::class)->except(['create', 'show', 'edit']);
+
         // Moderation & Chat Filter
         Route::get('/moderation', [\App\Http\Controllers\Admin\ModerationController::class, 'index'])->name('moderation.index');
         Route::post('/moderation/approve/{type}/{id}', [\App\Http\Controllers\Admin\ModerationController::class, 'approve'])->name('moderation.approve');

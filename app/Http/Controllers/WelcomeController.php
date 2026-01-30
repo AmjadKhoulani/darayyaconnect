@@ -156,7 +156,23 @@ class WelcomeController extends Controller
                 ];
             });
 
-        // 7. Render Welcome Page
+        // 7. Fetch Carousel Items
+        $carouselItems = \App\Models\CarouselItem::where('is_active', true)
+            ->orderBy('order')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'image' => $item->image_path ? asset('storage/' . $item->image_path) : null,
+                    'button_text' => $item->button_text,
+                    'button_link' => $item->button_link,
+                    'type' => $item->type,
+                ];
+            });
+
+        // 8. Render Welcome Page
         return Inertia::render('Welcome', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
@@ -168,7 +184,8 @@ class WelcomeController extends Controller
             'feed' => $feed,
             'featuredStudy' => $featuredStudy,
             'latestDiscussions' => $latestDiscussions,
-            'sections' => $sections
+            'sections' => $sections,
+            'carouselItems' => $carouselItems
         ]);
     }
 }

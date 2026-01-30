@@ -104,7 +104,7 @@ export default function Discussions() {
                     </div>
                 </header>
 
-                <main className="px-5 -mt-10 relative z-50 bg-slate-50 dark:bg-slate-900 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-4 transition-colors duration-300">
+                <main className="px-5 -mt-10 relative z-50 bg-slate-50 dark:bg-slate-900 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-4 transition-colors duration-300 max-w-5xl mx-auto w-full">
                     {/* Categories Scroll */}
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {categories.map(cat => (
@@ -125,71 +125,74 @@ export default function Discussions() {
                     {loading ? (
                         [1, 2, 3].map(i => <SkeletonLoader key={i} type="card" />)
                     ) : (
-                        discussions
-                            .filter(d => selectedCategory === 'general' || d.category === selectedCategory)
-                            .map(discussion => (
-                                <div
-                                    key={discussion.id}
-                                    onClick={() => navigate(`/discussions/${discussion.id}`)}
-                                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-premium active:scale-[0.99] transition-all overflow-hidden mb-4"
-                                >
-                                    {/* Image on Top */}
-                                    {discussion.image_url && (
-                                        <div className="h-40 w-full bg-slate-50 dark:bg-slate-900 relative">
-                                            <LazyImage src={discussion.image_url} alt={discussion.title} className="w-full h-full object-cover" />
-                                            <div className="absolute top-3 right-3">
-                                                <span className={`px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm backdrop-blur-md bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100`}>
-                                                    {categories.find(c => c.id === discussion.category)?.name || discussion.category}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="p-4">
-                                        {!discussion.image_url && (
-                                            <div className="flex justify-between items-start mb-3">
-                                                <span className={`px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400`}>
-                                                    {categories.find(c => c.id === discussion.category)?.name || discussion.category}
-                                                </span>
-                                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                                                    {new Date(discussion.created_at).toLocaleDateString('ar-SY')}
-                                                </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {discussions
+                                .filter(d => selectedCategory === 'general' || d.category === selectedCategory)
+                                .map(discussion => (
+                                    <div
+                                        key={discussion.id}
+                                        onClick={() => navigate(`/discussions/${discussion.id}`)}
+                                        className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-premium active:scale-[0.99] transition-all overflow-hidden mb-0" // mb-0 because grid handles gap
+                                    >
+                                        {/* Image on Top */}
+                                        {discussion.image_url && (
+                                            <div className="h-40 w-full bg-slate-50 dark:bg-slate-900 relative">
+                                                <LazyImage src={discussion.image_url} alt={discussion.title} className="w-full h-full object-cover" />
+                                                <div className="absolute top-3 right-3">
+                                                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm backdrop-blur-md bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100`}>
+                                                        {categories.find(c => c.id === discussion.category)?.name || discussion.category}
+                                                    </span>
+                                                </div>
                                             </div>
                                         )}
 
-                                        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-2 line-clamp-1">{discussion.title}</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
-                                            {discussion.body}
-                                        </p>
-
-                                        <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-[10px]">
-                                                    {discussion.user?.name.charAt(0)}
+                                        <div className="p-4">
+                                            {!discussion.image_url && (
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400`}>
+                                                        {categories.find(c => c.id === discussion.category)?.name || discussion.category}
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                                                        {new Date(discussion.created_at).toLocaleDateString('ar-SY')}
+                                                    </span>
                                                 </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{discussion.user?.name}</span>
-                                                    {discussion.image_url && <span className="text-[10px] text-slate-400 dark:text-slate-500">{new Date(discussion.created_at).toLocaleDateString('ar-SY')}</span>}
-                                                </div>
-                                            </div>
+                                            )}
 
-                                            <div className="flex items-center gap-3">
-                                                <button
-                                                    onClick={(e) => handleVote(discussion.id, e)}
-                                                    className={`flex items-center gap-1 text-xs font-bold transition-colors ${discussion.current_user_vote ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}
-                                                >
-                                                    {discussion.current_user_vote ? <div className="text-emerald-600 dark:text-emerald-400">☝️</div> : <div className="grayscale opacity-50">☝️</div>}
-                                                    <span>{discussion.votes_count || 0}</span>
-                                                </button>
-                                                <div className="flex items-center gap-1 text-xs font-bold text-slate-400 dark:text-slate-500">
-                                                    <MessageCircle size={16} />
-                                                    <span>{discussion.replies_count || 0}</span>
+                                            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-2 line-clamp-1">{discussion.title}</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
+                                                {discussion.body}
+                                            </p>
+
+                                            <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-[10px]">
+                                                        {discussion.user?.name.charAt(0)}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{discussion.user?.name}</span>
+                                                        {discussion.image_url && <span className="text-[10px] text-slate-400 dark:text-slate-500">{new Date(discussion.created_at).toLocaleDateString('ar-SY')}</span>}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-3">
+                                                    <button
+                                                        onClick={(e) => handleVote(discussion.id, e)}
+                                                        className={`flex items-center gap-1 text-xs font-bold transition-colors ${discussion.current_user_vote ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}
+                                                    >
+                                                        {discussion.current_user_vote ? <div className="text-emerald-600 dark:text-emerald-400">☝️</div> : <div className="grayscale opacity-50">☝️</div>}
+                                                        <span>{discussion.votes_count || 0}</span>
+                                                    </button>
+                                                    <div className="flex items-center gap-1 text-xs font-bold text-slate-400 dark:text-slate-500">
+                                                        <MessageCircle size={16} />
+                                                        <span>{discussion.replies_count || 0}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                ))
+                            }
+                        </div>
                     )}
                 </main>
 

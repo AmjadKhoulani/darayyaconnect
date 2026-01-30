@@ -38,6 +38,15 @@ export default function AdminLayout({
                     >
                         لوحة التحكم
                     </SidebarLink>
+                    {user.role === 'admin' && (
+                        <SidebarLink
+                            href={route('admin.carousel.index')}
+                            active={route().current('admin.carousel.*')}
+                            icon="🖼️"
+                        >
+                            إدارة السلايدر
+                        </SidebarLink>
+                    )}
 
                     {user.role === 'admin' && (
                         <>
