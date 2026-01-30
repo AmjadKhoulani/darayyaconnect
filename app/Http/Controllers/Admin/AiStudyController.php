@@ -64,9 +64,6 @@ class AiStudyController extends Controller
         return Inertia::render('Admin/AiStudies/Create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -77,6 +74,7 @@ class AiStudyController extends Controller
             'gradient' => 'required|string|max:100',
             'summary' => 'required|string',
             'is_published' => 'boolean',
+            'is_featured' => 'boolean',
             
             // JSON Fields
             'scenario.current' => 'required|string',
@@ -108,7 +106,12 @@ class AiStudyController extends Controller
             'technical_details' => 'array',
         ]);
 
-        AiStudy::create($validated);
+        $study = AiStudy::create($validated);
+
+        // If featured, create/update carousel item
+        if ($validated['is_featured'] ?? false) {
+            $this->syncCarouselItem($study);
+        }
 
         return redirect()->route('admin.ai-studies.index')->with('success', 'تم إنشاء الدراسة بنجاح');
     }
@@ -123,9 +126,6 @@ class AiStudyController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, AiStudy $aiStudy)
     {
         $validated = $request->validate([
@@ -136,6 +136,7 @@ class AiStudyController extends Controller
             'gradient' => 'required|string|max:100',
             'summary' => 'required|string',
             'is_published' => 'boolean',
+            'is_featured' => 'boolean',
             
             'scenario.current' => 'required|string',
             'scenario.withProject' => 'required|string',
@@ -166,7 +167,21 @@ class AiStudyController extends Controller
             'technical_details' => 'array',
         ]);
 
+        $wasFeatur ed = $aiStudy->is_featured;
         $aiStudy->update($validated);
+        $isFeatured = $validated['is_featured'] ?? false;
+
+        // Handle carousel item creation/deletion based on featured status
+        if ($isFeatured && !$wasFeatured) {
+            // Just became featured - create carousel item
+            $this->syncCarouselItem($aiStudy);
+        } elseif (!$isFeatured && $wasFeatured) {
+            // No longer featured - remove carousel item
+            $this->removeCarouselItem($aiStudy);
+        } elseif ($isFeatured) {
+            // Still featured - update carousel item
+            $this->syncCarouselItem($aiStudy);
+        }
 
         return redirect()->route('admin.ai-studies.index')->with('success', 'تم تحديث الدراسة بنجاح');
     }
@@ -176,7 +191,50 @@ class AiStudyController extends Controller
      */
     public function destroy(AiStudy $aiStudy)
     {
+        // Remove carousel item if exists
+        if ($aiStudy->is_featured) {
+            $this->removeCarouselItem($aiStudy);
+        }
+        
         $aiStudy->delete();
         return redirect()->back()->with('success', 'تم حذف الدراسة بنجاح');
+    }
+
+    /**
+     * Sync carousel item for featured study
+     */
+    private function syncCarouselItem(AiStudy $study)
+    {
+        $carouselItem = \App\Models\CarouselItem::where('type', 'ai_study')
+            ->where('button_link', route('ai-studies.show', $study->id))
+            ->first();
+
+        $data = [
+            'title' => $study->title,
+            'description' => $study->summary,
+            'image_type' => 'gradient',
+            'gradient' => $study->gradient,
+            'button_text' => 'اقرأ المزيد',
+            'button_link' => route('ai-studies.show', $study->id),
+            'type' => 'ai_study',
+            'order' => $study->display_order ?? 0,
+            'is_active' => $study->is_published,
+        ];
+
+        if ($carouselItem) {
+            $carouselItem->update($data);
+        } else {
+            \App\Models\CarouselItem::create($data);
+        }
+    }
+
+    /**
+     * Remove carousel item for study
+     */
+    private function removeCarouselItem(AiStudy $study)
+    {
+        \App\Models\CarouselItem::where('type', 'ai_study')
+            ->where('button_link', route('ai-studies.show', $study->id))
+            ->delete();
     }
 }

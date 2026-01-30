@@ -34,7 +34,7 @@ class CarouselController extends Controller
             'gradient' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
-            'type' => 'required|string|in:general,global,awareness',
+            'type' => 'required|string|in:general,global,awareness,ai_study',
             'order' => 'required|integer',
             'is_active' => 'required|boolean',
         ]);
@@ -61,7 +61,7 @@ class CarouselController extends Controller
             'gradient' => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
-            'type' => 'required|string|in:general,global,awareness',
+            'type' => 'required|string|in:general,global,awareness,ai_study',
             'order' => 'required|integer',
             'is_active' => 'required|boolean',
         ]);
