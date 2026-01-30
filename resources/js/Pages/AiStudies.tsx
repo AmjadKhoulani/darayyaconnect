@@ -149,20 +149,18 @@ export default function AiStudies({
                                 <button
                                     key={cat.id}
                                     onClick={() => handleCategoryChange(cat.id)}
-                                    className={`flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold transition-all ${
-                                        currentCategory === cat.id
+                                    className={`flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold transition-all ${currentCategory === cat.id
                                             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
                                             : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                                    }`}
+                                        }`}
                                 >
                                     <span className="text-xl">{cat.icon}</span>
                                     <span>{cat.name}</span>
                                     <span
-                                        className={`rounded-full px-2 py-0.5 text-xs ${
-                                            currentCategory === cat.id
+                                        className={`rounded-full px-2 py-0.5 text-xs ${currentCategory === cat.id
                                                 ? 'bg-white/20'
                                                 : 'bg-slate-100'
-                                        }`}
+                                            }`}
                                     >
                                         {cat.count}
                                     </span>
@@ -222,7 +220,7 @@ export default function AiStudies({
                                                 الاستثمار
                                             </div>
                                             <div className="text-sm font-bold text-slate-900">
-                                                {study.economics.investment}
+                                                {study.economics?.investment || '-'}
                                             </div>
                                         </div>
                                         <div>
@@ -230,7 +228,7 @@ export default function AiStudies({
                                                 فرص العمل
                                             </div>
                                             <div className="text-sm font-bold text-emerald-600">
-                                                {study.economics.jobs}
+                                                {study.economics?.jobs || '-'}
                                             </div>
                                         </div>
                                     </div>
@@ -377,13 +375,13 @@ export default function AiStudies({
                                                 <div className="text-lg font-black text-slate-900">
                                                     {
                                                         selectedStudy.economics
-                                                            .investment
+                                                            ?.investment || '-'
                                                     }
                                                 </div>
                                                 <div className="mt-1 text-[10px] text-slate-500">
                                                     {
                                                         selectedStudy.economics
-                                                            .investmentRange
+                                                            ?.investmentRange || ''
                                                     }
                                                 </div>
                                             </div>
@@ -394,13 +392,13 @@ export default function AiStudies({
                                                 <div className="text-lg font-black text-emerald-700">
                                                     {
                                                         selectedStudy.economics
-                                                            .revenue
+                                                            ?.revenue || '-'
                                                     }
                                                 </div>
                                                 <div className="mt-1 text-[10px] text-emerald-600">
                                                     {
                                                         selectedStudy.economics
-                                                            .revenueRange
+                                                            ?.revenueRange || ''
                                                     }
                                                 </div>
                                             </div>
@@ -411,7 +409,7 @@ export default function AiStudies({
                                                 <div className="text-lg font-black text-blue-700">
                                                     {
                                                         selectedStudy.economics
-                                                            .payback
+                                                            ?.payback || '-'
                                                     }
                                                 </div>
                                             </div>
@@ -422,13 +420,13 @@ export default function AiStudies({
                                                 <div className="text-lg font-black text-amber-700">
                                                     {
                                                         selectedStudy.economics
-                                                            .jobs
+                                                            ?.jobs || '-'
                                                     }
                                                 </div>
                                                 <div className="mt-1 text-[10px] text-amber-600">
                                                     {
                                                         selectedStudy.economics
-                                                            .jobsBreakdown
+                                                            ?.jobsBreakdown || ''
                                                     }
                                                 </div>
                                             </div>
@@ -440,7 +438,7 @@ export default function AiStudies({
                                                 📋 تفصيل التكاليف
                                             </h4>
                                             <div className="space-y-2">
-                                                {selectedStudy.economics.costBreakdown.map(
+                                                {(selectedStudy.economics?.costBreakdown || []).map(
                                                     (item, idx) => (
                                                         <div
                                                             key={idx}
@@ -466,7 +464,7 @@ export default function AiStudies({
                                         </h3>
                                         <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
                                             <ul className="space-y-2">
-                                                {selectedStudy.technicalDetails.map(
+                                                {(selectedStudy.technicalDetails || [] || []).map(
                                                     (detail, idx) => (
                                                         <li
                                                             key={idx}
@@ -493,77 +491,77 @@ export default function AiStudies({
                                         <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
                                             <ul className="space-y-2">
                                                 {selectedStudy.environmental
-                                                    .wasteReduction && (
-                                                    <li className="flex items-start gap-2 text-sm text-green-900">
-                                                        <span className="text-lg">
-                                                            ♻️
-                                                        </span>
-                                                        <span>
-                                                            <strong>
-                                                                تقليل النفايات:
-                                                            </strong>{' '}
-                                                            {
-                                                                selectedStudy
-                                                                    .environmental
-                                                                    .wasteReduction
-                                                            }
-                                                        </span>
-                                                    </li>
-                                                )}
+                                                    ?.wasteReduction && (
+                                                        <li className="flex items-start gap-2 text-sm text-green-900">
+                                                            <span className="text-lg">
+                                                                ♻️
+                                                            </span>
+                                                            <span>
+                                                                <strong>
+                                                                    تقليل النفايات:
+                                                                </strong>{' '}
+                                                                {
+                                                                    selectedStudy
+                                                                        .environmental
+                                                                        ?.wasteReduction
+                                                                }
+                                                            </span>
+                                                        </li>
+                                                    )}
                                                 {selectedStudy.environmental
-                                                    .emissions && (
-                                                    <li className="flex items-start gap-2 text-sm text-green-900">
-                                                        <span className="text-lg">
-                                                            🌫️
-                                                        </span>
-                                                        <span>
-                                                            <strong>
-                                                                خفض الانبعاثات:
-                                                            </strong>{' '}
-                                                            {
-                                                                selectedStudy
-                                                                    .environmental
-                                                                    .emissions
-                                                            }
-                                                        </span>
-                                                    </li>
-                                                )}
+                                                    ?.emissions && (
+                                                        <li className="flex items-start gap-2 text-sm text-green-900">
+                                                            <span className="text-lg">
+                                                                🌫️
+                                                            </span>
+                                                            <span>
+                                                                <strong>
+                                                                    خفض الانبعاثات:
+                                                                </strong>{' '}
+                                                                {
+                                                                    selectedStudy
+                                                                        .environmental
+                                                                        ?.emissions
+                                                                }
+                                                            </span>
+                                                        </li>
+                                                    )}
                                                 {selectedStudy.environmental
-                                                    .waterSaved && (
-                                                    <li className="flex items-start gap-2 text-sm text-green-900">
-                                                        <span className="text-lg">
-                                                            💧
-                                                        </span>
-                                                        <span>
-                                                            <strong>
-                                                                توفير المياه:
-                                                            </strong>{' '}
-                                                            {
-                                                                selectedStudy
-                                                                    .environmental
-                                                                    .waterSaved
-                                                            }
-                                                        </span>
-                                                    </li>
-                                                )}
+                                                    ?.waterSaved && (
+                                                        <li className="flex items-start gap-2 text-sm text-green-900">
+                                                            <span className="text-lg">
+                                                                💧
+                                                            </span>
+                                                            <span>
+                                                                <strong>
+                                                                    توفير المياه:
+                                                                </strong>{' '}
+                                                                {
+                                                                    selectedStudy
+                                                                        .environmental
+                                                                        ?.waterSaved
+                                                                }
+                                                            </span>
+                                                        </li>
+                                                    )}
                                                 {selectedStudy.environmental
-                                                    .energySaved && (
-                                                    <li className="flex items-start gap-2 text-sm text-green-900">
-                                                        <span className="text-lg">
-                                                            ⚡
-                                                        </span>
-                                                        <span>
-                                                            <strong>
-                                                                توفير الطاقة:
-                                                            </strong>{' '}
-                                                            {
-                                                                selectedStudy
-                                                                    .environmental
-                                                                    .energySaved
-                                                            }
-                                                        </span>
-                                                    </li>
-                                                )}
+                                                    ?.energySaved && (
+                                                        <li className="flex items-start gap-2 text-sm text-green-900">
+                                                            <span className="text-lg">
+                                                                ⚡
+                                                            </span>
+                                                            <span>
+                                                                <strong>
+                                                                    توفير الطاقة:
+                                                                </strong>{' '}
+                                                                {
+                                                                    selectedStudy
+                                                                        .environmental
+                                                                        ?.energySaved
+                                                                }
+                                                            </span>
+                                                        </li>
+                                                    )}
                                             </ul>
                                         </div>
                                     </section>
@@ -582,7 +580,7 @@ export default function AiStudies({
                                                     <div className="text-lg font-bold text-blue-900">
                                                         {
                                                             selectedStudy.social
-                                                                .beneficiaries
+                                                                ?.beneficiaries || '-'
                                                         }
                                                     </div>
                                                 </div>
@@ -593,7 +591,7 @@ export default function AiStudies({
                                                     <div className="text-sm text-blue-900">
                                                         {
                                                             selectedStudy.social
-                                                                .impact
+                                                                ?.impact || '-'
                                                         }
                                                     </div>
                                                 </div>
@@ -620,7 +618,7 @@ export default function AiStudies({
                                                         {
                                                             selectedStudy
                                                                 .implementation
-                                                                .phase1
+                                                                ?.phase1 || '-'
                                                         }
                                                     </div>
                                                 </div>
@@ -638,7 +636,7 @@ export default function AiStudies({
                                                         {
                                                             selectedStudy
                                                                 .implementation
-                                                                .phase2
+                                                                ?.phase2 || '-'
                                                         }
                                                     </div>
                                                 </div>
@@ -655,7 +653,7 @@ export default function AiStudies({
                                                         {
                                                             selectedStudy
                                                                 .implementation
-                                                                .phase3
+                                                                ?.phase3 || '-'
                                                         }
                                                     </div>
                                                 </div>
@@ -670,7 +668,7 @@ export default function AiStudies({
                                         </h3>
                                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
                                             <ul className="space-y-2">
-                                                {selectedStudy.risks.map(
+                                                {(selectedStudy.risks || [] || []).map(
                                                     (risk, idx) => (
                                                         <li
                                                             key={idx}
@@ -696,7 +694,7 @@ export default function AiStudies({
                                         </h3>
                                         <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
                                             <ul className="space-y-2">
-                                                {selectedStudy.recommendations.map(
+                                                {(selectedStudy.recommendations || [] || []).map(
                                                     (rec, idx) => (
                                                         <li
                                                             key={idx}

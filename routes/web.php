@@ -36,6 +36,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/ai-studies', [AiStudyController::class, 'publicIndex'])->name('ai-studies');
     Route::get('/initiatives', [\App\Http\Controllers\Admin\InitiativeController::class, 'publicIndex'])->name('initiatives.public');
 
+    // Missing Pages Routes (Under Construction)
+    Route::get('/lost-found', function () {
+        return Inertia::render('UnderConstruction', [
+            'title' => 'مركز المفقودات والموجودات',
+            'icon' => '🔍',
+            'description' => 'نعمل حالياً على تطوير مركز المفقودات لتسهيل الإبلاغ والبحث عن المفقودات في المدينة.'
+        ]);
+    })->name('lost-found.index');
+
+    Route::get('/books', function () {
+        return Inertia::render('UnderConstruction', [
+            'title' => 'مكتبة المجتمع',
+            'icon' => '📚',
+            'description' => 'مكتبة مجتمعية رقمية تتيح تبادل الكتب والمعرفة بين الأهالي. قريباً ستكون متاحة!'
+        ]);
+    })->name('books.index');
+
+    Route::get('/directory', function () {
+        return Inertia::render('UnderConstruction', [
+            'title' => 'دليل الخدمات الشامل',
+            'icon' => '📒',
+            'description' => 'دليل شامل لكافة الخدمات والمحلات والمهن في داريا. نعمل على جمع وتوثيق البيانات حالياً.'
+        ]);
+    })->name('directory.index');
+
 
     // Admin Panel
     Route::prefix('admin')
