@@ -274,6 +274,82 @@ export default function InfrastructureIndex({ auth, points }: any) {
                     .catch(err => console.error(err));
             });
 
+            // 3.5 Community User Locations (The "People" Heatmap)
+            fetch('/api/analytics/heatmap?type=community')
+                .then((res) => res.json())
+                .then((geoJson) => {
+                    if (!map.current) return;
+
+                    map.current.addSource('community-users-source', {
+                        type: 'geojson',
+                        data: geoJson
+                    });
+
+                    // Heatmap
+                    map.current.addLayer({
+                        id: 'community-heatmap',
+                        type: 'heatmap',
+                        source: 'community-users-source',
+                        maxzoom: 24,
+                        layout: {
+                            visibility: activeLayers.includes('crowd-status') ? 'visible' : 'none',
+                        },
+                        paint: {
+                            'heatmap-weight': [
+                                'interpolate',
+                                ['linear'],
+                                ['get', 'weight'],
+                                0, 0,
+                                1, 3 // High weight for visibility
+                            ],
+                            'heatmap-intensity': [
+                                'interpolate',
+                                ['linear'],
+                                ['zoom'],
+                                11, 1,
+                                15, 3
+                            ],
+                            'heatmap-color': [
+                                'interpolate',
+                                ['linear'],
+                                ['heatmap-density'],
+                                0, 'rgba(33,102,172,0)',
+                                0.01, 'rgba(236, 72, 153, 0.3)',
+                                0.2, 'rgba(236, 72, 153, 0.5)',
+                                0.5, 'rgba(219, 39, 119, 0.7)',
+                                1, 'rgba(157, 23, 77, 0.9)'
+                            ],
+                            'heatmap-radius': [
+                                'interpolate',
+                                ['linear'],
+                                ['zoom'],
+                                11, 20,
+                                15, 50
+                            ],
+                            'heatmap-opacity': 0.8
+                        }
+                    });
+
+                    // Circle (Points) Fallback
+                    map.current.addLayer({
+                        id: 'community-points-layer',
+                        type: 'circle',
+                        source: 'community-users-source',
+                        maxzoom: 24,
+                        layout: {
+                            visibility: activeLayers.includes('crowd-status') ? 'visible' : 'none',
+                        },
+                        paint: {
+                            'circle-radius': 6,
+                            'circle-color': '#ec4899', // Pink
+                            'circle-stroke-width': 2,
+                            'circle-stroke-color': '#ffffff',
+                            'circle-opacity': 0.9
+                        }
+                    });
+                })
+                .catch(err => console.error("Error loading community heatmap:", err));
+
             // 4. Public Reports Layer (HTML Markers for animation)
             const reportMarkers: maplibregl.Marker[] = [];
             fetch('/api/infrastructure/public-reports')
@@ -377,6 +453,17 @@ export default function InfrastructureIndex({ auth, points }: any) {
                     `crowd-${type}-fill`,
                     'visibility',
                     activeLayers.includes('crowd-status') ? 'visible' : 'none',
+                );
+            }
+        });
+
+        // Toggle Community Heatmap Layers
+        ['community-heatmap', 'community-points-layer'].forEach(layerId => {
+            if (map.current!.getLayer(layerId)) {
+                map.current!.setLayoutProperty(
+                    layerId,
+                    'visibility',
+                    activeLayers.includes('crowd-status') ? 'visible' : 'none'
                 );
             }
         });
