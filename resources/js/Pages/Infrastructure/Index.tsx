@@ -417,19 +417,37 @@ export default function InfrastructureIndex({ auth, points }: any) {
                 })
                 .catch(err => console.error("Error loading community heatmap:", err));
 
-            // 4. Public Reports Layer (HTML Markers for animation)
+            // 4. Public Reports Layer (HTML Markers with proper styling)
             const reportMarkers: maplibregl.Marker[] = [];
             fetch('/api/infrastructure/public-reports')
                 .then((res) => res.json())
                 .then((data) => {
                     if (!map.current) return;
 
+                    const categoryColors: Record<string, string> = {
+                        water: 'bg-blue-500',
+                        electricity: 'bg-yellow-500',
+                        lighting: 'bg-amber-500',
+                        sanitation: 'bg-brown-500',
+                        trash: 'bg-green-600',
+                        road: 'bg-orange-500',
+                        infrastructure: 'bg-orange-500',
+                        communication: 'bg-purple-500',
+                        other: 'bg-slate-500'
+                    };
+
                     data.features.forEach((feat: any) => {
                         const props = feat.properties;
+                        const category = props.category || 'other';
+                        const color = categoryColors[category] || 'bg-slate-500';
+
                         const el = document.createElement('div');
-                        el.className = `status-bubble ${props.status === 'urgent' ? 'critical' : ''}`;
-                        el.innerHTML = getEmojiForCategory(props.category);
-                        el.style.animationDelay = `${Math.random() * -4}s`;
+                        el.className = 'cursor-pointer transition-transform hover:scale-110 active:scale-95';
+                        el.innerHTML = `
+                            <div class="w-10 h-10 ${color} rounded-full flex items-center justify-center text-xl shadow-lg border-2 border-white dark:border-slate-100 animate-pulse-slow">
+                                ${getEmojiForCategory(category)}
+                            </div>
+                        `;
 
                         el.onclick = () => {
                             const categoryAr = {
@@ -439,6 +457,7 @@ export default function InfrastructureIndex({ auth, points }: any) {
                                 sanitation: 'الصرف الصحي',
                                 trash: 'النظافة العامة',
                                 road: 'الطرق والجسور',
+                                infrastructure: 'الطرق والجسور',
                                 communication: 'الاتصالات',
                                 other: 'بلاغ عام'
                             }[props.category as string] || 'بلاغ خدمة';
@@ -464,13 +483,25 @@ export default function InfrastructureIndex({ auth, points }: any) {
             points.forEach((point: Point) => {
                 const el = document.createElement('div');
                 const isIssue = point.status !== 'active';
-                el.className = isIssue ? `status-bubble ${point.status === 'damaged' ? 'critical' : 'warning'}` : 'marker-icon';
 
                 if (isIssue) {
-                    el.innerHTML = point.status === 'maintenance' ? '🏗️' : getEmojiForType(point.type);
-                    el.style.animationDelay = `${Math.random() * -4}s`;
+                    const isDamaged = point.status === 'damaged';
+                    const color = isDamaged ? 'bg-red-500' : 'bg-yellow-500';
+                    const emoji = point.status === 'maintenance' ? '🏗️' : getEmojiForType(point.type);
+
+                    el.className = 'cursor-pointer transition-transform hover:scale-110';
+                    el.innerHTML = `
+                        <div class="w-10 h-10 ${color} rounded-full flex items-center justify-center text-xl shadow-lg border-2 border-white animate-pulse-slow">
+                            ${emoji}
+                        </div>
+                    `;
                 } else {
-                    el.innerHTML = `<div class="bg-white p-1 rounded-full shadow-md border-2 border-emerald-500 cursor-pointer hover:scale-110 transition-transform">${getEmojiForType(point.type)}</div>`;
+                    el.className = 'cursor-pointer transition-transform hover:scale-110';
+                    el.innerHTML = `
+                        <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-base shadow-md border-2 border-white">
+                            ${getEmojiForType(point.type)}
+                        </div>
+                    `;
                 }
 
                 const marker = new maplibregl.Marker({ element: el, anchor: isIssue ? 'bottom' : 'center' })
