@@ -440,7 +440,7 @@ export default function Map() {
                         id: 'heatmap-layer',
                         type: 'heatmap',
                         source: 'heatmap-source',
-                        maxzoom: 15,
+                        maxzoom: 24,
                         paint: {
                             'heatmap-weight': [
                                 'interpolate',
