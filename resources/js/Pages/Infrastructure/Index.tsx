@@ -26,6 +26,40 @@ const colors: Record<string, string> = {
     phone: '#10b981',
 };
 
+// DARAYYA ADMINISTRATIVE BOUNDARIES (Simplified ADM3)
+const darayyaBoundary = [
+    [36.2052, 33.4839],
+    [36.2232, 33.4947],
+    [36.2413, 33.5004],
+    [36.2625, 33.4916],
+    [36.2730, 33.4735],
+    [36.2789, 33.4480],
+    [36.2655, 33.4320],
+    [36.2413, 33.4255],
+    [36.2165, 33.4278],
+    [36.1955, 33.4425],
+    [36.1882, 33.4654],
+    [36.2052, 33.4839] // Close the loop
+];
+
+// MASK GEOJSON (World with Darayya hole)
+const darayyaMask: any = {
+    type: 'Feature',
+    geometry: {
+        type: 'Polygon',
+        coordinates: [
+            [
+                [-180, -90],
+                [180, -90],
+                [180, 90],
+                [-180, 90],
+                [-180, -90]
+            ],
+            darayyaBoundary
+        ]
+    }
+};
+
 interface Point {
     id: number;
     name: string;
@@ -78,7 +112,11 @@ export default function InfrastructureIndex({ auth, points }: any) {
             center: mapCenter,
             zoom: mapZoom,
             maxZoom: 18,
-            minZoom: 10,
+            minZoom: 12, // More zoomed in
+            maxBounds: [
+                [36.15, 33.40], // Southwest
+                [36.35, 33.55]  // Northeast
+            ]
         });
 
         map.current.addControl(
@@ -88,6 +126,43 @@ export default function InfrastructureIndex({ auth, points }: any) {
 
         map.current.on('load', () => {
             if (!map.current) return;
+
+            // 1. Add Masking Layer
+            map.current.addSource('darayya-mask', {
+                type: 'geojson',
+                data: darayyaMask
+            });
+
+            map.current.addLayer({
+                id: 'mask-fill',
+                type: 'fill',
+                source: 'darayya-mask',
+                paint: {
+                    'fill-color': '#0f172a',
+                    'fill-opacity': 0.6
+                }
+            });
+
+            // Darayya Outline
+            map.current.addSource('darayya-outline', {
+                type: 'geojson',
+                data: {
+                    type: 'Feature',
+                    geometry: { type: 'Polygon', coordinates: [darayyaBoundary] },
+                    properties: {}
+                }
+            });
+
+            map.current.addLayer({
+                id: 'outline-line',
+                type: 'line',
+                source: 'darayya-outline',
+                paint: {
+                    'line-color': '#10b981',
+                    'line-width': 3,
+                    'line-dasharray': [2, 1]
+                }
+            });
 
             // 2. Add Infrastructure Data (Lines & Nodes)
             fetch('/api/infrastructure')
