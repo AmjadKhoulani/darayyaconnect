@@ -330,23 +330,6 @@ export default function InfrastructureIndex({ auth, points }: any) {
                         }
                     });
 
-                    // Circle (Points) Fallback
-                    map.current.addLayer({
-                        id: 'community-points-layer',
-                        type: 'circle',
-                        source: 'community-users-source',
-                        maxzoom: 24,
-                        layout: {
-                            visibility: activeLayers.includes('crowd-status') ? 'visible' : 'none',
-                        },
-                        paint: {
-                            'circle-radius': 6,
-                            'circle-color': '#ec4899', // Pink
-                            'circle-stroke-width': 2,
-                            'circle-stroke-color': '#ffffff',
-                            'circle-opacity': 0.9
-                        }
-                    });
                 })
                 .catch(err => console.error("Error loading community heatmap:", err));
 
@@ -458,7 +441,7 @@ export default function InfrastructureIndex({ auth, points }: any) {
         });
 
         // Toggle Community Heatmap Layers
-        ['community-heatmap', 'community-points-layer'].forEach(layerId => {
+        ['community-heatmap'].forEach(layerId => {
             if (map.current!.getLayer(layerId)) {
                 map.current!.setLayoutProperty(
                     layerId,
