@@ -63,6 +63,11 @@ export default function Map() {
     const [infraData, setInfraData] = useState<{ nodes: any[], lines: any[] }>({ nodes: [], lines: [] });
     const [crowdData, setCrowdData] = useState<{ electricity?: any, water?: any }>({});
 
+    // Refs for markers
+    const markersRef = useRef<maplibregl.Marker[]>([]);
+    const statusMarkersRef = useRef<maplibregl.Marker[]>([]);
+    const reportMarkersRef = useRef<maplibregl.Marker[]>([]);
+
     const selectedDate = useMemo(() => {
         const d = new Date();
         d.setDate(d.getDate() + timeOffset);
@@ -435,8 +440,6 @@ export default function Map() {
     }, [activeLayers, infraData, crowdData]);
 
     // Fetch and Render Public Reports as HTML Markers
-    const reportMarkersRef = useRef<maplibregl.Marker[]>([]);
-
     useEffect(() => {
         if (!map.current || !activeLayers.publicReports) {
             // Clean up markers if layer is disabled
@@ -578,9 +581,7 @@ export default function Map() {
     }, [searchQuery, allServices]);
 
 
-    // Manage Markers
-    const markersRef = useRef<maplibregl.Marker[]>([]);
-    const statusMarkersRef = useRef<maplibregl.Marker[]>([]);
+    // Manage Markers (refs declared at top)
 
     const updateStatusBubbles = (data: { nodes: any[], lines: any[] }, crowd: { electricity?: any, water?: any }) => {
         if (!map.current) return;
