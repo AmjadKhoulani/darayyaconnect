@@ -35,25 +35,7 @@ export default function Show({ id }: { id: string }) {
         }
     };
 
-    const handleVote = async () => {
-        if (!auth.user) return alert('يرجى تسجيل الدخول');
 
-        // Optimistic
-        setDiscussion((prev: any) => ({
-            ...prev,
-            votes_count: prev.current_user_vote
-                ? prev.votes_count - 1
-                : prev.votes_count + 1,
-            current_user_vote: !prev.current_user_vote,
-        }));
-
-        try {
-            await axios.post(`/api/portal/discussions/${id}/vote`);
-        } catch (err) {
-            // Revert
-            fetchDiscussion();
-        }
-    };
 
     const handleReply = async (e: any) => {
         e.preventDefault();
@@ -158,20 +140,7 @@ export default function Show({ id }: { id: string }) {
 
                             {/* Actions */}
                             <div className="flex items-center gap-6 border-b border-t border-slate-100 py-6">
-                                <button
-                                    onClick={handleVote}
-                                    className={`flex items-center gap-2 text-base font-bold transition-all ${discussion.current_user_vote ? 'rounded-xl bg-red-50 px-4 py-2 text-red-500' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    <Heart
-                                        size={20}
-                                        className={
-                                            discussion.current_user_vote
-                                                ? 'fill-current'
-                                                : ''
-                                        }
-                                    />
-                                    <span>{discussion.votes_count} تأييد</span>
-                                </button>
+
                                 <div className="flex items-center gap-2 font-bold text-slate-500">
                                     <MessageCircle size={20} />
                                     <span>

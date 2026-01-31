@@ -61,34 +61,7 @@ export default function CommunityForum() {
             .catch((e) => console.error('Failed to fetch discussions', e));
     };
 
-    const handleVote = async (id: number, e: any) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!auth.user) return alert('يرجى تسجيل الدخول للتصويت');
 
-        // Optimistic Update
-        setDiscussions((prev) =>
-            prev.map((d) => {
-                if (d.id === id) {
-                    return {
-                        ...d,
-                        votes_count: d.current_user_vote
-                            ? d.votes_count - 1
-                            : d.votes_count + 1,
-                        current_user_vote: !d.current_user_vote,
-                    };
-                }
-                return d;
-            }),
-        );
-
-        try {
-            await axios.post(`/api/portal/discussions/${id}/vote`);
-        } catch (error) {
-            console.error(error);
-            fetchDiscussions(); // Revert on error
-        }
-    };
 
     const handleCreateTopic = (e: any) => {
         e.preventDefault();
@@ -190,7 +163,7 @@ export default function CommunityForum() {
                         <span>💬</span> حوار المجتمع
                     </h3>
                     <p className="mt-1 text-xs text-slate-500">
-                        مساحة للنقاش الحر والبناء (بدون لايكات! فقط دعم)
+                        مساحة للنقاش الحر والبناء
                     </p>
                 </div>
                 {auth.user ? (
@@ -214,21 +187,20 @@ export default function CommunityForum() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                                activeTab === tab
+                            className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab
                                     ? 'border-emerald-500 text-emerald-600'
                                     : 'border-transparent text-slate-500 hover:text-slate-700'
-                            }`}
+                                }`}
                         >
                             {tab === 'all'
                                 ? 'الكل'
                                 : tab === 'social'
-                                  ? 'اجتماعي'
-                                  : tab === 'services'
-                                    ? 'خدمي'
-                                    : tab === 'suggestions'
-                                      ? 'اقتراحات'
-                                      : 'شكاوى'}
+                                    ? 'اجتماعي'
+                                    : tab === 'services'
+                                        ? 'خدمي'
+                                        : tab === 'suggestions'
+                                            ? 'اقتراحات'
+                                            : 'شكاوى'}
                         </button>
                     ),
                 )}
@@ -250,16 +222,15 @@ export default function CommunityForum() {
                                     />
                                     <div className="absolute right-4 top-4">
                                         <span
-                                            className={`rounded-lg px-3 py-1 text-xs font-bold shadow-sm backdrop-blur-md ${
-                                                topic.category === 'general'
+                                            className={`rounded-lg px-3 py-1 text-xs font-bold shadow-sm backdrop-blur-md ${topic.category === 'general'
                                                     ? 'bg-slate-900/10 bg-white/90 text-slate-800'
                                                     : topic.category === 'tech'
-                                                      ? 'bg-blue-900/10 bg-white/90 text-blue-800'
-                                                      : topic.category ===
-                                                          'events'
-                                                        ? 'bg-purple-900/10 bg-white/90 text-purple-800'
-                                                        : 'bg-emerald-900/10 bg-white/90 text-emerald-800'
-                                            }`}
+                                                        ? 'bg-blue-900/10 bg-white/90 text-blue-800'
+                                                        : topic.category ===
+                                                            'events'
+                                                            ? 'bg-purple-900/10 bg-white/90 text-purple-800'
+                                                            : 'bg-emerald-900/10 bg-white/90 text-emerald-800'
+                                                }`}
                                         >
                                             {getCategoryName(topic.category)}
                                         </span>
@@ -317,27 +288,7 @@ export default function CommunityForum() {
                                 </div>
 
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleVote(topic.id, e);
-                                        }}
-                                        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                                            topic.current_user_vote
-                                                ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200'
-                                                : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                                        }`}
-                                    >
-                                        <ArrowUp
-                                            size={14}
-                                            className={
-                                                topic.current_user_vote
-                                                    ? 'fill-current'
-                                                    : ''
-                                            }
-                                        />
-                                        <span>{topic.votes_count}</span>
-                                    </button>
+
 
                                     <Link
                                         href={`/community/${topic.id}`}
@@ -411,11 +362,10 @@ export default function CommunityForum() {
                                                     category: cat.id,
                                                 })
                                             }
-                                            className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold transition-all ${
-                                                newTopic.category === cat.id
+                                            className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold transition-all ${newTopic.category === cat.id
                                                     ? `bg-${cat.color}-50 border-${cat.color}-500 text-${cat.color}-700 ring-1 ring-${cat.color}-500`
                                                     : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-                                            }`}
+                                                }`}
                                         >
                                             <span
                                                 className={`h-2 w-2 rounded-full bg-${cat.color}-500`}
@@ -629,11 +579,10 @@ export default function CommunityForum() {
                                             className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                                         >
                                             <div
-                                                className={`max-w-[80%] rounded-2xl p-3 text-sm shadow-sm ${
-                                                    isMe
+                                                className={`max-w-[80%] rounded-2xl p-3 text-sm shadow-sm ${isMe
                                                         ? 'rounded-tl-none bg-emerald-500 text-white'
                                                         : 'rounded-tr-none border border-slate-200 bg-white text-slate-700'
-                                                }`}
+                                                    }`}
                                             >
                                                 {!isMe && (
                                                     <div className="mb-1 flex items-center gap-2">
@@ -678,7 +627,7 @@ export default function CommunityForum() {
                                     onChange={(e) =>
                                         setReplyBody(e.target.value)
                                     }
-                                    // disabled={loading}
+                                // disabled={loading}
                                 />
                                 <button
                                     disabled={loading || !replyBody.trim()}
