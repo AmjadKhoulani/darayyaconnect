@@ -191,10 +191,19 @@ export default function AdminLayout({
                     <SidebarLink
                         href={route('profile.edit')}
                         active={route().current('profile.edit')}
-                        icon="⚙️"
+                        icon="👤"
                     >
                         الملف الشخصي
                     </SidebarLink>
+                    {user.role === 'admin' && (
+                        <SidebarLink
+                            href={route('admin.settings.index')}
+                            active={route().current('admin.settings.*')}
+                            icon="⚙️"
+                        >
+                            إعدادات المنصة
+                        </SidebarLink>
+                    )}
                 </nav>
 
                 <div className="border-t border-slate-800 p-4">

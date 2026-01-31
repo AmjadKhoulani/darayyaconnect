@@ -13,6 +13,7 @@ import {
     Moon,
     Sun,
 } from 'lucide-react';
+import { usePage } from '@inertiajs/react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef, useState } from 'react';
@@ -46,6 +47,14 @@ export default function InfrastructureIndex({ auth, points }: any) {
     ]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [darkMode, setDarkMode] = useState(false);
+    const { settings } = usePage().props as any;
+
+    const mapCenter = [
+        parseFloat(settings?.map_center_lng || '36.2366'),
+        parseFloat(settings?.map_center_lat || '33.4593')
+    ] as [number, number];
+    const mapZoom = parseFloat(settings?.map_zoom || '14');
+
 
     useEffect(() => {
         if (!mapContainer.current) return;
@@ -66,10 +75,10 @@ export default function InfrastructureIndex({ auth, points }: any) {
                 },
                 layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
             },
-            center: [36.2366, 33.4593],
-            zoom: 14,
+            center: mapCenter,
+            zoom: mapZoom,
             maxZoom: 18,
-            minZoom: 12,
+            minZoom: 10,
         });
 
         map.current.addControl(
@@ -551,7 +560,7 @@ export default function InfrastructureIndex({ auth, points }: any) {
                                     className="text-emerald-500"
                                     size={20}
                                 />
-                                مستكشف المدينة
+                                مستكشف {settings?.city_name || 'المدينة'}
                             </h3>
                             <div className="flex items-center gap-1">
                                 <button

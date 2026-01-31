@@ -1,5 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import {
     Activity,
     Droplets,
@@ -116,6 +116,13 @@ export default function UserMap({
         if (map.current) return;
         if (!mapContainer.current) return;
 
+        const { settings } = usePage().props as any;
+        const mapCenter = [
+            parseFloat(settings?.map_center_lng || '36.2366'),
+            parseFloat(settings?.map_center_lat || '33.4593')
+        ] as [number, number];
+        const mapZoom = parseFloat(settings?.map_zoom || '13');
+
         map.current = new maplibregl.Map({
             container: mapContainer.current,
             style: {
@@ -138,8 +145,8 @@ export default function UserMap({
                     },
                 ],
             },
-            center: [36.236, 33.456], // Darayya Center
-            zoom: 13,
+            center: mapCenter,
+            zoom: mapZoom,
             pitch: 0,
         });
 
@@ -535,8 +542,8 @@ export default function UserMap({
                                     key={role.id}
                                     onClick={() => setFilterRole(role.id)}
                                     className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${filterRole === role.id
-                                            ? `bg-${role.color}-500 text-white border-${role.color}-600 shadow-md`
-                                            : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                                        ? `bg-${role.color}-500 text-white border-${role.color}-600 shadow-md`
+                                        : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
                                         }`}
                                 >
                                     {role.label}
@@ -656,14 +663,14 @@ const LayerToggle = ({ active, onClick, icon, label, color }: any) => (
     <button
         onClick={onClick}
         className={`group flex w-full items-center gap-3 rounded-xl border p-3 transition-all duration-200 ${active
-                ? `bg-${color}-50 border-${color}-200 shadow-inner`
-                : 'border-transparent bg-white hover:bg-slate-50'
+            ? `bg-${color}-50 border-${color}-200 shadow-inner`
+            : 'border-transparent bg-white hover:bg-slate-50'
             }`}
     >
         <div
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${active
-                    ? `bg-${color}-500 text-white shadow-md`
-                    : 'bg-slate-100 text-slate-400 group-hover:text-slate-600'
+                ? `bg-${color}-500 text-white shadow-md`
+                : 'bg-slate-100 text-slate-400 group-hover:text-slate-600'
                 }`}
         >
             {icon}
@@ -676,15 +683,15 @@ const LayerToggle = ({ active, onClick, icon, label, color }: any) => (
             </span>
             <div
                 className={`mt-1.5 h-1 w-full rounded-full transition-all ${active
-                        ? `bg-${color}-500 opacity-100`
-                        : 'bg-slate-200 opacity-0'
+                    ? `bg-${color}-500 opacity-100`
+                    : 'bg-slate-200 opacity-0'
                     }`}
             ></div>
         </div>
         <div
             className={`flex h-4 w-4 items-center justify-center rounded-full border-2 transition-all ${active
-                    ? `border-${color}-500 bg-${color}-500`
-                    : 'border-slate-300'
+                ? `border-${color}-500 bg-${color}-500`
+                : 'border-slate-300'
                 }`}
         >
             {active && <div className="h-1.5 w-1.5 rounded-full bg-white" />}

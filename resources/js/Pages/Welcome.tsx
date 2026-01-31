@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 interface Props {
@@ -41,6 +41,10 @@ export default function Welcome({
     carouselItems = [],
 }: Props) {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const { settings } = usePage().props as any;
+
+    const isEnabled = (module: string) => settings[`module_${module}`] === '1';
+
 
     useEffect(() => {
         if (carouselItems.length > 1) {
@@ -67,20 +71,20 @@ export default function Welcome({
                         </div>
                         <div className="hidden md:block">
                             <h1 className="text-xl font-black tracking-tight text-slate-900">
-                                داريا <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">الرقمية</span>
+                                {settings?.city_name || 'داريا'} <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">الرقمية</span>
                             </h1>
                             <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">
-                                Smart City Ecosystem
+                                {settings?.site_name || 'Smart City Ecosystem'}
                             </p>
                         </div>
                     </div>
 
                     <div className="hidden items-center gap-8 lg:flex">
-                        <NavLink href={route('infrastructure.index')} label="الخريطة" active={route().current('infrastructure.*')} />
-                        <NavLink href={route('initiatives.public')} label="المبادرات" />
-                        <NavLink href={route('ai-studies')} label="الدراسات" />
-                        <NavLink href={route('community.index')} label="المجتمع" />
-                        <NavLink href={route('volunteer.index')} label="التطوع" />
+                        {isEnabled('infrastructure') && <NavLink href={route('infrastructure.index')} label="الخريطة" active={route().current('infrastructure.*')} />}
+                        {isEnabled('initiatives') && <NavLink href={route('initiatives.public')} label="المبادرات" />}
+                        {isEnabled('knowledge') && <NavLink href={route('ai-studies')} label="الدراسات" />}
+                        {isEnabled('discussions') && <NavLink href={route('community.index')} label="المجتمع" />}
+                        {isEnabled('volunteering') && <NavLink href={route('volunteer.index')} label="التطوع" />}
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -135,7 +139,7 @@ export default function Welcome({
                                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
                                             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
                                             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                                                {item.type === 'global' ? 'تجارب عالمية' : item.type === 'awareness' ? 'توعية مجتمعية' : 'بوابة داريا الرقمية'}
+                                                {item.type === 'global' ? 'تجارب عالمية' : item.type === 'awareness' ? 'توعية مجتمعية' : `${settings?.city_name || 'داريا'} الرقمية`}
                                             </span>
                                         </div>
                                         <h1 className="mb-6 text-4xl font-black leading-[1.1] text-white md:text-5xl lg:text-7xl">
@@ -180,28 +184,32 @@ export default function Welcome({
 
                             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
                                 <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Darayya Digital Portal 2026</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">{settings?.site_name || 'Darayya Digital Portal 2026'}</span>
                             </div>
                             <h1 className="mb-6 max-w-3xl text-4xl font-black leading-[1.1] text-white md:text-5xl lg:text-7xl">
-                                مستقبل <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">داريا</span> يصنعه مجتمعها الرقمي
+                                مستقبل <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">{settings?.city_name || 'داريا'}</span> يصنعه مجتمعها الرقمي
                             </h1>
                             <p className="mb-10 max-w-2xl text-lg font-medium leading-relaxed text-slate-400 md:text-xl">
-                                المنصة الموحدة لإدارة خدمات المدينة، المبادرات المجتمعية، والدراسات الرقمية المتقدمة لتعزيز جودة الحياة.
+                                المنصة الموحدة لإدارة خدمات المدينة، المبادرات المجتمعية، والدراسات الرقمية المتقدمة لتعزيز جودة الحياة في {settings?.city_name || 'داريا'}.
                             </p>
 
                             <div className="flex flex-col gap-4 sm:flex-row">
-                                <Link
-                                    href={route('infrastructure.index')}
-                                    className="flex items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-sm font-black text-slate-900 shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-400 hover:-translate-y-1 active:scale-95"
-                                >
-                                    <span className="text-lg">🗺️</span> استكشف خريطة المدينة
-                                </Link>
-                                <Link
-                                    href={route('community.index')}
-                                    className="flex items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-8 py-4 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-slate-800 hover:-translate-y-1 active:scale-95"
-                                >
-                                    <span className="text-lg">💬</span> انضم لمجلس المجتمع
-                                </Link>
+                                {isEnabled('infrastructure') && (
+                                    <Link
+                                        href={route('infrastructure.index')}
+                                        className="flex items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-sm font-black text-slate-900 shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-400 hover:-translate-y-1 active:scale-95"
+                                    >
+                                        <span className="text-lg">🗺️</span> استكشف خريطة المدينة
+                                    </Link>
+                                )}
+                                {isEnabled('discussions') && (
+                                    <Link
+                                        href={route('community.index')}
+                                        className="flex items-center justify-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-8 py-4 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-slate-800 hover:-translate-y-1 active:scale-95"
+                                    >
+                                        <span className="text-lg">💬</span> انضم لمجلس المجتمع
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     )}
@@ -227,174 +235,188 @@ export default function Welcome({
 
                 {/* 2. Quick Services Grid (Modern App Style) */}
                 <div className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <Link
-                        href="/directory"
-                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-8 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10"
-                    >
-                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-amber-50 text-amber-500 transition-transform group-hover:scale-110 group-hover:rotate-6">
-                            <span className="text-3xl">📞</span>
-                        </div>
-                        <div>
-                            <h4 className="mb-2 text-xl font-black text-slate-800">دليل الخدمات</h4>
-                            <p className="text-sm font-medium text-slate-400">أرقام الطوارئ والمؤسسات الخدمية في متناول يدك</p>
-                        </div>
-                        <div className="mt-6 flex items-center gap-2 font-black text-emerald-600">
-                            <span className="text-xs uppercase tracking-widest">تصفح الآن</span>
-                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
-                        </div>
-                    </Link>
+                    {isEnabled('directory') && (
+                        <Link
+                            href="/directory"
+                            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-8 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10"
+                        >
+                            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-amber-50 text-amber-500 transition-transform group-hover:scale-110 group-hover:rotate-6">
+                                <span className="text-3xl">📞</span>
+                            </div>
+                            <div>
+                                <h4 className="mb-2 text-xl font-black text-slate-800">دليل الخدمات</h4>
+                                <p className="text-sm font-medium text-slate-400">أرقام الطوارئ والمؤسسات الخدمية في متناول يدك</p>
+                            </div>
+                            <div className="mt-6 flex items-center gap-2 font-black text-emerald-600">
+                                <span className="text-xs uppercase tracking-widest">تصفح الآن</span>
+                                <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
+                            </div>
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/lost-found"
-                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-600/30"
-                    >
-                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110 group-hover:rotate-6">
-                            <span className="text-3xl">🔍</span>
-                        </div>
-                        <div>
-                            <h4 className="mb-2 text-xl font-black">مركز المفقودات</h4>
-                            <p className="text-sm font-medium text-indigo-100/70">ساهم في إعادة الممتلكات لأصحابها أو أبلغ عن مفقود</p>
-                        </div>
-                        <div className="mt-6 flex items-center gap-2 font-black">
-                            <span className="text-xs uppercase tracking-widest">المزيد</span>
-                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
-                        </div>
-                    </Link>
+                    {isEnabled('lost_found') && (
+                        <Link
+                            href="/lost-found"
+                            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-600/30"
+                        >
+                            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110 group-hover:rotate-6">
+                                <span className="text-3xl">🔍</span>
+                            </div>
+                            <div>
+                                <h4 className="mb-2 text-xl font-black">مركز المفقودات</h4>
+                                <p className="text-sm font-medium text-indigo-100/70">ساهم في إعادة الممتلكات لأصحابها أو أبلغ عن مفقود</p>
+                            </div>
+                            <div className="mt-6 flex items-center gap-2 font-black">
+                                <span className="text-xs uppercase tracking-widest">المزيد</span>
+                                <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
+                            </div>
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/books"
-                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-emerald-600 p-8 text-white shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/30"
-                    >
-                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110 group-hover:rotate-6">
-                            <span className="text-3xl">📚</span>
-                        </div>
-                        <div>
-                            <h4 className="mb-2 text-xl font-black">مكتبة المجتمع</h4>
-                            <p className="text-sm font-medium text-emerald-50/70">منصة تبادل الكتب الورقية لتشجيع القراءة في المدينة</p>
-                        </div>
-                        <div className="mt-6 flex items-center gap-2 font-black">
-                            <span className="text-xs uppercase tracking-widest">تصفح الكتب</span>
-                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
-                        </div>
-                    </Link>
+                    {isEnabled('library') && (
+                        <Link
+                            href="/books"
+                            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-emerald-600 p-8 text-white shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/30"
+                        >
+                            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] border border-white/20 bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110 group-hover:rotate-6">
+                                <span className="text-3xl">📚</span>
+                            </div>
+                            <div>
+                                <h4 className="mb-2 text-xl font-black">مكتبة المجتمع</h4>
+                                <p className="text-sm font-medium text-emerald-50/70">منصة تبادل الكتب الورقية لتشجيع القراءة في المدينة</p>
+                            </div>
+                            <div className="mt-6 flex items-center gap-2 font-black">
+                                <span className="text-xs uppercase tracking-widest">تصفح الكتب</span>
+                                <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
+                            </div>
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/ai-studies"
-                        className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50 p-8 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-200/50"
-                    >
-                        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-900 text-white transition-transform group-hover:scale-110 group-hover:rotate-6">
-                            <span className="text-3xl">💡</span>
-                        </div>
-                        <div>
-                            <h4 className="mb-2 text-xl font-black text-slate-800">مركز المعرفة</h4>
-                            <p className="text-sm font-medium text-slate-400">تحليل البيانات والمبادرات الرقمية لتطوير داريا</p>
-                        </div>
-                        <div className="mt-6 flex items-center gap-2 font-black text-slate-800">
-                            <span className="text-xs uppercase tracking-widest">الدراسات</span>
-                            <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
-                        </div>
-                    </Link>
+                    {isEnabled('knowledge') && (
+                        <Link
+                            href="/ai-studies"
+                            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50 p-8 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-200/50"
+                        >
+                            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-900 text-white transition-transform group-hover:scale-110 group-hover:rotate-6">
+                                <span className="text-3xl">💡</span>
+                            </div>
+                            <div>
+                                <h4 className="mb-2 text-xl font-black text-slate-800">مركز المعرفة</h4>
+                                <p className="text-sm font-medium text-slate-400">تحليل البيانات والمبادرات الرقمية لتطوير المدينة</p>
+                            </div>
+                            <div className="mt-6 flex items-center gap-2 font-black text-slate-800">
+                                <span className="text-xs uppercase tracking-widest">الدراسات</span>
+                                <span className="transition-transform group-hover:translate-x-[-4px]">←</span>
+                            </div>
+                        </Link>
+                    )}
                 </div>
 
-                {/* 1. Lost & Found Section - Moved UP for visibility */}
-                <HomeSection
-                    title="المفقودات"
-                    icon="🔍"
-                    href={route('admin.lost-found.index')}
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {sections.lostFound.map((item) => (
-                            <div
-                                key={item.id}
-                                className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
-                            >
-                                <div className="relative flex h-32 items-center justify-center bg-slate-100">
-                                    {item.images && item.images[0] ? (
-                                        <img
-                                            src={`/storage/${item.images[0]}`}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-3xl">
-                                            {item.type === 'lost' ? '❓' : '🎁'}
+                {/* 1. Lost & Found Section */}
+                {isEnabled('lost_found') && (
+                    <HomeSection
+                        title="المفقودات"
+                        icon="🔍"
+                        href={route('admin.lost-found.index')}
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {sections.lostFound.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
+                                >
+                                    <div className="relative flex h-32 items-center justify-center bg-slate-100">
+                                        {item.images && item.images[0] ? (
+                                            <img
+                                                src={`/storage/${item.images[0]}`}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-3xl">
+                                                {item.type === 'lost' ? '❓' : '🎁'}
+                                            </span>
+                                        )}
+                                        <span
+                                            className={`absolute right-2 top-2 rounded px-2 py-0.5 text-[10px] font-bold ${item.type === 'lost' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}
+                                        >
+                                            {item.type === 'lost'
+                                                ? 'مفقود'
+                                                : 'موجود'}
                                         </span>
-                                    )}
-                                    <span
-                                        className={`absolute right-2 top-2 rounded px-2 py-0.5 text-[10px] font-bold ${item.type === 'lost' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}
-                                    >
-                                        {item.type === 'lost'
-                                            ? 'مفقود'
-                                            : 'موجود'}
-                                    </span>
-                                </div>
-                                <div className="p-4">
-                                    <h4 className="mb-1 line-clamp-1 text-sm font-bold text-slate-800">
-                                        {item.title}
-                                    </h4>
-                                    <p className="mb-2 line-clamp-2 h-7 text-[10px] text-slate-500">
-                                        {item.location}
-                                    </p>
-                                    <div className="text-[9px] font-bold text-slate-400">
-                                        {item.date}
                                     </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </HomeSection>
-
-                {/* 2. Book Library Section - Moved UP for visibility */}
-                <HomeSection
-                    title="مكتبة الكتب التبادلية"
-                    icon="📚"
-                    href={route('admin.books.index')}
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {sections.books.map((item) => (
-                            <div
-                                key={item.id}
-                                className="group flex gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:shadow-md"
-                            >
-                                <div className="h-24 w-16 flex-shrink-0 overflow-hidden rounded bg-slate-100 shadow-inner">
-                                    {item.cover_image ? (
-                                        <img
-                                            src={`/storage/${item.cover_image}`}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full w-full items-center justify-center text-slate-300">
-                                            📖
+                                    <div className="p-4">
+                                        <h4 className="mb-1 line-clamp-1 text-sm font-bold text-slate-800">
+                                            {item.title}
+                                        </h4>
+                                        <p className="mb-2 line-clamp-2 h-7 text-[10px] text-slate-500">
+                                            {item.location}
+                                        </p>
+                                        <div className="text-[9px] font-bold text-slate-400">
+                                            {item.date}
                                         </div>
-                                    )}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <h4 className="mb-1 line-clamp-2 text-xs font-bold leading-tight text-slate-800">
-                                        {item.title}
-                                    </h4>
-                                    <p className="mb-2 line-clamp-1 text-[10px] text-slate-500">
-                                        {item.author}
-                                    </p>
-                                    <div className="inline-block rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600">
-                                        متاح
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </HomeSection>
+                            ))}
+                        </div>
+                    </HomeSection>
+                )}
 
-                {/* 3. Awareness Section - Moved UP for visibility */}
-                <HomeSection
-                    title="التوعية والتعليم"
-                    icon="💡"
-                    href={route('ai-studies')}
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {sections.awareness.map((item) => (
-                            <StudyCard key={item.id} item={item} color="blue" />
-                        ))}
-                    </div>
-                </HomeSection>
+                {/* 2. Book Library Section */}
+                {isEnabled('library') && (
+                    <HomeSection
+                        title="مكتبة الكتب التبادلية"
+                        icon="📚"
+                        href={route('admin.books.index')}
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {sections.books.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="group flex gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:shadow-md"
+                                >
+                                    <div className="h-24 w-16 flex-shrink-0 overflow-hidden rounded bg-slate-100 shadow-inner">
+                                        {item.cover_image ? (
+                                            <img
+                                                src={`/storage/${item.cover_image}`}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center text-slate-300">
+                                                📖
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="mb-1 line-clamp-2 text-xs font-bold leading-tight text-slate-800">
+                                            {item.title}
+                                        </h4>
+                                        <p className="mb-2 line-clamp-1 text-[10px] text-slate-500">
+                                            {item.author}
+                                        </p>
+                                        <div className="inline-block rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600">
+                                            متاح
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </HomeSection>
+                )}
+
+                {/* 3. Awareness Section */}
+                {isEnabled('knowledge') && (
+                    <HomeSection
+                        title="التوعية والتعليم"
+                        icon="💡"
+                        href={route('ai-studies')}
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {sections.awareness.map((item) => (
+                                <StudyCard key={item.id} item={item} color="blue" />
+                            ))}
+                        </div>
+                    </HomeSection>
+                )}
 
                 <div className="mt-20 grid grid-cols-1 gap-12 lg:grid-cols-12">
                     {/* Right Column: Live Ecosystem (3 Cols) */}
@@ -452,47 +474,49 @@ export default function Welcome({
                             </Link>
                         </div>
                         {/* Community Discussions Widget */}
-                        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40 mt-8">
-                            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-8 py-5">
-                                <h3 className="flex items-center gap-3 text-sm font-black text-slate-900 uppercase tracking-widest">
-                                    <span>💬</span> نقاشات المجتمع
-                                </h3>
-                                <Link
-                                    href={route('community.index')}
-                                    className="text-[10px] font-black text-emerald-600 hover:underline"
-                                >
-                                    الكل
-                                </Link>
-                            </div>
-                            <div className="divide-y divide-slate-100">
-                                {latestDiscussions && latestDiscussions.length > 0 ? (
-                                    latestDiscussions.map((d: any) => (
-                                        <Link
-                                            key={d.id}
-                                            href={route('community.show', d.id)}
-                                            className="group block p-6 transition hover:bg-slate-50"
-                                        >
-                                            <h4 className="mb-2 line-clamp-1 text-sm font-black text-slate-700 group-hover:text-emerald-600">
-                                                {d?.title}
-                                            </h4>
-                                            <div className="flex items-center justify-between text-[10px] text-slate-400">
-                                                <span className="font-bold">{d?.user}</span>
-                                                <div className="flex items-center gap-3">
-                                                    <span>{d?.time}</span>
-                                                    <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5">
-                                                        <span>↩️</span> {d?.replies_count}
-                                                    </span>
+                        {isEnabled('discussions') && (
+                            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40 mt-8">
+                                <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-8 py-5">
+                                    <h3 className="flex items-center gap-3 text-sm font-black text-slate-900 uppercase tracking-widest">
+                                        <span>💬</span> نقاشات المجتمع
+                                    </h3>
+                                    <Link
+                                        href={route('community.index')}
+                                        className="text-[10px] font-black text-emerald-600 hover:underline"
+                                    >
+                                        الكل
+                                    </Link>
+                                </div>
+                                <div className="divide-y divide-slate-100">
+                                    {latestDiscussions && latestDiscussions.length > 0 ? (
+                                        latestDiscussions.map((d: any) => (
+                                            <Link
+                                                key={d.id}
+                                                href={route('community.show', d.id)}
+                                                className="group block p-6 transition hover:bg-slate-50"
+                                            >
+                                                <h4 className="mb-2 line-clamp-1 text-sm font-black text-slate-700 group-hover:text-emerald-600">
+                                                    {d?.title}
+                                                </h4>
+                                                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                                    <span className="font-bold">{d?.user}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <span>{d?.time}</span>
+                                                        <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5">
+                                                            <span>↩️</span> {d?.replies_count}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </Link>
-                                    ))
-                                ) : (
-                                    <div className="p-10 text-center text-xs text-slate-400">
-                                        لا توجد نقاشات حالياً
-                                    </div>
-                                )}
+                                            </Link>
+                                        ))
+                                    ) : (
+                                        <div className="p-10 text-center text-xs text-slate-400">
+                                            لا توجد نقاشات حالياً
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </aside>
 
                     <main className="space-y-10 lg:col-span-8">
@@ -573,106 +597,114 @@ export default function Welcome({
                 {/* Secondary Horizontal Sections */}
 
                 {/* 4. Initiatives Section */}
-                <HomeSection
-                    title="المبادرات المجتمعية"
-                    icon="🤝"
-                    href={route('initiatives.public')}
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {sections.initiatives.map((item) => (
-                            <div
-                                key={item.id}
-                                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
-                            >
-                                <div className="mb-3 h-32 overflow-hidden rounded-lg bg-slate-100">
-                                    {item.image ? (
-                                        <img
-                                            src={`/storage/${item.image}`}
-                                            className="h-full w-full object-cover"
-                                            alt={item.title}
-                                        />
-                                    ) : (
-                                        <div className="flex h-full w-full items-center justify-center font-serif text-3xl italic text-slate-300">
-                                            Initiative
-                                        </div>
-                                    )}
+                {isEnabled('initiatives') && (
+                    <HomeSection
+                        title="المبادرات المجتمعية"
+                        icon="🤝"
+                        href={route('initiatives.public')}
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {sections.initiatives.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+                                >
+                                    <div className="mb-3 h-32 overflow-hidden rounded-lg bg-slate-100">
+                                        {item.image ? (
+                                            <img
+                                                src={`/storage/${item.image}`}
+                                                className="h-full w-full object-cover"
+                                                alt={item.title}
+                                            />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center font-serif text-3xl italic text-slate-300">
+                                                Initiative
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h4 className="mb-1 line-clamp-1 text-sm font-bold text-slate-800">
+                                        {item.title}
+                                    </h4>
+                                    <p className="mb-3 line-clamp-2 h-8 text-[11px] text-slate-500">
+                                        {item.description}
+                                    </p>
+                                    <div className="flex items-center justify-between rounded-lg bg-slate-50 p-2">
+                                        <span className="text-[10px] font-bold uppercase text-emerald-600">
+                                            {item.status}
+                                        </span>
+                                        <span className="text-[10px] text-slate-400">
+                                            {item.created_at.split('T')[0]}
+                                        </span>
+                                    </div>
                                 </div>
-                                <h4 className="mb-1 line-clamp-1 text-sm font-bold text-slate-800">
-                                    {item.title}
-                                </h4>
-                                <p className="mb-3 line-clamp-2 h-8 text-[11px] text-slate-500">
-                                    {item.description}
-                                </p>
-                                <div className="flex items-center justify-between rounded-lg bg-slate-50 p-2">
-                                    <span className="text-[10px] font-bold uppercase text-emerald-600">
-                                        {item.status}
-                                    </span>
-                                    <span className="text-[10px] text-slate-400">
-                                        {item.created_at.split('T')[0]}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </HomeSection>
+                            ))}
+                        </div>
+                    </HomeSection>
+                )}
 
                 {/* 5. Studies Section */}
-                <HomeSection
-                    title="الدراسات والأبحاث"
-                    icon="📑"
-                    href={route('ai-studies')}
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {sections.studies.map((item) => (
-                            <StudyCard key={item.id} item={item} />
-                        ))}
-                    </div>
-                </HomeSection>
+                {isEnabled('knowledge') && (
+                    <HomeSection
+                        title="الدراسات والأبحاث"
+                        icon="📑"
+                        href={route('ai-studies')}
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {sections.studies.map((item) => (
+                                <StudyCard key={item.id} item={item} />
+                            ))}
+                        </div>
+                    </HomeSection>
+                )}
 
                 {/* 6. Global Experiences */}
-                <HomeSection
-                    title="تجارب عالمية"
-                    icon="🌍"
-                    href={route('ai-studies')}
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {sections.global.map((item) => (
-                            <StudyCard key={item.id} item={item} color="blue" />
-                        ))}
-                    </div>
-                </HomeSection>
+                {isEnabled('knowledge') && (
+                    <HomeSection
+                        title="تجارب عالمية"
+                        icon="🌍"
+                        href={route('ai-studies')}
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {sections.global.map((item) => (
+                                <StudyCard key={item.id} item={item} color="blue" />
+                            ))}
+                        </div>
+                    </HomeSection>
+                )}
 
                 {/* 7. Volunteer Opportunities */}
-                <HomeSection
-                    title="فرص التطوع"
-                    icon="🙋‍♂️"
-                    href={route('volunteer.index')}
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {sections.opportunities.map((item) => (
-                            <div
-                                key={item.id}
-                                className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200"
-                            >
-                                <div className="absolute right-0 top-0 -mr-10 -mt-10 h-20 w-20 rounded-bl-full bg-emerald-50 transition-all group-hover:scale-110"></div>
-                                <h4 className="relative z-10 mb-2 text-sm font-bold text-slate-800">
-                                    {item.title}
-                                </h4>
-                                <p className="mb-4 line-clamp-2 text-xs text-slate-500">
-                                    {item.description}
-                                </p>
-                                <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-4 text-[10px] font-bold">
-                                    <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-600">
-                                        نشط
-                                    </span>
-                                    <span className="text-slate-400">
-                                        نهاية الموعد: {item.deadline || 'دائم'}
-                                    </span>
+                {isEnabled('volunteering') && (
+                    <HomeSection
+                        title="فرص التطوع"
+                        icon="🙋‍♂️"
+                        href={route('volunteer.index')}
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            {sections.opportunities.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200"
+                                >
+                                    <div className="absolute right-0 top-0 -mr-10 -mt-10 h-20 w-20 rounded-bl-full bg-emerald-50 transition-all group-hover:scale-110"></div>
+                                    <h4 className="relative z-10 mb-2 text-sm font-bold text-slate-800">
+                                        {item.title}
+                                    </h4>
+                                    <p className="mb-4 line-clamp-2 text-xs text-slate-500">
+                                        {item.description}
+                                    </p>
+                                    <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-4 text-[10px] font-bold">
+                                        <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-600">
+                                            نشط
+                                        </span>
+                                        <span className="text-slate-400">
+                                            نهاية الموعد: {item.deadline || 'دائم'}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </HomeSection>
+                            ))}
+                        </div>
+                    </HomeSection>
+                )}
             </div>
 
             <footer className="mt-12 border-t border-slate-200 bg-white py-8 text-center">

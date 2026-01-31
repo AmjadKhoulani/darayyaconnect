@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import React, { PropsWithChildren } from 'react';
 import EmergencyModal from '@/Components/EmergencyModal';
 
@@ -14,6 +14,10 @@ export default function PortalLayout({
     header,
 }: PropsWithChildren<Props>) {
     const [emergencyModalOpen, setEmergencyModalOpen] = React.useState(false);
+    const { settings } = usePage().props as any;
+
+    const isEnabled = (module: string) => settings[`module_${module}`] === '1';
+
 
     return (
         <div
@@ -35,44 +39,54 @@ export default function PortalLayout({
                             </div>
                             <div className="hidden md:block">
                                 <h1 className="text-lg font-bold leading-tight text-slate-900">
-                                    داريا{' '}
+                                    {settings?.city_name || 'داريا'}{' '}
                                     <span className="text-emerald-600">
                                         الرقمية
                                     </span>
                                 </h1>
                                 <p className="text-[10px] uppercase tracking-wider text-slate-500">
-                                    منصة إدارة المدينة الموحدة
+                                    {settings?.site_name || 'منصة إدارة المدينة الموحدة'}
                                 </p>
                             </div>
                         </Link>
                     </div>
 
                     <div className="hidden items-center gap-6 md:flex">
-                        <NavLink
-                            href={route('infrastructure.index')}
-                            label="الخريطة"
-                            active={route().current('infrastructure.index')}
-                        />
-                        <NavLink
-                            href={route('initiatives.public')}
-                            label="المبادرات"
-                            active={route().current('initiatives.public')}
-                        />
-                        <NavLink
-                            href={route('ai-studies')}
-                            label="الدراسات"
-                            active={route().current('ai-studies')}
-                        />
-                        <NavLink
-                            href={route('community.index')}
-                            label="المجتمع"
-                            active={route().current('community.index')}
-                        />
-                        <NavLink
-                            href={route('volunteer.index')}
-                            label="التطوع"
-                            active={route().current('volunteer.index')}
-                        />
+                        {isEnabled('infrastructure') && (
+                            <NavLink
+                                href={route('infrastructure.index')}
+                                label="الخريطة"
+                                active={route().current('infrastructure.index')}
+                            />
+                        )}
+                        {isEnabled('initiatives') && (
+                            <NavLink
+                                href={route('initiatives.public')}
+                                label="المبادرات"
+                                active={route().current('initiatives.public')}
+                            />
+                        )}
+                        {isEnabled('knowledge') && (
+                            <NavLink
+                                href={route('ai-studies')}
+                                label="الدراسات"
+                                active={route().current('ai-studies')}
+                            />
+                        )}
+                        {isEnabled('discussions') && (
+                            <NavLink
+                                href={route('community.index')}
+                                label="المجتمع"
+                                active={route().current('community.index')}
+                            />
+                        )}
+                        {isEnabled('volunteering') && (
+                            <NavLink
+                                href={route('volunteer.index')}
+                                label="التطوع"
+                                active={route().current('volunteer.index')}
+                            />
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3">

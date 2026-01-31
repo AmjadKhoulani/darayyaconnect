@@ -21,46 +21,54 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Service Logs (Citizens)
     Route::post('/service-logs', [\App\Http\Controllers\ServiceLogController::class, 'store'])->name('service-logs.store');
 
-    // Community
-    Route::get('/community', function () {
-        return Inertia::render('Community/Index');
-    })->name('community.index');
-    
-    Route::get('/community/{id}', [\App\Http\Controllers\CommunityController::class, 'show'])->name('community.show');
-    Route::post('/community', [\App\Http\Controllers\CommunityController::class, 'store'])->name('community.store');
+    // Community / Discussions
+    Route::middleware('module:discussions')->group(function () {
+        Route::get('/community', function () {
+            return Inertia::render('Community/Index');
+        })->name('community.index');
+        Route::get('/community/{id}', [\App\Http\Controllers\CommunityController::class, 'show'])->name('community.show');
+        Route::post('/community', [\App\Http\Controllers\CommunityController::class, 'store'])->name('community.store');
+    });
 
     // Infrastructure Control (Read Access for Map)
-    Route::get('/infrastructure', [InfrastructureManagerController::class, 'index'])->name('infrastructure.index');
+    Route::get('/infrastructure', [InfrastructureManagerController::class, 'index'])->middleware('module:infrastructure')->name('infrastructure.index');
 
-    // AI Studies (Public fetch from DB)
-    Route::get('/ai-studies', [AiStudyController::class, 'publicIndex'])->name('ai-studies');
-    Route::get('/ai-studies/{id}', [AiStudyController::class, 'publicShow'])->name('ai-studies.show');
-    Route::get('/initiatives', [\App\Http\Controllers\Admin\InitiativeController::class, 'publicIndex'])->name('initiatives.public');
+    // AI Studies (Knowledge Base)
+    Route::middleware('module:knowledge')->group(function () {
+        Route::get('/ai-studies', [AiStudyController::class, 'publicIndex'])->name('ai-studies');
+        Route::get('/ai-studies/{id}', [AiStudyController::class, 'publicShow'])->name('ai-studies.show');
+    });
+
+    // Initiatives
+    Route::get('/initiatives', [\App\Http\Controllers\Admin\InitiativeController::class, 'publicIndex'])->middleware('module:initiatives')->name('initiatives.public');
 
     // Missing Pages Routes (Under Construction)
+    // Lost & Found
     Route::get('/lost-found', function () {
         return Inertia::render('UnderConstruction', [
             'title' => 'مركز المفقودات والموجودات',
             'icon' => '🔍',
             'description' => 'نعمل حالياً على تطوير مركز المفقودات لتسهيل الإبلاغ والبحث عن المفقودات في المدينة.'
         ]);
-    })->name('lost-found.index');
+    })->middleware('module:lost_found')->name('lost-found.index');
 
+    // Library (Books)
     Route::get('/books', function () {
         return Inertia::render('UnderConstruction', [
             'title' => 'مكتبة المجتمع',
             'icon' => '📚',
             'description' => 'مكتبة مجتمعية رقمية تتيح تبادل الكتب والمعرفة بين الأهالي. قريباً ستكون متاحة!'
         ]);
-    })->name('books.index');
+    })->middleware('module:library')->name('books.index');
 
+    // Directory
     Route::get('/directory', function () {
         return Inertia::render('UnderConstruction', [
             'title' => 'دليل الخدمات الشامل',
             'icon' => '📒',
             'description' => 'دليل شامل لكافة الخدمات والمحلات والمهن في داريا. نعمل على جمع وتوثيق البيانات حالياً.'
         ]);
-    })->name('directory.index');
+    })->middleware('module:directory')->name('directory.index');
 
 
     // Admin Panel
@@ -142,6 +150,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Reports List
         Route::resource('reports', \App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show', 'update']);
 
+        // System Settings
+        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+
         // Carousel Management
         Route::resource('carousel', \App\Http\Controllers\Admin\CarouselController::class)->except(['create', 'show', 'edit']);
 
@@ -203,8 +215,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/volunteers', [\App\Http\Controllers\VolunteerController::class, 'adminIndex'])->name('admin.volunteers.index'); // Separated Admin Route
     
     // Volunteer Routes - Public (Keep this if used by web, otherwise mobile uses API)
-    Route::get('/volunteer', [\App\Http\Controllers\VolunteerController::class, 'index'])->name('volunteer.index');
-    Route::post('/volunteer/apply', [\App\Http\Controllers\VolunteerController::class, 'store'])->name('volunteer.apply');
+    // Volunteer Routes - Public
+    Route::get('/volunteer', [\App\Http\Controllers\VolunteerController::class, 'index'])->middleware('module:volunteering')->name('volunteer.index');
+    Route::post('/volunteer/apply', [\App\Http\Controllers\VolunteerController::class, 'store'])->middleware('module:volunteering')->name('volunteer.apply');
 
     // Pharmacy Routes
     Route::post('/pharmacy/duty/toggle', [\App\Http\Controllers\PharmacyController::class, 'toggleDuty'])->name('pharmacy.duty.toggle');

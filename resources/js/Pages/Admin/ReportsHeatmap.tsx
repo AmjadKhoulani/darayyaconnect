@@ -1,5 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { Moon, Sun } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
@@ -14,6 +14,13 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
 
     useEffect(() => {
         if (!mapContainer.current) return;
+
+        const { settings } = usePage().props as any;
+        const mapCenter = [
+            parseFloat(settings?.map_center_lng || '36.2366'),
+            parseFloat(settings?.map_center_lat || '33.4593')
+        ] as [number, number];
+        const mapZoom = parseFloat(settings?.map_zoom || '14');
 
         map.current = new maplibregl.Map({
             container: mapContainer.current,
@@ -37,8 +44,8 @@ export default function ReportsHeatmap({ auth }: { auth: any }) {
                     },
                 ],
             },
-            center: [36.236, 33.456], // Darayya Center
-            zoom: 14,
+            center: mapCenter,
+            zoom: mapZoom,
         });
 
         map.current.on('load', () => {

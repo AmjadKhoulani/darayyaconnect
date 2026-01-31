@@ -34,6 +34,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ? $request->user()->load('department') : null,
             ],
+            'settings' => \Illuminate\Support\Facades\Cache::remember('site_settings', 60, function () {
+                return \App\Models\Setting::all()->mapWithKeys(function ($item) {
+                    return [$item['key'] => $item['value']];
+                });
+            }),
         ];
     }
 }
