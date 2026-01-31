@@ -20,7 +20,7 @@ class AnalyticsController extends Controller
                     'type' => 'Feature',
                     'geometry' => [
                         'type' => 'Point',
-                        'coordinates' => [$user->longitude, $user->latitude],
+            'coordinates' => [(float)$user->longitude, (float)$user->latitude],
                     ],
                     'properties' => [
                         'weight' => 1.0, // Each user counts as 1

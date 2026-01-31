@@ -69,6 +69,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'is_resident' => 'boolean',
         ];
     }
 
