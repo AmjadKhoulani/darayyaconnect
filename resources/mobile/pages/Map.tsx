@@ -351,74 +351,8 @@ export default function Map() {
                 });
             });
 
-            // 4. Public Reports Layer
-            map.current.addSource('public-reports-source', {
-                type: 'geojson',
-                data: { type: 'FeatureCollection', features: [] }
-            });
 
-            const addEmojiIcon = (id: string, emoji: string) => {
-                if (map.current?.hasImage(id)) return;
-                const canvas = document.createElement('canvas');
-                canvas.width = 64; canvas.height = 64;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    ctx.font = '48px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText(emoji, 32, 32);
-                    const imageData = ctx.getImageData(0, 0, 64, 64);
-                    map.current?.addImage(id, imageData);
-                }
-            };
-
-            addEmojiIcon('report-water', '💧');
-            addEmojiIcon('report-electricity', '⚡');
-            addEmojiIcon('report-lighting', '💡');
-            addEmojiIcon('report-sanitation', '🗑️');
-            addEmojiIcon('report-trash', '🗑️');
-            addEmojiIcon('report-road', '🚧');
-            addEmojiIcon('report-comm', '📡');
-            addEmojiIcon('report-other', '⚠️');
-
-            map.current.addLayer({
-                id: 'public-reports-layer',
-                type: 'symbol',
-                source: 'public-reports-source',
-                layout: {
-                    'visibility': activeLayers.publicReports ? 'visible' : 'none',
-                    'icon-image': [
-                        'match',
-                        ['get', 'category'],
-                        'water', 'report-water',
-                        'electricity', 'report-electricity',
-                        'lighting', 'report-lighting',
-                        'sanitation', 'report-sanitation',
-                        'trash', 'report-trash',
-                        'road', 'report-road',
-                        'communication', 'report-comm',
-                        'report-other'
-                    ],
-                    'icon-size': 0.6,
-                    'icon-allow-overlap': true
-                }
-            });
-
-            map.current.on('click', 'public-reports-layer', (e) => {
-                if (e.features && e.features[0]) {
-                    const props = e.features[0].properties;
-                    const categoryAr = {
-                        water: 'شبكة المياه',
-                        electricity: 'شبكة الكهرباء',
-                        lighting: 'الإنارة العامة',
-                        sanitation: 'الصرف الصحي',
-                        trash: 'النظافة العامة',
-                        road: 'الطرق والجسور',
-                        communication: 'الاتصالات',
-                        other: 'بلاغ عام'
-                    }[props.category as string] || 'بلاغ خدمة';
-
-                    alert(`📅 تاريخ البلاغ: ${props.created_at || 'غير محدد'}\n⚠️ نوع البلاغ: ${categoryAr}`);
-                }
-            });
+            // 4. Public Reports Layer - Removed Symbol Layer, Use HTML Markers Instead
         });
 
         // Removed default NavigationControl as per user request (buttons behind bar) and mobile preference (pinch zoom).
@@ -498,22 +432,89 @@ export default function Map() {
         });
 
         updateStatusBubbles(infraData, crowdData);
-
-        if (map.current?.getLayer('public-reports-layer')) {
-            map.current.setLayoutProperty('public-reports-layer', 'visibility', activeLayers.publicReports ? 'visible' : 'none');
-        }
     }, [activeLayers, infraData, crowdData]);
 
-    // Fetch Public Reports
+    // Fetch and Render Public Reports as HTML Markers
+    const reportMarkersRef = useRef<maplibregl.Marker[]>([]);
+
     useEffect(() => {
-        if (!map.current) return;
+        if (!map.current || !activeLayers.publicReports) {
+            // Clean up markers if layer is disabled
+            reportMarkersRef.current.forEach(m => m.remove());
+            reportMarkersRef.current = [];
+            return;
+        }
+
         api.get('/infrastructure/public-reports')
             .then(res => {
-                const source = map.current?.getSource('public-reports-source');
-                if (source) {
-                    (source as any).setData(res.data);
-                }
-            });
+                // Clean up old markers
+                reportMarkersRef.current.forEach(m => m.remove());
+                reportMarkersRef.current = [];
+
+                const categoryIcons: Record<string, string> = {
+                    water: '💧',
+                    electricity: '⚡',
+                    lighting: '💡',
+                    sanitation: '🗑️',
+                    trash: '🗑️',
+                    road: '🚧',
+                    communication: '📡',
+                    other: '⚠️'
+                };
+
+                const categoryColors: Record<string, string> = {
+                    water: 'bg-blue-500',
+                    electricity: 'bg-yellow-500',
+                    lighting: 'bg-amber-500',
+                    sanitation: 'bg-brown-500',
+                    trash: 'bg-green-600',
+                    road: 'bg-orange-500',
+                    communication: 'bg-purple-500',
+                    other: 'bg-slate-500'
+                };
+
+                const categoryNamesAr: Record<string, string> = {
+                    water: 'شبكة المياه',
+                    electricity: 'شبكة الكهرباء',
+                    lighting: 'الإنارة العامة',
+                    sanitation: 'الصرف الصحي',
+                    trash: 'النظافة العامة',
+                    road: 'الطرق والجسور',
+                    communication: 'الاتصالات',
+                    other: 'بلاغ عام'
+                };
+
+                const reports = res.data.features || [];
+
+                reports.forEach((report: any) => {
+                    const category = report.properties.category || 'other';
+                    const icon = categoryIcons[category] || '⚠️';
+                    const color = categoryColors[category] || 'bg-slate-500';
+                    const coords = report.geometry.coordinates;
+
+                    const el = document.createElement('div');
+                    el.className = 'cursor-pointer transition-transform hover:scale-110 active:scale-95';
+                    el.innerHTML = `
+                        <div class="w-10 h-10 ${color} rounded-full flex items-center justify-center text-xl shadow-lg border-2 border-white dark:border-slate-100 animate-pulse-slow">
+                            ${icon}
+                        </div>
+                    `;
+
+                    el.onclick = (e) => {
+                        e.stopPropagation();
+                        const categoryAr = categoryNamesAr[category] || 'بلاغ خدمة';
+                        const createdAt = report.properties.created_at || 'غير محدد';
+                        alert(`📅 تاريخ البلاغ: ${createdAt}\n⚠️ نوع البلاغ: ${categoryAr}`);
+                    };
+
+                    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+                        .setLngLat(coords)
+                        .addTo(map.current!);
+
+                    reportMarkersRef.current.push(marker);
+                });
+            })
+            .catch(err => console.error('Failed to load reports', err));
     }, [activeLayers.publicReports]);
 
 
