@@ -42,21 +42,56 @@ class ServiceLogObserver
 
     private function checkTrendAndAlert(ServiceLog $log)
     {
-        // Count confirmed logs in this neighborhood in the last 60 minutes
-        $count = ServiceLog::where('neighborhood', $log->neighborhood)
-            ->where('service_type', $log->service_type)
-            ->where('status', 'available')
-            ->where('created_at', '>=', Carbon::now()->subMinutes(60))
-            ->count();
+        // 1. Count confirmed logs in this neighborhood OR nearby in the last 60 minutes
+        // We use the User's location if available, otherwise fallback to neighborhood string
+        $user = $log->user;
+        
+        if ($user && $user->latitude && $user->longitude) {
+            // Spatial Query: Find logs from users within 500m
+            $count = ServiceLog::join('users', 'service_logs.user_id', '=', 'users.id')
+                ->where('service_logs.service_type', $log->service_type)
+                ->where('service_logs.status', 'available')
+                ->where('service_logs.created_at', '>=', Carbon::now()->subMinutes(60))
+                ->whereRaw("
+                    (6371 * acos(cos(radians(?)) * cos(radians(users.latitude)) 
+                    * cos(radians(users.longitude) - radians(?)) + sin(radians(?)) 
+                    * sin(radians(users.latitude)))) < 0.5
+                ", [$user->latitude, $user->longitude, $user->latitude])
+                ->count();
 
-        // THRESHOLD: If this is the 5th report (User requested 5)
-        if ($count == 4) { // 4 existing + this one = 5
-            // Find neighbors who haven't logged recently
-            $neighbors = User::where('neighborhood', $log->neighborhood)
-                ->where('id', '!=', $log->user_id) // Don't notify self
-                ->chunk(100, function ($users) use ($log) {
-                    Notification::send($users, new ServiceAvailableNotification($log->service_type, $log->neighborhood));
-                });
+            // THRESHOLD: If this is the 5th report
+            if ($count >= 5) {
+                // Find neighbors within 500m
+                $neighbors = User::select('users.*')
+                    ->where('id', '!=', $log->user_id)
+                    ->whereNotNull('latitude')
+                    ->whereNotNull('longitude')
+                    ->whereRaw("
+                        (6371 * acos(cos(radians(?)) * cos(radians(latitude)) 
+                        * cos(radians(longitude) - radians(?)) + sin(radians(?)) 
+                        * sin(radians(latitude)))) < 0.5
+                    ", [$user->latitude, $user->longitude, $user->latitude])
+                    ->get();
+                    
+                if ($neighbors->count() > 0) {
+                     Notification::send($neighbors, new ServiceAvailableNotification($log->service_type, 'منطقتك (تنبيه مكاني)'));
+                }
+            }
+        } else {
+            // Fallback: String Match
+            $count = ServiceLog::where('neighborhood', $log->neighborhood)
+                ->where('service_type', $log->service_type)
+                ->where('status', 'available')
+                ->where('created_at', '>=', Carbon::now()->subMinutes(60))
+                ->count();
+            
+            if ($count == 4) {
+                $neighbors = User::where('neighborhood', $log->neighborhood)
+                    ->where('id', '!=', $log->user_id)
+                    ->chunk(100, function ($users) use ($log) {
+                        Notification::send($users, new ServiceAvailableNotification($log->service_type, $log->neighborhood));
+                    });
+            }
         }
     }
 }
