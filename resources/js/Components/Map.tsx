@@ -333,7 +333,7 @@ export default function Map() {
     // Heatmap Logic
     // Heatmap Logic
     const [heatmapMode, setHeatmapMode] = useState<
-        'none' | 'problems' | 'coverage'
+        'none' | 'problems' | 'coverage' | 'community'
     >('none');
     const [heatmapTime, setHeatmapTime] = useState(24); // Hours ago
 
@@ -356,45 +356,65 @@ export default function Map() {
         const colorScale: any =
             type === 'coverage'
                 ? [
-                      'interpolate',
-                      ['linear'],
-                      ['heatmap-density'],
-                      0,
-                      'rgba(33,102,172,0)',
-                      0.2,
-                      'rgb(166, 219, 160)', // Light Green
-                      0.4,
-                      'rgb(116, 196, 118)',
-                      0.6,
-                      'rgb(65, 171, 93)',
-                      0.8,
-                      'rgb(35, 139, 69)',
-                      1,
-                      'rgb(0, 90, 50)', // Dark Green
-                  ]
-                : [
-                      'interpolate',
-                      ['linear'],
-                      ['heatmap-density'],
-                      0,
-                      'rgba(33,102,172,0)',
-                      0.2,
-                      'rgb(103,169,207)',
-                      0.4,
-                      'rgb(209,229,240)',
-                      0.6,
-                      'rgb(253,219,199)', // Orange/Red ramp
-                      0.8,
-                      'rgb(239,138,98)',
-                      1,
-                      'rgb(178,24,43)',
-                  ];
+                    'interpolate',
+                    ['linear'],
+                    ['heatmap-density'],
+                    0,
+                    'rgba(33,102,172,0)',
+                    0.2,
+                    'rgb(166, 219, 160)', // Light Green
+                    0.4,
+                    'rgb(116, 196, 118)',
+                    0.6,
+                    'rgb(65, 171, 93)',
+                    0.8,
+                    'rgb(35, 139, 69)',
+                    1,
+                    'rgb(0, 90, 50)', // Dark Green
+                ]
+                : type === 'community'
+                    ? [
+                        'interpolate',
+                        ['linear'],
+                        ['heatmap-density'],
+                        0,
+                        'rgba(33,102,172,0)',
+                        0.01, // Very sensitive! Show color almost immediately
+                        'rgba(236, 72, 153, 0.3)', // Pink-500 (Low density)
+                        0.2,
+                        'rgba(236, 72, 153, 0.5)',
+                        0.5,
+                        'rgba(219, 39, 119, 0.7)',
+                        0.8,
+                        'rgba(190, 24, 93, 0.8)',
+                        1,
+                        'rgba(157, 23, 77, 0.9)', // Pink-800 (High density)
+                    ]
+                    : [
+                        'interpolate',
+                        ['linear'],
+                        ['heatmap-density'],
+                        0,
+                        'rgba(33,102,172,0)',
+                        0.1, // Single report should trigger this
+                        'rgb(103,169,207)',
+                        0.4,
+                        'rgb(209,229,240)',
+                        0.6,
+                        'rgb(253,219,199)', // Orange/Red ramp
+                        0.8,
+                        'rgb(239,138,98)',
+                        1,
+                        'rgb(178,24,43)',
+                    ];
 
         // Fetch data
         const endpoint =
             type === 'coverage'
                 ? '/api/analytics/heatmap?type=coverage'
-                : `/api/analytics/heatmap?type=problems&hours_ago=${heatmapTime}`;
+                : type === 'community'
+                    ? '/api/analytics/heatmap?type=community'
+                    : `/api/analytics/heatmap?type=problems&hours_ago=${heatmapTime}`;
 
         fetch(endpoint)
             .then((res) => res.json())
@@ -513,14 +533,14 @@ export default function Map() {
                 point.type === 'transformer'
                     ? '⚡'
                     : point.type === 'well'
-                      ? '💧'
-                      : '📍';
+                        ? '💧'
+                        : '📍';
             const colorClass =
                 point.status === 'active'
                     ? 'bg-emerald-500'
                     : point.status === 'stopped'
-                      ? 'bg-rose-500'
-                      : 'bg-amber-500';
+                        ? 'bg-rose-500'
+                        : 'bg-amber-500';
 
             el.innerHTML = `<div class="w-8 h-8 rounded-full ${colorClass} text-white flex items-center justify-center text-lg shadow-lg border-2 border-white transform transition hover:scale-110 cursor-pointer">${icon}</div>`;
 
@@ -599,6 +619,19 @@ export default function Map() {
                     title="نطاق الخدمة (الأمان)"
                 >
                     🛡️
+                </button>
+                <button
+                    onClick={() =>
+                        setHeatmapMode(
+                            heatmapMode === 'community'
+                                ? 'none'
+                                : 'community',
+                        )
+                    }
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm transition ${heatmapMode === 'community' ? 'animate-pulse bg-pink-100 ring-2 ring-pink-500' : 'hover:bg-slate-100'}`}
+                    title="التوافر المجتمعي"
+                >
+                    👥
                 </button>
                 <button
                     onClick={() => {

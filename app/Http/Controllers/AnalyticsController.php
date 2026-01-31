@@ -11,7 +11,24 @@ class AnalyticsController extends Controller
     {
         $type = $request->query('type', 'problems');
 
-        if ($type === 'coverage') {
+        if ($type === 'community') {
+            // "Community Availability": Show where people are
+            $users = \App\Models\User::whereNotNull('latitude')->whereNotNull('longitude')->get();
+
+            $features = $users->map(function ($user) {
+                return [
+                    'type' => 'Feature',
+                    'geometry' => [
+                        'type' => 'Point',
+                        'coordinates' => [$user->longitude, $user->latitude],
+                    ],
+                    'properties' => [
+                        'weight' => 1.0, // Each user counts as 1
+                    ],
+                ];
+            });
+
+        } elseif ($type === 'coverage') {
             // "Service Influence Map": Show where we ARE providing value
             // Weight: Schools/Hospitals = 1.0, Parks = 0.8, Lighting = 0.5
             $assets = \App\Models\InfrastructurePoint::where('status', 'active')->get();
