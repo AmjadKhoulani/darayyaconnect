@@ -522,9 +522,18 @@ export default function InfrastructureIndex({ auth, points }: any) {
 
     const getEmojiForCategory = (cat: string) => {
         const map: Record<string, string> = {
-            water: '💧', electricity: '⚡', lighting: '💡', sanitation: '🗑️', trash: '🗑️', road: '🚧', communication: '📡'
+            water: '💧',
+            electricity: '⚡',
+            lighting: '💡',
+            sanitation: '🗑️',
+            trash: '🗑️',
+            road: '🚧',
+            infrastructure: '🚧',
+            communication: '📡',
+            other: '📣' // Changed from ⚠️ to avoids "yellow triangle" confusion
         };
-        return map[cat] || '⚠️';
+        // Normalize category to lower case for better matching
+        return map[cat.toLowerCase()] || '📣';
     };
 
     // Effect to sync layer visibility
