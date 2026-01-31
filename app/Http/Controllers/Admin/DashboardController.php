@@ -111,14 +111,30 @@ class DashboardController extends Controller
             return $data;
         };
 
+        // Reports Breakdown by Category
+        $reportBreakdown = $safeFetch(fn() => 
+            Report::select('category', DB::raw('count(*) as count'))
+                ->groupBy('category')
+                ->get()
+                ->pluck('count', 'category'),
+            []
+        );
+
         try {
             $data = [
-                'stats' => $stats,
+                'stats' => array_merge($stats, [
+                    'total_ai_studies' => $safeFetch(fn() => \App\Models\AiStudy::count(), 0),
+                    'volunteers_active' => $safeFetch(fn() => \App\Models\User::where('role', 'volunteer')->count(), 0),
+                    'lost_found_active' => $safeFetch(fn() => \App\Models\LostFoundItem::where('status', 'lost')->count(), 0),
+                    'initiatives_pending' => $safeFetch(fn() => \App\Models\Initiative::where('moderation_status', 'pending')->count(), 0),
+                    'discussion_posts' => $safeFetch(fn() => \App\Models\Discussion::count(), 0),
+                ]),
                 'trends' => [
                     'reports' => $reportTrends,
                     'users' => $userTrends,
                     'services' => $serviceTrends,
                 ],
+                'report_breakdown' => $reportBreakdown,
                 'bottlenecks' => [
                     'summary' => [],
                     'list' => []
