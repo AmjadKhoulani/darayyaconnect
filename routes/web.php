@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // AI Studies (Public fetch from DB)
     Route::get('/ai-studies', [AiStudyController::class, 'publicIndex'])->name('ai-studies');
+    Route::get('/ai-studies/{id}', [AiStudyController::class, 'publicShow'])->name('ai-studies.show');
     Route::get('/initiatives', [\App\Http\Controllers\Admin\InitiativeController::class, 'publicIndex'])->name('initiatives.public');
 
     // Missing Pages Routes (Under Construction)

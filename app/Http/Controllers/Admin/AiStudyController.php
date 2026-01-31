@@ -47,6 +47,18 @@ class AiStudyController extends Controller
     }
 
     /**
+     * Display the specified resource publically.
+     */
+    public function publicShow($id)
+    {
+        $study = AiStudy::where('is_published', true)->findOrFail($id);
+
+        return Inertia::render('AiStudies/Show', [
+            'study' => $study
+        ]);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index()
