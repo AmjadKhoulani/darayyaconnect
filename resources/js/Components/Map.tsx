@@ -349,6 +349,13 @@ export default function Map() {
                     'none',
                 );
             }
+            if (map.current.getLayer('community-points')) {
+                map.current.setLayoutProperty(
+                    'community-points',
+                    'visibility',
+                    'none',
+                );
+            }
             return;
         }
 
@@ -435,6 +442,10 @@ export default function Map() {
                     map.current.removeLayer('heatmap-layer');
                 }
 
+                const beforeLayerId = map.current?.getLayer('z-mask')
+                    ? 'z-mask'
+                    : undefined;
+
                 map.current?.addLayer(
                     {
                         id: 'heatmap-layer',
@@ -449,7 +460,7 @@ export default function Map() {
                                 0,
                                 0,
                                 1,
-                                1,
+                                3, // Increase weight significantly!
                             ],
                             'heatmap-intensity': [
                                 'interpolate',
@@ -466,15 +477,42 @@ export default function Map() {
                                 ['linear'],
                                 ['zoom'],
                                 11,
-                                20, // Increased radius for better "zone" feel
+                                20,
                                 15,
-                                40,
+                                50, // Larger radius
                             ],
-                            'heatmap-opacity': 0.7,
+                            'heatmap-opacity': 0.8,
                         },
                     },
-                    'z-mask',
+                    beforeLayerId,
                 );
+
+                // Add Circle Layer for Community Mode (Direct Visibility)
+                if (type === 'community') {
+                    if (map.current?.getLayer('community-points')) {
+                        map.current.removeLayer('community-points');
+                    }
+                    map.current?.addLayer(
+                        {
+                            id: 'community-points',
+                            type: 'circle',
+                            source: 'heatmap-source',
+                            maxzoom: 24,
+                            paint: {
+                                'circle-radius': 6,
+                                'circle-color': '#ec4899', // Pink-500
+                                'circle-stroke-width': 2,
+                                'circle-stroke-color': '#ffffff',
+                                'circle-opacity': 0.9,
+                            },
+                        },
+                        beforeLayerId,
+                    );
+                } else {
+                    if (map.current?.getLayer('community-points')) {
+                        map.current.removeLayer('community-points');
+                    }
+                }
             });
     }, [heatmapMode, heatmapTime]); // Re-run when time changes
 
