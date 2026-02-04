@@ -21,12 +21,12 @@ import { useState } from 'react';
 
 export default function VolunteerIndex({
     auth,
-    opportunities,
-    applications,
+    opportunities = [],
+    applications = [],
 }: {
     auth: any;
-    opportunities: any[];
-    applications: any[];
+    opportunities?: any[];
+    applications?: any[];
 }) {
     const [activeTab, setActiveTab] = useState<
         'opportunities' | 'applications'
@@ -160,7 +160,7 @@ function OpportunitiesTab({ opportunities }: { opportunities: any[] }) {
         <div>
             <div className="mb-6 flex items-center justify-between">
                 <h3 className="text-lg font-bold text-gray-800">
-                    قائمة الفرص المتاحة ({opportunities.length})
+                    قائمة الفرص المتاحة ({opportunities?.length || 0})
                 </h3>
                 <PrimaryButton onClick={() => openModal()}>
                     <Plus size={16} className="ml-2" />
@@ -193,7 +193,7 @@ function OpportunitiesTab({ opportunities }: { opportunities: any[] }) {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {opportunities.map((opp) => (
+                        {opportunities && opportunities.map((opp) => (
                             <tr key={opp.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4">
                                     <div className="text-sm font-bold text-gray-900">
@@ -212,8 +212,8 @@ function OpportunitiesTab({ opportunities }: { opportunities: any[] }) {
                                 >
                                     {opp.start_date
                                         ? new Date(
-                                              opp.start_date,
-                                          ).toLocaleDateString()
+                                            opp.start_date,
+                                        ).toLocaleDateString()
                                         : '-'}
                                 </td>
                                 <td className="px-6 py-4">
@@ -392,10 +392,10 @@ function OpportunitiesTab({ opportunities }: { opportunities: any[] }) {
 }
 
 // --- Applications Tab ---
-function ApplicationsTab({ applications }: { applications: any[] }) {
+function ApplicationsTab({ applications = [] }: { applications: any[] }) {
     // Filter apps by status
-    const pendingApps = applications.filter((app) => app.status === 'pending');
-    const approvedApps = applications.filter(
+    const pendingApps = (applications || []).filter((app) => app.status === 'pending');
+    const approvedApps = (applications || []).filter(
         (app) => app.status === 'approved',
     );
 
