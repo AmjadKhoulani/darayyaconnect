@@ -14,7 +14,7 @@ export default function Discussions() {
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
     const [newImage, setNewImage] = useState<File | null>(null);
-    const [selectedCategory, setSelectedCategory] = useState('general');
+    const [selectedCategory, setSelectedCategory] = useState('all');
     const [submitting, setSubmitting] = useState(false);
     const [user, setUser] = useState<any>(null);
     const navigate = useNavigate();
@@ -107,6 +107,16 @@ export default function Discussions() {
                 <main className="px-5 -mt-10 relative z-50 bg-slate-50 dark:bg-slate-900 rounded-t-[40px] pt-8 min-h-[calc(100vh-200px)] space-y-4 transition-colors duration-300 max-w-5xl mx-auto w-full">
                     {/* Categories Scroll */}
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                        <button
+                            onClick={() => setSelectedCategory('all')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all whitespace-nowrap ${selectedCategory === 'all'
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                }`}
+                        >
+                            <span className="text-xs font-bold">الكل</span>
+                        </button>
+
                         {categories.map(cat => (
                             <button
                                 key={cat.id}
@@ -127,7 +137,7 @@ export default function Discussions() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {discussions
-                                .filter(d => selectedCategory === 'general' || d.category === selectedCategory)
+                                .filter(d => selectedCategory === 'all' || d.category === selectedCategory)
                                 .map(discussion => (
                                     <div
                                         key={discussion.id}

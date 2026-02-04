@@ -24,7 +24,9 @@ class EngagementController extends Controller
     public function showDiscussion($id)
     {
         return response()->json(
-            Discussion::with(['user:id,name', 'replies.user:id,name', 'replies.replies.user:id,name']) // Load 2 levels of replies
+            Discussion::with(['user:id,name', 'replies' => function($query) {
+                $query->whereNull('parent_id')->with('user:id,name', 'replies.user:id,name');
+            }]) 
                 ->withCount(['votes', 'replies'])
                 ->findOrFail($id)
         );

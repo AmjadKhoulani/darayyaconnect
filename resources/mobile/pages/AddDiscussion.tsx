@@ -86,8 +86,7 @@ export default function AddDiscussion() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setIsDirty(false);
-            showToast('تم نشر الموضوع بنجاح 🎉', 'success');
-            navigate('/discussions');
+            showToast('تم إرسال الموضوع بنجاح، سيظهر بعد المراجعة 🎉', 'success');
             navigate('/discussions');
         } catch (err: any) {
             console.error(err);

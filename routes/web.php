@@ -9,13 +9,15 @@ use App\Http\Controllers\Admin\InfrastructureManagerController;
 use App\Http\Controllers\Admin\AiStudyController;
 use App\Models\AiStudy;
 
-Route::get('/', [\App\Http\Controllers\WelcomeController::class, 'index'])->name('welcome');
 
-Route::get('/privacy-policy', function () {
-    return Inertia::render('PrivacyPolicy');
-})->name('privacy-policy');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\WelcomeController::class, 'index'])->name('welcome');
+
+    Route::get('/privacy-policy', function () {
+        return Inertia::render('PrivacyPolicy');
+    })->name('privacy-policy');
+    
     Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])->name('dashboard');
 
     // Service Logs (Citizens)

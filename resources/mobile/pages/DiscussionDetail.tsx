@@ -184,9 +184,9 @@ function ReplyItem({ reply, onReply, depth = 0 }: { reply: any, onReply: (r: any
     const isNested = depth > 0;
     return (
         <div className={`flex gap-3 ${isNested ? 'mr-8 mt-2 relative' : ''}`}>
-            {isNested && <div className="absolute -right-6 top-4 w-4 h-px bg-slate-200"></div>}
+            {isNested && <div className="absolute -right-6 top-4 w-4 h-px bg-slate-200 dark:bg-slate-700"></div>}
 
-            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0 border border-slate-100">
+            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs shrink-0 border border-slate-100 dark:border-slate-700">
                 {reply.user.name.charAt(0)}
             </div>
 
@@ -199,7 +199,7 @@ function ReplyItem({ reply, onReply, depth = 0 }: { reply: any, onReply: (r: any
 
                 {reply.image_path && (
                     <div className="mb-2 rounded-lg overflow-hidden max-w-[200px] border border-slate-100 dark:border-slate-700">
-                        <LazyImage src={`/storage/${reply.image_path}`} alt="Reply" className="w-full h-auto" />
+                        <LazyImage src={reply.image_url || `/storage/${reply.image_path}`} alt="Reply" className="w-full h-auto" />
                     </div>
                 )}
 

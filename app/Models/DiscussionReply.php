@@ -11,6 +11,13 @@ class DiscussionReply extends Model
 
     protected $fillable = ['user_id', 'discussion_id', 'body', 'image_path', 'parent_id'];
 
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image_path ? asset('storage/' . $this->image_path) : null;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

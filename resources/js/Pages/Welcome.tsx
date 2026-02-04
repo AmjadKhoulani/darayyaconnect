@@ -104,7 +104,7 @@ export default function Welcome({
                                 href={route('login')}
                                 className="rounded-xl bg-slate-900 px-6 py-2.5 text-xs font-black text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                             >
-                                دخول الموظفين
+                                الانضمام او تسجيل الدخول
                             </Link>
                         )}
                     </div>

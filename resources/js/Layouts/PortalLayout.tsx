@@ -126,7 +126,7 @@ export default function PortalLayout({
                                 href={route('login')}
                                 className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-900/10 transition hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                             >
-                                دخول الموظفين
+                                الانضمام او تسجيل الدخول
                             </Link>
                         )}
                     </div>

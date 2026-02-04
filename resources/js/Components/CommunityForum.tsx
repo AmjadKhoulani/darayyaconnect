@@ -81,6 +81,7 @@ export default function CommunityForum() {
                     setIsCreateModalOpen(false);
                     setNewTopic({ title: '', body: '', category: 'general' });
                     setNewImage(null);
+                    alert('تم إرسال الموضوع بنجاح. سيظهر للجميع بعد مراجعة الإدارة.');
                     fetchDiscussions(); // Refresh the list
                     setLoading(false);
                 },
@@ -103,8 +104,18 @@ export default function CommunityForum() {
 
     const getCategoryName = (id: string) =>
         categories.find((c) => c.id === id)?.name || id;
-    const getCategoryColor = (id: string) =>
-        categories.find((c) => c.id === id)?.color || 'slate';
+    const getCategoryColor = (id: string) => {
+        const cat = categories.find((c) => c.id === id);
+        const color = cat?.color || 'slate';
+        const colors: any = {
+            slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+            blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+            amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+            red: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+            emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+        };
+        return colors[color] || colors.slate;
+    };
 
     const handleReply = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -156,51 +167,53 @@ export default function CommunityForum() {
             : discussions.filter((d) => d.category === activeTab);
 
     return (
-        <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800">
+                    <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
                         <span>💬</span> حوار المجتمع
                     </h3>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         مساحة للنقاش الحر والبناء
                     </p>
                 </div>
                 {auth.user ? (
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-md transition hover:bg-slate-800"
+                        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-md transition hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700"
                     >
                         + موضوع جديد
                     </button>
                 ) : (
-                    <span className="rounded bg-slate-50 px-2 py-1 text-xs text-slate-400">
+                    <span className="rounded bg-slate-50 px-2 py-1 text-xs text-slate-400 dark:bg-slate-800 dark:text-slate-500">
                         سجل للدخول للمشاركة
                     </span>
                 )}
             </div>
 
             {/* Tabs */}
-            <div className="mb-4 flex overflow-x-auto border-b border-slate-100">
-                {['all', 'social', 'services', 'suggestions', 'complaints'].map(
+            <div className="mb-4 flex overflow-x-auto border-b border-slate-100 dark:border-slate-800">
+                {['all', 'general', 'services', 'suggestions', 'complaints', 'help'].map(
                     (tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab
-                                    ? 'border-emerald-500 text-emerald-600'
-                                    : 'border-transparent text-slate-500 hover:text-slate-700'
+                                ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
+                                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                 }`}
                         >
                             {tab === 'all'
                                 ? 'الكل'
-                                : tab === 'social'
-                                    ? 'اجتماعي'
+                                : tab === 'general'
+                                    ? 'عام'
                                     : tab === 'services'
-                                        ? 'خدمي'
+                                        ? 'خدمات'
                                         : tab === 'suggestions'
                                             ? 'اقتراحات'
-                                            : 'شكاوى'}
+                                            : tab === 'complaints'
+                                                ? 'شكاوى'
+                                                : 'مساعدة'}
                         </button>
                     ),
                 )}
@@ -210,7 +223,7 @@ export default function CommunityForum() {
                 {filtered.map((topic) => (
                     <div
                         key={topic.id}
-                        className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md"
+                        className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                     >
                         <Link href={`/community/${topic.id}`} className="block">
                             {topic.image_url && (
@@ -223,13 +236,13 @@ export default function CommunityForum() {
                                     <div className="absolute right-4 top-4">
                                         <span
                                             className={`rounded-lg px-3 py-1 text-xs font-bold shadow-sm backdrop-blur-md ${topic.category === 'general'
-                                                    ? 'bg-slate-900/10 bg-white/90 text-slate-800'
-                                                    : topic.category === 'tech'
-                                                        ? 'bg-blue-900/10 bg-white/90 text-blue-800'
-                                                        : topic.category ===
-                                                            'events'
-                                                            ? 'bg-purple-900/10 bg-white/90 text-purple-800'
-                                                            : 'bg-emerald-900/10 bg-white/90 text-emerald-800'
+                                                ? 'bg-slate-900/10 bg-white/90 text-slate-800 dark:bg-slate-800/90 dark:text-slate-100'
+                                                : topic.category === 'tech'
+                                                    ? 'bg-blue-900/10 bg-white/90 text-blue-800 dark:bg-blue-900/90 dark:text-blue-100'
+                                                    : topic.category ===
+                                                        'events'
+                                                        ? 'bg-purple-900/10 bg-white/90 text-purple-800 dark:bg-purple-900/90 dark:text-purple-100'
+                                                        : 'bg-emerald-900/10 bg-white/90 text-emerald-800 dark:bg-emerald-900/90 dark:text-emerald-100'
                                                 }`}
                                         >
                                             {getCategoryName(topic.category)}
@@ -257,28 +270,28 @@ export default function CommunityForum() {
 
                             <Link
                                 href={`/community/${topic.id}`}
-                                className="block transition-colors group-hover:text-emerald-600"
+                                className="block transition-colors group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
                             >
-                                <h3 className="mb-2 line-clamp-1 text-xl font-bold text-slate-900">
+                                <h3 className="mb-2 line-clamp-1 text-xl font-bold text-slate-900 dark:text-slate-100">
                                     {topic.title}
                                 </h3>
                             </Link>
 
-                            <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-600">
+                            <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                                 {topic.body}
                             </p>
 
                             <div className="flex items-center justify-between border-t border-slate-50 pt-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400">
                                         {topic.user.name[0]}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-xs font-bold text-slate-700">
+                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                                             {topic.user.name}
                                         </span>
                                         {topic.image_url && (
-                                            <span className="text-[10px] text-slate-400">
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500">
                                                 {new Date(
                                                     topic.created_at,
                                                 ).toLocaleDateString('ar-SY')}
@@ -292,7 +305,7 @@ export default function CommunityForum() {
 
                                     <Link
                                         href={`/community/${topic.id}`}
-                                        className="flex items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500 transition-all hover:bg-slate-100"
+                                        className="flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-100 dark:hover:bg-slate-700"
                                     >
                                         <MessageSquare size={14} />
                                         <span>{topic.replies_count}</span>
@@ -309,14 +322,14 @@ export default function CommunityForum() {
                 show={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
             >
-                <div className="rounded-2xl bg-white p-6 text-right" dir="rtl">
-                    <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
-                        <h2 className="text-xl font-bold text-slate-800">
+                <div className="rounded-2xl bg-white p-6 text-right dark:bg-slate-900" dir="rtl">
+                    <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                             ✨ طرح موضوع جديد
                         </h2>
                         <button
                             onClick={() => setIsCreateModalOpen(false)}
-                            className="text-slate-400 transition hover:text-red-500"
+                            className="text-slate-400 transition hover:text-red-500 dark:hover:text-red-400"
                         >
                             <X size={24} />
                         </button>
@@ -327,10 +340,10 @@ export default function CommunityForum() {
                         <div>
                             <InputLabel
                                 value="عنوان الموضوع"
-                                className="mb-2 text-sm font-bold text-slate-700"
+                                className="mb-2 text-sm font-bold text-slate-700 dark:text-slate-300"
                             />
                             <TextInput
-                                className="w-full rounded-xl border-slate-200 px-4 py-3 font-medium text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:ring-emerald-500"
+                                className="w-full rounded-xl border-slate-200 px-4 py-3 font-medium text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                                 value={newTopic.title}
                                 onChange={(e) =>
                                     setNewTopic({
@@ -363,12 +376,24 @@ export default function CommunityForum() {
                                                 })
                                             }
                                             className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold transition-all ${newTopic.category === cat.id
-                                                    ? `bg-${cat.color}-50 border-${cat.color}-500 text-${cat.color}-700 ring-1 ring-${cat.color}-500`
-                                                    : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                                                ? {
+                                                    slate: 'bg-slate-50 border-slate-500 text-slate-700 dark:bg-slate-800 dark:text-slate-200',
+                                                    blue: 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+                                                    amber: 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                                                    red: 'bg-rose-50 border-rose-500 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+                                                    emerald: 'bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                                }[cat.color] || 'bg-slate-50 border-slate-500 text-slate-700'
+                                                : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
                                                 }`}
                                         >
                                             <span
-                                                className={`h-2 w-2 rounded-full bg-${cat.color}-500`}
+                                                className={`h-2 w-2 rounded-full ${{
+                                                    slate: 'bg-slate-500',
+                                                    blue: 'bg-blue-500',
+                                                    amber: 'bg-amber-500',
+                                                    red: 'bg-rose-500',
+                                                    emerald: 'bg-emerald-500'
+                                                }[cat.color] || 'bg-slate-500'}`}
                                             ></span>
                                             {cat.name}
                                         </button>
@@ -380,10 +405,10 @@ export default function CommunityForum() {
                         <div>
                             <InputLabel
                                 value="تفاصيل الموضوع"
-                                className="mb-2 text-sm font-bold text-slate-700"
+                                className="mb-2 text-sm font-bold text-slate-700 dark:text-slate-300"
                             />
                             <textarea
-                                className="h-40 w-full resize-none rounded-xl border-slate-200 px-4 py-3 font-medium text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:ring-emerald-500"
+                                className="h-40 w-full resize-none rounded-xl border-slate-200 px-4 py-3 font-medium text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                                 value={newTopic.body}
                                 onChange={(e) =>
                                     setNewTopic({
@@ -400,34 +425,34 @@ export default function CommunityForum() {
                         <div>
                             <InputLabel
                                 value="إرفاق صورة (اختياري)"
-                                className="mb-2 text-sm font-bold text-slate-700"
+                                className="mb-2 text-sm font-bold text-slate-700 dark:text-slate-300"
                             />
                             <label
-                                className={`flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all ${newImage ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 bg-white hover:border-emerald-400 hover:bg-slate-50'}`}
+                                className={`flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all ${newImage ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' : 'border-slate-300 bg-white hover:border-emerald-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-500'}`}
                             >
                                 <div className="flex flex-col items-center justify-center pb-6 pt-5">
                                     {newImage ? (
                                         <div className="text-center">
-                                            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                                            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
                                                 <ImageIcon size={20} />
                                             </div>
-                                            <p className="text-sm font-bold text-emerald-600">
+                                            <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                                 {newImage.name}
                                             </p>
-                                            <p className="text-xs text-emerald-500">
+                                            <p className="text-xs text-emerald-500 dark:text-emerald-500">
                                                 تم اختيار الصورة بنجاح
                                             </p>
                                         </div>
                                     ) : (
                                         <>
-                                            <ImageIcon className="mb-2 h-8 w-8 text-slate-400" />
-                                            <p className="text-sm text-slate-500">
-                                                <span className="font-bold text-emerald-600">
+                                            <ImageIcon className="mb-2 h-8 w-8 text-slate-400 dark:text-slate-600" />
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                <span className="font-bold text-emerald-600 dark:text-emerald-500">
                                                     اضغط للرفع
                                                 </span>{' '}
                                                 أو اسحب وأفلت
                                             </p>
-                                            <p className="text-xs text-slate-400">
+                                            <p className="text-xs text-slate-400 dark:text-slate-600">
                                                 PNG, JPG, GIF up to 5MB
                                             </p>
                                         </>
@@ -455,9 +480,10 @@ export default function CommunityForum() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
+                        <div className="flex justify-end gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
                             <SecondaryButton
                                 onClick={() => setIsCreateModalOpen(false)}
+                                className="dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
                             >
                                 إلغاء
                             </SecondaryButton>
@@ -504,19 +530,19 @@ export default function CommunityForum() {
             >
                 {selectedDiscussion && (
                     <div
-                        className="flex h-[80vh] flex-col overflow-hidden rounded-lg bg-white"
+                        className="flex h-[80vh] flex-col overflow-hidden rounded-lg bg-white dark:bg-slate-900"
                         dir="rtl"
                     >
                         {/* Header */}
-                        <div className="flex flex-shrink-0 items-start justify-between border-b border-slate-100 bg-slate-50 p-4">
+                        <div className="flex flex-shrink-0 items-start justify-between border-b border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
                             <div>
-                                <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                                <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-slate-100">
                                     {selectedDiscussion.title}
-                                    <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-normal text-slate-500">
+                                    <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-normal text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                                         {selectedDiscussion.category}
                                     </span>
                                 </h2>
-                                <div className="mt-1 flex gap-2 text-xs text-slate-500">
+                                <div className="mt-1 flex gap-2 text-xs text-slate-500 dark:text-slate-400">
                                     <span>
                                         بواسطة {selectedDiscussion.user.name}
                                     </span>
@@ -549,19 +575,19 @@ export default function CommunityForum() {
                         </div>
 
                         {/* Chat Area */}
-                        <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50 p-4">
+                        <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50 p-4 dark:bg-slate-950">
                             {/* Original Post as the First Message */}
                             <div className="flex justify-start">
-                                <div className="max-w-[85%] rounded-2xl rounded-tr-none border border-slate-200 bg-white p-4 shadow-sm">
-                                    <div className="mb-2 flex items-center gap-2 border-b border-slate-100 pb-2">
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+                                <div className="max-w-[85%] rounded-2xl rounded-tr-none border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                    <div className="mb-2 flex items-center gap-2 border-b border-slate-100 pb-2 dark:border-slate-800">
+                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
                                             {selectedDiscussion.user.name[0]}
                                         </div>
-                                        <span className="text-xs font-bold text-slate-700">
+                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                                             {selectedDiscussion.user.name}
                                         </span>
                                     </div>
-                                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                                         {selectedDiscussion.body}
                                     </p>
                                 </div>
@@ -580,8 +606,8 @@ export default function CommunityForum() {
                                         >
                                             <div
                                                 className={`max-w-[80%] rounded-2xl p-3 text-sm shadow-sm ${isMe
-                                                        ? 'rounded-tl-none bg-emerald-500 text-white'
-                                                        : 'rounded-tr-none border border-slate-200 bg-white text-slate-700'
+                                                    ? 'rounded-tl-none bg-emerald-500 text-white'
+                                                    : 'rounded-tr-none border border-slate-200 bg-white text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'
                                                     }`}
                                             >
                                                 {!isMe && (
@@ -617,11 +643,11 @@ export default function CommunityForum() {
                         </div>
 
                         {/* Input Area (Sticky) */}
-                        <div className="flex-shrink-0 border-t border-slate-100 bg-white p-4">
+                        <div className="flex-shrink-0 border-t border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
                             <form onSubmit={handleReply} className="flex gap-2">
                                 <input
                                     type="text"
-                                    className="flex-1 rounded-full border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                    className="flex-1 rounded-full border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-emerald-500 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-emerald-500"
                                     placeholder="اكتب ردك هنا..."
                                     value={replyBody}
                                     onChange={(e) =>
