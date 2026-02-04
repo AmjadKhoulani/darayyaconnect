@@ -162,12 +162,20 @@ Route::get('/books', [App\Http\Controllers\Api\BookController::class, 'index']);
 Route::get('/volunteering', [App\Http\Controllers\Api\VolunteeringController::class, 'index']);
 Route::get('/volunteering/{id}', [App\Http\Controllers\Api\VolunteeringController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/volunteering', [App\Http\Controllers\Api\VolunteeringController::class, 'store']); // Create Opportunity (Teams)
     Route::post('/volunteering/{id}/apply', [App\Http\Controllers\Api\VolunteeringController::class, 'apply']);
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
     Route::get('/notifications/unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
     Route::post('/notifications/read/{id?}', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+
+    // Volunteer Teams
+    Route::get('/volunteer/teams', [App\Http\Controllers\Api\VolunteerTeamController::class, 'index']);
+    Route::post('/volunteer/teams', [App\Http\Controllers\Api\VolunteerTeamController::class, 'store']);
+    Route::get('/volunteer/teams/my-team', [App\Http\Controllers\Api\VolunteerTeamController::class, 'myTeam']);
+    Route::get('/volunteer/teams/{id}', [App\Http\Controllers\Api\VolunteerTeamController::class, 'show']);
+    Route::post('/volunteer/teams/{id}', [App\Http\Controllers\Api\VolunteerTeamController::class, 'update']); // Using POST for file upload support
 });
 
 // --- Dynamic Directory & Service Status ---
