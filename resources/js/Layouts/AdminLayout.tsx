@@ -200,8 +200,8 @@ export default function AdminLayout({
                             </SidebarLink>
                             {!user.city_id && (
                                 <SidebarLink
-                                    href={route('admin.locations.index')}
-                                    active={route().current('admin.locations.*')}
+                                    href="/admin/locations"
+                                    active={window.location.pathname.startsWith('/admin/locations')}
                                     icon="🌍"
                                 >
                                     المحافظات والمدن
