@@ -7,6 +7,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import axios from 'axios';
+// @ts-ignore
+import SnapMode from 'mapbox-gl-draw-snap-mode';
 import {
     Check,
     Undo2,
@@ -201,6 +203,17 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         // Initialize Draw Tools
         draw.current = new MapboxDraw({
             displayControlsDefault: false,
+            modes: {
+                ...MapboxDraw.modes,
+                draw_line_string: SnapMode,
+                draw_point: SnapMode,
+            },
+            // Snap options
+            snap: true,
+            snapOptions: {
+                snapPx: 15, // Snap when within 15 pixels
+                snapToMidPoints: true, // Allow snapping to line midpoints
+            },
             styles: [
                 {
                     id: 'gl-draw-line',
