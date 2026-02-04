@@ -356,11 +356,20 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                     geometry: { type: 'LineString', coordinates: l.coordinates },
                     properties: { id: l.id, type: l.type, meta: l.meta, is_published: l.is_published }
                 })),
-                ...nodesData.map(n => ({
-                    type: 'Feature',
-                    geometry: { type: 'Point', coordinates: [parseFloat(n.longitude), parseFloat(n.latitude)] },
-                    properties: { id: n.id, type: n.type, meta: n.meta, is_published: n.is_published }
-                }))
+                ...nodesData.map(n => {
+                    const nodeConfig = config.nodeTypes.find(t => t.type === n.type);
+                    return {
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: [parseFloat(n.longitude), parseFloat(n.latitude)] },
+                        properties: {
+                            id: n.id,
+                            type: n.type,
+                            meta: n.meta,
+                            is_published: n.is_published,
+                            icon: nodeConfig?.icon || '📍'
+                        }
+                    };
+                })
             ]
         };
 
@@ -383,17 +392,31 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
                 }
             });
 
+            // Circle Background
             map.current.addLayer({
                 id: `${sourceId}-nodes`,
                 type: 'circle',
                 source: sourceId,
                 filter: ['==', '$type', 'Point'],
                 paint: {
-                    'circle-radius': 6,
+                    'circle-radius': 10,
                     'circle-color': config?.color || '#333',
                     'circle-stroke-width': 2,
                     'circle-stroke-color': '#fff',
                     'circle-opacity': ['case', ['==', ['get', 'is_published'], false], 0.5, 1]
+                }
+            });
+
+            // Icons
+            map.current.addLayer({
+                id: `${sourceId}-nodes-icon`,
+                type: 'symbol',
+                source: sourceId,
+                filter: ['==', '$type', 'Point'],
+                layout: {
+                    'text-field': ['get', 'icon'],
+                    'text-size': 14,
+                    'text-allow-overlap': true,
                 }
             });
         }
