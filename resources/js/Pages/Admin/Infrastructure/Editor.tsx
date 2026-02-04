@@ -552,9 +552,20 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             const endpoint = inspectorData.layer.includes('nodes') ? 'nodes' : 'lines';
 
             // Handle both string and object meta
-            const currentMeta = typeof inspectorData.properties.meta === 'string'
-                ? JSON.parse(inspectorData.properties.meta || '{}')
-                : (inspectorData.properties.meta || {});
+            let currentMeta = {};
+            try {
+                const rawMeta = inspectorData.properties.meta;
+                if (typeof rawMeta === 'string') {
+                    // Check if it's "null" string or empty
+                    if (rawMeta === 'null' || !rawMeta) currentMeta = {};
+                    else currentMeta = JSON.parse(rawMeta);
+                } else if (typeof rawMeta === 'object' && rawMeta !== null) {
+                    currentMeta = rawMeta;
+                }
+            } catch (err) {
+                console.error('Meta parsing failed:', inspectorData.properties.meta, err);
+                currentMeta = {}; // Fallback
+            }
 
             const newMeta = {
                 ...currentMeta,
