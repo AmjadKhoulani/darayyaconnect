@@ -600,6 +600,39 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
     // Auto-focus logic
 
 
+    // Highlight Effect when Inspector is Open
+    useEffect(() => {
+        if (!map.current || !sector) return;
+
+        const sourceId = `net-${sector}`;
+        const selectedId = inspectorData?.id;
+        const config = SECTOR_CONFIG[sector] || SECTOR_CONFIG['water'];
+
+        // Style for Nodes
+        if (map.current.getLayer(`${sourceId}-nodes`)) {
+            map.current.setPaintProperty(`${sourceId}-nodes`, 'circle-radius',
+                selectedId ? ['case', ['==', ['get', 'id'], selectedId], 14, 10] : 10
+            );
+            map.current.setPaintProperty(`${sourceId}-nodes`, 'circle-stroke-color',
+                selectedId ? ['case', ['==', ['get', 'id'], selectedId], '#10b981', '#fff'] : '#fff'
+            );
+            map.current.setPaintProperty(`${sourceId}-nodes`, 'circle-stroke-width',
+                selectedId ? ['case', ['==', ['get', 'id'], selectedId], 3, 2] : 2
+            );
+        }
+
+        // Style for Lines
+        if (map.current.getLayer(`${sourceId}-lines`)) {
+            map.current.setPaintProperty(`${sourceId}-lines`, 'line-color',
+                selectedId ? ['case', ['==', ['get', 'id'], selectedId], '#10b981', config.color] : config.color
+            );
+            map.current.setPaintProperty(`${sourceId}-lines`, 'line-width',
+                selectedId ? ['case', ['==', ['get', 'id'], selectedId], 6, 4] : 4
+            );
+        }
+
+    }, [inspectorData, sector]);
+
     const canServe = useMemo(() => {
         if (!inspectorData) return false;
         const assetType = inspectorData.properties.type;
