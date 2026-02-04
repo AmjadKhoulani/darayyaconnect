@@ -161,15 +161,18 @@ class DashboardController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
-            'type' => 'required|in:info,success,warning,danger',
-            'duration_hours' => 'required|integer|min:1',
+            'is_pinned' => 'required|boolean', // true = Pinned, false = Normal
         ]);
+
+        // Logic: Pinned = Red/Danger & No Expiry. Normal = Info & 24h Expiry.
+        $type = $request->is_pinned ? 'danger' : 'info';
+        $expiresAt = $request->is_pinned ? null : now()->addHours(24);
 
         ServiceAlert::create([
             'title' => $request->title,
             'body' => $request->body,
-            'type' => $request->type,
-            'expires_at' => now()->addHours($request->duration_hours),
+            'type' => $type,
+            'expires_at' => $expiresAt,
             'is_active' => true,
         ]);
 

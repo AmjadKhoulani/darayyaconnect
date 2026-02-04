@@ -512,8 +512,7 @@ function AlertForm() {
     const { data, setData, post, processing, reset } = useForm({
         title: '',
         body: '',
-        type: 'warning',
-        duration_hours: 24,
+        is_pinned: false // Default to Normal
     });
 
     const submit = (e: React.FormEvent) => {
@@ -526,13 +525,13 @@ function AlertForm() {
             <div className="space-y-2">
                 <input
                     type="text"
-                    placeholder="عنوان التنبيه الموجه للجمهور..."
+                    placeholder="عنوان التنبيه..."
                     className="w-full rounded-2xl border-none bg-white/10 text-sm font-bold placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500"
                     value={data.title}
                     onChange={(e) => setData('title', e.target.value)}
                 />
                 <textarea
-                    placeholder="اكتب رسالتك هنا بوضوح..."
+                    placeholder="نص الرسالة..."
                     className="h-28 w-full rounded-2xl border-none bg-white/10 text-sm font-bold placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500"
                     value={data.body}
                     onChange={(e) => setData('body', e.target.value)}
@@ -540,23 +539,21 @@ function AlertForm() {
             </div>
             <div className="flex gap-2">
                 <select
-                    className="flex-1 rounded-xl border-none bg-white/10 text-xs font-bold focus:ring-2 focus:ring-emerald-500"
-                    value={data.type}
-                    onChange={(e) => setData('type', e.target.value)}
+                    className="flex-1 rounded-xl border-none bg-white/10 text-xs font-bold focus:ring-2 focus:ring-emerald-500 text-slate-300"
+                    value={data.is_pinned ? 'true' : 'false'}
+                    onChange={(e) => setData('is_pinned', e.target.value === 'true')}
                 >
-                    <option value="warning" className="text-slate-900">تنبيه تحذيري</option>
-                    <option value="info" className="text-slate-900">معلومات عامة</option>
-                    <option value="success" className="text-slate-900">إشعار نجاح</option>
-                    <option value="danger" className="text-slate-900">خطر عاجل</option>
+                    <option value="false" className="text-slate-900">🔔 إشعار عادي (يختفي بعد 24 ساعة)</option>
+                    <option value="true" className="text-slate-900">📌 تنبيه مثبت (يبقى في الرئيسية)</option>
                 </select>
                 <button
                     type="submit"
                     disabled={processing}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-black text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 active:scale-95 disabled:opacity-50"
+                    className={`flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-black text-white shadow-lg transition active:scale-95 disabled:opacity-50 ${data.is_pinned ? 'bg-red-500 hover:bg-red-400 shadow-red-500/20' : 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/20'}`}
                 >
                     {processing ? 'جاري البث...' : (
                         <>
-                            <span>بث للحظي</span>
+                            <span>{data.is_pinned ? 'بث وتثبيت' : 'بث التنبيه'}</span>
                             <Send size={16} className="rotate-180" />
                         </>
                     )}
