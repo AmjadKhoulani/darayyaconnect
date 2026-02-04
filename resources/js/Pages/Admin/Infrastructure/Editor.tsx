@@ -7,8 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import axios from 'axios';
-// @ts-ignore
-import SnapMode from 'mapbox-gl-draw-snap-mode';
+import { SnapLineMode, SnapPointMode } from 'mapbox-gl-draw-snap-mode';
 import {
     Check,
     Undo2,
@@ -205,8 +204,8 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
             displayControlsDefault: false,
             modes: {
                 ...MapboxDraw.modes,
-                draw_line_string: SnapMode,
-                draw_point: SnapMode,
+                draw_line_string: SnapLineMode,
+                draw_point: SnapPointMode,
             },
             // Snap options
             snap: true,
