@@ -136,13 +136,7 @@ export default function AdminLayout({
                             >
                                 دليل المدينة
                             </SidebarLink>
-                            <SidebarLink
-                                href={route('admin.generators.index')}
-                                active={route().current('admin.generators.*')}
-                                icon="🔌"
-                            >
-                                الأمبيرات
-                            </SidebarLink>
+
                             <SidebarLink
                                 href={route('admin.initiatives.index')}
                                 active={route().current('admin.initiatives.*')}
