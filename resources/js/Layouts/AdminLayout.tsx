@@ -197,6 +197,15 @@ export default function AdminLayout({
                         >
                             إعدادات المنصة
                         </SidebarLink>
+                            {!user.city_id && (
+                        <SidebarLink
+                            href={route('admin.locations.index')}
+                            active={route().current('admin.locations.*')}
+                            icon="🌍"
+                        >
+                            المحافظات والمدن
+                        </SidebarLink>
+                    )}
                     )}
                 </nav>
 

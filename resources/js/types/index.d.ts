@@ -10,6 +10,8 @@ export interface User {
         name: string;
         slug: string;
     };
+    city_id?: number;
+    governorate_id?: number;
 }
 
 export type PageProps<

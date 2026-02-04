@@ -155,6 +155,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // System Settings
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+        
+        // Location Management (Super Admin)
+        Route::get('/locations', [\App\Http\Controllers\Admin\LocationController::class, 'index'])->name('locations.index');
+        Route::post('/locations/city', [\App\Http\Controllers\Admin\LocationController::class, 'storeCity'])->name('locations.city.store');
+        Route::post('/locations/account', [\App\Http\Controllers\Admin\LocationController::class, 'createAccount'])->name('locations.account.create');
 
         // Carousel Management
         Route::resource('carousel', \App\Http\Controllers\Admin\CarouselController::class)->except(['create', 'show', 'edit']);
