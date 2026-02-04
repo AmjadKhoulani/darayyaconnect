@@ -190,22 +190,24 @@ export default function AdminLayout({
                         الملف الشخصي
                     </SidebarLink>
                     {user.role === 'admin' && (
-                        <SidebarLink
-                            href={route('admin.settings.index')}
-                            active={route().current('admin.settings.*')}
-                            icon="⚙️"
-                        >
-                            إعدادات المنصة
-                        </SidebarLink>
+                        <>
+                            <SidebarLink
+                                href={route('admin.settings.index')}
+                                active={route().current('admin.settings.*')}
+                                icon="⚙️"
+                            >
+                                إعدادات المنصة
+                            </SidebarLink>
                             {!user.city_id && (
-                        <SidebarLink
-                            href={route('admin.locations.index')}
-                            active={route().current('admin.locations.*')}
-                            icon="🌍"
-                        >
-                            المحافظات والمدن
-                        </SidebarLink>
-                    )}
+                                <SidebarLink
+                                    href={route('admin.locations.index')}
+                                    active={route().current('admin.locations.*')}
+                                    icon="🌍"
+                                >
+                                    المحافظات والمدن
+                                </SidebarLink>
+                            )}
+                        </>
                     )}
                 </nav>
 
