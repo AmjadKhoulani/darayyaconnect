@@ -124,7 +124,7 @@ export default function Dashboard({
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 rounded-full bg-red-600 px-4 py-1.5 text-sm font-black text-white">
-                                        {active_sos_alerts.length} إشارة
+                                        {active_sos_alerts ? active_sos_alerts.length : 0} إشارة
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 divide-y divide-red-50 lg:grid-cols-2 lg:divide-y-0 lg:divide-x lg:divide-x-reverse">
@@ -266,7 +266,7 @@ export default function Dashboard({
                                     <Link href={route('admin.reports.index')} className="text-sm font-black text-emerald-600 hover:underline">عرض جميع البلاغات</Link>
                                 </div>
                                 <div className="space-y-4">
-                                    {recent_reports.map((report) => (
+                                    {recent_reports && recent_reports.map((report) => (
                                         <div key={report.id} className="group flex items-center justify-between rounded-3xl border border-slate-50 bg-slate-50/50 p-5 transition hover:border-emerald-200 hover:bg-white hover:shadow-xl hover:shadow-emerald-500/5">
                                             <div className="flex items-center gap-5">
                                                 <div className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm bg-white text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors`}>
@@ -326,7 +326,7 @@ export default function Dashboard({
                                                 paddingAngle={5}
                                                 dataKey="value"
                                             >
-                                                {pieData.map((entry, index) => (
+                                                {pieData && pieData.map((entry, index) => (
                                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                                 ))}
                                             </Pie>
@@ -360,7 +360,7 @@ export default function Dashboard({
                                     </Link>
                                 </div>
                                 <div className="space-y-4">
-                                    {users.slice(0, 5).map(user => (
+                                    {users && users.slice(0, 5).map(user => (
                                         <div key={user.id} className="flex items-center gap-4">
                                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-400">
                                                 {user.name.charAt(0)}
