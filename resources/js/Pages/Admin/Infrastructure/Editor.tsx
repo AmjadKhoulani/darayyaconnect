@@ -249,7 +249,10 @@ export default function InfrastructureEditor({ auth, sector }: Props) {
         });
 
         map.current.on('click', (e) => {
-            const features = map.current?.queryRenderedFeatures(e.point);
+            const sourceId = `net-${sector}`;
+            const features = map.current?.queryRenderedFeatures(e.point, {
+                layers: [`${sourceId}-nodes`, `${sourceId}-lines`]
+            });
             if (features && features.length > 0 && features[0].properties?.id) {
                 const props = features[0].properties;
                 setInspectorData({
