@@ -55,6 +55,9 @@ export default function Map() {
         publicReports: true
     });
 
+    // Dark Mode State
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
     const [filteredServices, setFilteredServices] = useState<any[]>([]);
     const [allServices, setAllServices] = useState<any[]>([]);
     const [user, setUser] = useState<any>(null);
@@ -363,6 +366,38 @@ export default function Map() {
         // Removed default NavigationControl as per user request (buttons behind bar) and mobile preference (pinch zoom).
         // map.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
     }, []);
+
+    // Handle Dark Mode Style Change
+    useEffect(() => {
+        if (!map.current || !map.current.isStyleLoaded()) return;
+
+        const currentSource = map.current.getSource('osm') as any;
+        if (currentSource) {
+            const newTiles = isDarkMode
+                ? ['https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png']
+                : ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'];
+
+            // Update the tile URL by removing and re-adding the source
+            const currentLayers = map.current.getStyle().layers;
+            const osmLayer = currentLayers?.find(l => l.id === 'osm');
+
+            map.current.removeLayer('osm');
+            map.current.removeSource('osm');
+
+            map.current.addSource('osm', {
+                type: 'raster',
+                tiles: newTiles,
+                tileSize: 256,
+                attribution: isDarkMode ? '© Stadia Maps © OpenMapTiles' : '© OpenStreetMap'
+            });
+
+            map.current.addLayer({
+                id: 'osm',
+                type: 'raster',
+                source: 'osm',
+            }, 'population-heatmap'); // Insert before heatmap to keep it as base layer
+        }
+    }, [isDarkMode]);
 
     // Handle Time Machine Data Updates
     useEffect(() => {
@@ -794,6 +829,12 @@ export default function Map() {
                         className="w-12 h-12 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border border-slate-100 dark:border-slate-700"
                     >
                         <Crosshair size={24} />
+                    </button>
+                    <button
+                        onClick={() => setIsDarkMode(prev => !prev)}
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-premium active:scale-95 transition-transform border text-xl ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}
+                    >
+                        {isDarkMode ? '🌙' : '☀️'}
                     </button>
 
                     {user?.role === 'admin' && (
