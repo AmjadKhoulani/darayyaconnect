@@ -11,6 +11,24 @@ export default function AdminLayout({
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
+    // Helper: Determine which infrastructure sectors user can access
+    const canAccessSector = (sector: 'water' | 'electricity' | 'sewage' | 'phone') => {
+        // Super admins can access everything
+        if (user.role === 'admin') return true;
+
+        // Department-specific access
+        const deptSlug = user.department?.slug;
+        if (!deptSlug) return false;
+
+        const accessMap: Record<string, string[]> = {
+            'electricity': ['electricity'],
+            'water': ['water', 'sewage'],
+            'municipality': ['phone'],
+        };
+
+        return accessMap[deptSlug]?.includes(sector) || false;
+    };
+
     return (
         <div className="flex min-h-screen bg-slate-100" dir="rtl">
             {/* Sidebar */}
@@ -93,34 +111,71 @@ export default function AdminLayout({
                             >
                                 المتطوعين
                             </SidebarLink>
-                            <SidebarLink
-                                href={route('admin.infrastructure.water')}
-                                active={route().current('admin.infrastructure.water')}
-                                icon="💧"
-                            >
-                                إدارة المياه
-                            </SidebarLink>
-                            <SidebarLink
-                                href={route('admin.departments.index')}
-                                active={route().current('admin.departments.*')}
-                                icon="🏢"
-                            >
-                                الجهات الحكومية
-                            </SidebarLink>
-                            <SidebarLink
-                                href={route('admin.infrastructure.editor')}
-                                active={route().current('admin.infrastructure.editor')}
-                                icon="🏗️"
-                            >
-                                محرر الخريطة
-                            </SidebarLink>
-                            <SidebarLink
-                                href={route('admin.service-states.index')}
-                                active={route().current('admin.service-states.index')}
-                                icon="⚡"
-                            >
-                                حالة الخدمات
-                            </SidebarLink>
+
+                            {/* Infrastructure Sectors - Filtered by Department */}
+                            <p className="mb-2 mt-6 px-3 text-xs font-bold uppercase text-slate-500">
+                                البنية التحتية
+                            </p>
+
+                            {canAccessSector('water') && (
+                                <SidebarLink
+                                    href={route('admin.infrastructure.water.editor')}
+                                    active={route().current('admin.infrastructure.water.editor')}
+                                    icon="💧"
+                                >
+                                    المياه
+                                </SidebarLink>
+                            )}
+
+                            {canAccessSector('electricity') && (
+                                <SidebarLink
+                                    href={route('admin.infrastructure.electricity.editor')}
+                                    active={route().current('admin.infrastructure.electricity.editor')}
+                                    icon="⚡"
+                                >
+                                    الكهرباء
+                                </SidebarLink>
+                            )}
+
+                            {canAccessSector('sewage') && (
+                                <SidebarLink
+                                    href={route('admin.infrastructure.sewage.editor')}
+                                    active={route().current('admin.infrastructure.sewage.editor')}
+                                    icon="🚰"
+                                >
+                                    الصرف الصحي
+                                </SidebarLink>
+                            )}
+
+                            {canAccessSector('phone') && (
+                                <SidebarLink
+                                    href={route('admin.infrastructure.phone.editor')}
+                                    active={route().current('admin.infrastructure.phone.editor')}
+                                    icon="📱"
+                                >
+                                    الهاتف
+                                </SidebarLink>
+                            )}
+
+                            {user.role === 'admin' && (
+                                <SidebarLink
+                                    href={route('admin.departments.index')}
+                                    active={route().current('admin.departments.*')}
+                                    icon="�"
+                                >
+                                    الجهات الحكومية
+                                </SidebarLink>
+                            )}
+
+                            {user.role === 'admin' && (
+                                <SidebarLink
+                                    href={route('admin.service-states.index')}
+                                    active={route().current('admin.service-states.index')}
+                                    icon="📊"
+                                >
+                                    حالة الخدمات
+                                </SidebarLink>
+                            )}
                         </>
                     )}
 

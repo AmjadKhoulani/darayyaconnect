@@ -44,6 +44,26 @@ class InfrastructureManagerController extends Controller
             abort(404);
         }
 
+        // Authorization check
+        $user = auth()->user();
+        
+        // Super admins can access all sectors
+        if ($user->role !== 'admin') {
+            $deptSlug = $user->department?->slug;
+            
+            $accessMap = [
+                'electricity' => ['electricity'],
+                'water' => ['water', 'sewage'],
+                'municipality' => ['phone'],
+            ];
+            
+            $allowedSectors = $accessMap[$deptSlug] ?? [];
+            
+            if (!in_array($sector, $allowedSectors)) {
+                abort(403, 'لا تملك صلاحية الوصول لهذا القطاع');
+            }
+        }
+
         return Inertia::render('Admin/Infrastructure/Editor', [
             'sector' => $sector
         ]);
