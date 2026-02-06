@@ -58,6 +58,9 @@ export default function Map() {
     // Dark Mode State
     const [isDarkMode, setIsDarkMode] = useState(false);
 
+    // Selected Report State (for popup)
+    const [selectedReport, setSelectedReport] = useState<any | null>(null);
+
     const [filteredServices, setFilteredServices] = useState<any[]>([]);
     const [allServices, setAllServices] = useState<any[]>([]);
     const [user, setUser] = useState<any>(null);
@@ -541,8 +544,15 @@ export default function Map() {
                     el.onclick = (e) => {
                         e.stopPropagation();
                         const categoryAr = categoryNamesAr[category] || 'بلاغ خدمة';
-                        const createdAt = report.properties.created_at || 'غير محدد';
-                        alert(`📅 تاريخ البلاغ: ${createdAt}\n⚠️ نوع البلاغ: ${categoryAr}`);
+                        setSelectedReport({
+                            category: categoryAr,
+                            date: report.properties.created_at || 'غير محدد',
+                            description: report.properties.description || 'لا يوجد وصف',
+                            severity: report.properties.severity || 3,
+                            status: report.properties.status || 'pending',
+                            icon: icon,
+                            color: color
+                        });
                     };
 
                     const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
@@ -1032,6 +1042,28 @@ export default function Map() {
                                 تبليغ عن عطل
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Report Detail Popup */}
+            {selectedReport && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-end p-4" onClick={() => setSelectedReport(null)}>
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg mx-auto p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-12 h-12 ${selectedReport.color} rounded-full flex items-center justify-center text-2xl`}>{selectedReport.icon}</div>
+                                <div>
+                                    <h3 className="font-bold text-lg dark:text-white">{selectedReport.category}</h3>
+                                    <p className="text-xs text-slate-500">📅 {selectedReport.date}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setSelectedReport(null)}className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><X size={18}/></button>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl">
+                            <p className="text-sm dark:text-slate-300">{selectedReport.description}</p>
+                        </div>
+                        <button onClick={() => setSelectedReport(null)} className="w-full py-3 bg-emerald-600 text-white font-bold rounded-2xl active:scale-95 transition">إغلاق</button>
                     </div>
                 </div>
             )}
