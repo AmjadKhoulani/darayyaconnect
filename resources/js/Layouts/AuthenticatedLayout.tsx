@@ -71,12 +71,14 @@ export default function Authenticated({
                             >
                                 النقاشات 💬
                             </Link>
-                            <Link
-                                href={route('admin.missing-data')}
-                                className={`text-sm font-bold transition ${route().current('admin.missing-data') ? 'text-emerald-600' : 'text-slate-600 hover:text-emerald-600'}`}
-                            >
-                                بيانات 🏳️
-                            </Link>
+                            {user.role === 'admin' && (
+                                <Link
+                                    href={route('admin.missing-data')}
+                                    className={`text-sm font-bold transition ${route().current('admin.missing-data') ? 'text-emerald-600' : 'text-slate-600 hover:text-emerald-600'}`}
+                                >
+                                    بيانات 🏳️
+                                </Link>
+                            )}
                         </nav>
                     </div>
 
@@ -164,12 +166,14 @@ export default function Authenticated({
                     >
                         النقاشات 💬
                     </ResponsiveNavLink>
-                    <ResponsiveNavLink
-                        href={route('admin.missing-data')}
-                        active={route().current('admin.missing-data')}
-                    >
-                        بيانات 🏳️
-                    </ResponsiveNavLink>
+                    {user.role === 'admin' && (
+                        <ResponsiveNavLink
+                            href={route('admin.missing-data')}
+                            active={route().current('admin.missing-data')}
+                        >
+                            بيانات 🏳️
+                        </ResponsiveNavLink>
+                    )}
                 </div>
             </nav>
 
